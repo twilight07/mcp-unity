@@ -14,8 +14,6 @@ namespace McpUnity.Unity
     public class McpUnityEditorWindow : EditorWindow
     {
         private string _statusMessage = "";
-        private MessageType _statusMessageType = MessageType.Info;
-        private double _statusMessageExpireTime = 0;
         private GUIStyle _headerStyle;
         private GUIStyle _subHeaderStyle;
         private GUIStyle _boxStyle;
@@ -35,13 +33,16 @@ namespace McpUnity.Unity
 
         private void OnEnable()
         {
+            titleContent = new GUIContent("MCP Unity");
+            _statusMessage = "Ready";
+            
             // Subscribe to McpUnityBridge events
             McpUnityBridge.OnConnected += HandleConnected;
             McpUnityBridge.OnDisconnected += HandleDisconnected;
+            McpUnityBridge.OnConnecting += HandleConnecting;
             McpUnityBridge.OnError += HandleError;
             
-            // Set up regular UI updates
-            EditorApplication.update += OnEditorUpdate;
+            InitializeStyles();
         }
 
         private void OnDisable()
@@ -49,38 +50,36 @@ namespace McpUnity.Unity
             // Unsubscribe from McpUnityBridge events
             McpUnityBridge.OnConnected -= HandleConnected;
             McpUnityBridge.OnDisconnected -= HandleDisconnected;
+            McpUnityBridge.OnConnecting -= HandleConnecting;
             McpUnityBridge.OnError -= HandleError;
-            
-            // Remove editor update callback
-            EditorApplication.update -= OnEditorUpdate;
         }
 
         private void HandleConnected()
         {
-            SetStatusMessage("Connected to server", MessageType.Info);
+            _statusMessage = "Connected";
+            
             Repaint();
         }
 
         private void HandleDisconnected()
         {
-            SetStatusMessage("Disconnected from server", MessageType.Info);
+            _statusMessage = "Disconnected";
+            
+            Repaint();
+        }
+
+        private void HandleConnecting()
+        {
+            _statusMessage = "Connecting...";
+            
             Repaint();
         }
 
         private void HandleError(string errorMessage)
         {
-            SetStatusMessage($"Error: {errorMessage}", MessageType.Error);
+            _statusMessage = $"Error: {errorMessage}";
+            
             Repaint();
-        }
-
-        private void OnEditorUpdate()
-        {
-            // Check if status message has expired
-            if (!string.IsNullOrEmpty(_statusMessage) && EditorApplication.timeSinceStartup > _statusMessageExpireTime)
-            {
-                _statusMessage = "";
-                Repaint();
-            }
         }
 
         private void OnGUI()
@@ -111,7 +110,7 @@ namespace McpUnity.Unity
             // Bottom Status bar
             if (!string.IsNullOrEmpty(_statusMessage))
             {
-                EditorGUILayout.HelpBox(_statusMessage, _statusMessageType);
+                EditorGUILayout.HelpBox(_statusMessage, MessageType.Info);
             }
             
             // Version info at the bottom
@@ -131,8 +130,10 @@ namespace McpUnity.Unity
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Server Status:", GUILayout.Width(120));
             
-            string statusText = McpUnityBridge.Instance.IsConnected ? "Connected" : "Disconnected";
-            Color statusColor = McpUnityBridge.Instance.IsConnected ? Color.green : Color.red;
+            var connectionState = McpUnityBridge.Instance.ConnectionState;
+            var statusText = connectionState == ConnectionState.Connected ? "Connected" : "Disconnected";
+            var statusColor = connectionState == ConnectionState.Connected  ? Color.green : Color.red;
+            statusColor = connectionState == ConnectionState.Connecting  ? Color.yellow : statusColor;
             
             GUIStyle statusStyle = new GUIStyle(EditorStyles.boldLabel);
             statusStyle.normal.textColor = statusColor;
@@ -155,16 +156,21 @@ namespace McpUnity.Unity
             // Server control buttons
             EditorGUILayout.BeginHorizontal();
             
-            GUI.enabled = !McpUnityBridge.Instance.IsConnected;
+            // Determine button states based on connection state
+            ConnectionState currentState = McpUnityBridge.Instance.ConnectionState;
+            
+            // Connect button - enabled only when disconnected
+            GUI.enabled = currentState == ConnectionState.Disconnected;
             if (GUILayout.Button("Start Server", GUILayout.Height(30)))
             {
-                StartServer();
+                _ = McpUnityBridge.Instance.Connect(McpUnitySettings.Instance.WebSocketUrl);
             }
             
-            GUI.enabled = McpUnityBridge.Instance.IsConnected;
+            // Disconnect button - enabled only when connected
+            GUI.enabled = currentState == ConnectionState.Connected;
             if (GUILayout.Button("Stop Server", GUILayout.Height(30)))
             {
-                StopServer();
+                _ = McpUnityBridge.Instance.Disconnect();
             }
             
             GUI.enabled = true;
@@ -246,32 +252,6 @@ namespace McpUnity.Unity
             EditorGUILayout.EndHorizontal();
             
             EditorGUILayout.EndVertical();
-        }
-
-        private async void StartServer()
-        {
-            try
-            {
-                await McpUnityBridge.Instance.Connect(McpUnitySettings.Instance.WebSocketUrl);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MCP Unity] Failed to start server: {ex.Message}");
-                EditorUtility.DisplayDialog("Error", $"Failed to start server: {ex.Message}", "OK");
-            }
-        }
-
-        private async void StopServer()
-        {
-            try
-            {
-                await McpUnityBridge.Instance.Disconnect();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MCP Unity] Failed to stop server: {ex.Message}");
-                EditorUtility.DisplayDialog("Error", $"Failed to stop server: {ex.Message}", "OK");
-            }
         }
 
         private void GenerateMcpConfigJson()
@@ -399,13 +379,6 @@ namespace McpUnity.Unity
             };
             
             _isInitialized = true;
-        }
-
-        private void SetStatusMessage(string message, MessageType type)
-        {
-            _statusMessage = message;
-            _statusMessageType = type;
-            _statusMessageExpireTime = EditorApplication.timeSinceStartup + 5;
         }
         
         /// <summary>

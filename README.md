@@ -1,98 +1,144 @@
-# Unity MCP Server
+# MCP Unity
 
 ## Overview
-Unity MCP Server is an implementation of the Model Context Protocol for Unity Editor, allowing AI assistants to interact with your Unity projects. The server provides a standardized API that enables AI agents to query information about the Unity project and execute operations within the Unity Editor.
+MCP Unity is an implementation of the Model Context Protocol for Unity Editor, allowing AI assistants to interact with your Unity projects. This package provides a bridge between Unity and a Node.js server that implements the MCP protocol, enabling AI agents like Claude, Windsurf, and Cursor to execute operations within the Unity Editor.
 
 ## Features
-The MCP server provides the following tools:
+MCP Unity currently provides the following tools:
 
-- **get_logs**: Retrieves logs from the Unity Editor Console with filtering options
-- **list_gameobjects**: Lists all GameObjects in open scenes with hierarchy information
-- **list_scenes**: Lists all open scenes with information about the active scene
-- **execute_menu_item**: Executes functions tagged with the MenuItem attribute
+- **execute_menu_item**: Executes Unity menu items (functions tagged with the MenuItem attribute)
+
+More tools will be added in future updates.
 
 ## Requirements
-- Unity 2022.3 or later
-- .NET Framework 4.7.1 or later
+- Unity 2021.3 or later
+- Node.js 18 or later (for running the server)
+- npm 9 or later (for building the server)
 
-## Getting Started
-1. The server starts automatically when the Unity Editor opens (this behavior can be configured)
-2. Access the server settings through the Unity Editor menu: Tools > UnityMCP > Server Window
-3. Use the Server Window to start/stop the server and configure settings
+## Installation
 
-## Configuration
-The following settings can be configured:
-- Port number (default: 50325)
-- Auto-start behavior
-- Logging preferences
-- Tool permissions
+### Via Unity Package Manager
+1. Open the Unity Package Manager (Window > Package Manager)
+2. Click the "+" button in the top-left corner
+3. Select "Add package from git URL..."
+4. Enter: `https://github.com/CoderGamester/mcp-unity.git`
+5. Click "Add"
 
-You can configure these settings through the Server Window (Tools > UnityMCP > Server Window) or programmatically:
+### Manual Installation
+1. Clone the repository: `git clone https://github.com/CoderGamester/mcp-unity.git`
+2. Copy the contents to your Unity project's Assets folder
 
-```csharp
-// Programmatic configuration
-var settings = MCPSettings.Instance;
-settings.Port = 8080;
-settings.AutoStartServer = true;
-settings.RequireConfirmationForExecution = true;
-settings.LogCommandExecution = true;
-settings.SaveSettings();
+## Running the Server
+There are two ways to run the server:
+
+### From Unity Editor
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Click "Start Server" to start the WebSocket server
+
+### Standalone Mode
+1. Navigate to the Server directory
+2. Run the server using Node.js:
+   ```
+   node build/index.js
+   ```
+
+## Configuring AI Clients
+
+Replace `ABSOLUTE\PATH\TO` with the actual path to your MCP Unity installation.
+
+### Claude Desktop
+Add the following configuration to your Claude Desktop settings:
+
+```json
+{
+  "mcpServers": {
+    "mcp-unity": {
+      "command": "node",
+      "args": [
+        "ABSOLUTE\PATH\TO\mcp-unity\Server\build\index.js"
+      ]
+    }
+  }
+}
 ```
 
-## Security
-The MCP server includes security features to protect your Unity project:
-- Optional confirmation dialog for executing menu items
-- Logs of all commands executed through the server
-- Ability to restrict which tools can be executed
+### Windsurf
+Add the following configuration to your Windsurf MCP Configure settings:
+
+```json
+{
+  "mcpServers": {
+    "mcp-unity": {
+      "command": "node",
+      "args": [
+        "ABSOLUTE\PATH\TO\mcp-unity\Server\build\index.js"
+      ]
+    }
+  }
+}
+```
+
+### Cursor
+Add the following configuration to your Cursor MCP Configure settings:
+
+- Name: MCP Unity
+- Command: node
+- Args: ABSOLUTE\PATH\TO\mcp-unity\Server\build\index.js
+
+## Building the Server
+The MCP Unity server is built using Node.js and TypeScript. To build the server:
+
+1. Navigate to the Server directory:
+   ```
+   cd Server
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. Build the server:
+   ```
+   npm run build
+   ```
+
+This will compile the TypeScript code to JavaScript in the `build` directory.
 
 ## Usage Examples
 
-### Creating a Custom MCP Tool
+### Executing a Menu Item
+AI assistants can execute Unity menu items using the `execute_menu_item` tool:
 
-You can create your own MCP tools by adding methods with the `MCPTool` attribute:
-
-```csharp
-// Simple tool with no parameters
-[MCPTool("my_custom_tool", "Description of what my tool does")]
-public static MyResultType MyCustomTool()
-{
-    // Tool implementation
-    return new MyResultType();
-}
-
-// Tool with simple parameter schema
-[MCPTool("tool_with_parameters", "A tool that takes parameters",
-    SchemaHelper.String("paramName", "Parameter description", true),
-    SchemaHelper.Number("optionalParam", "An optional parameter"))]
-public static ResultType ToolWithParameters(ParameterType parameters)
-{
-    // Implementation using parameters
-    return new ResultType();
-}
-
-// Advanced tool with complex schema (if SchemaHelper isn't sufficient)
-[MCPTool("advanced_tool", "An advanced tool with complex schema", @"{
-    ""type"": ""object"",
-    ""properties"": {
-        ""complexParam"": {
-            ""type"": ""object"",
-            ""properties"": {
-                ""nestedProp"": { ""type"": ""string"" }
-            }
-        }
-    }
-}")]
-public static AdvancedResult AdvancedTool(AdvancedParams parameters)
-{
-    // Implementation
-    return new AdvancedResult();
-}
+```typescript
+// Example: Creating a new scene in Unity
+await tools.execute_menu_item({
+  menuPath: "File/New Scene"
+});
 ```
+
+## Troubleshooting
+
+### Connection Issues
+- Ensure the WebSocket server is running (check the Server Window in Unity)
+- Check if there are any firewall restrictions blocking the connection
+
+### Server Not Starting
+- Check the Unity Console for error messages
+- Ensure Node.js is properly installed and accessible in your PATH
+- Verify that all dependencies are installed in the Server directory
+
+### Menu Items Not Executing
+- Ensure the menu item path is correct (case-sensitive)
+- Check if the menu item requires confirmation
+- Verify that the menu item is available in the current context
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request or open an Issue with your request.
-**Commit your changes** following the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format
+
+**Commit your changes** following the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
 
 ## License
 

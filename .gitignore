@@ -4,8 +4,6 @@
 #
 **/[Ll]ibrary/
 **/[Tt]emp/
-**/[Bb]uild/
-**/[Bb]uilds/
 **/[Ll]ogs/
 **/[Mm]emoryCaptures/
 **/[Uu]ser[Ss]ettings/
@@ -71,8 +69,6 @@ sysinfo.txt
 **/.utmp/
 **/BuildReports/
 **/BuildReports.meta
-**/Build/
-**/Build.meta
 **/Editor Default Resources/
 **/Editor Default Resources.meta
 **/WebGL Builds/

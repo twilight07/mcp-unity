@@ -13,6 +13,16 @@ using McpUnity.Tools;
 namespace McpUnity.Unity
 {
     /// <summary>
+    /// Connection state for the MCP Unity Bridge
+    /// </summary>
+    public enum ConnectionState
+    {
+        Disconnected,
+        Connecting,
+        Connected
+    }
+
+    /// <summary>
     /// Bridge between Unity and Node.js MCP server.
     /// Handles WebSocket communication and request processing.
     /// </summary>
@@ -22,7 +32,6 @@ namespace McpUnity.Unity
         private static McpUnityBridge _instance;
         private ClientWebSocket _webSocket;
         private CancellationTokenSource _cts;
-        private bool _isConnected = false;
         private Dictionary<string, TaskCompletionSource<JObject>> _pendingRequests = new Dictionary<string, TaskCompletionSource<JObject>>();
         
         // Dictionary to store tool instances
@@ -31,6 +40,7 @@ namespace McpUnity.Unity
         // Events
         public static event Action OnConnected;
         public static event Action OnDisconnected;
+        public static event Action OnConnecting;
         public static event Action<string> OnError;
         
         /// <summary>
@@ -63,9 +73,31 @@ namespace McpUnity.Unity
         }
         
         /// <summary>
-        /// Whether the bridge is currently connected
+        /// Current connection state mapped from WebSocket state
         /// </summary>
-        public bool IsConnected => _isConnected;
+        public ConnectionState ConnectionState
+        {
+            get
+            {
+                if (_webSocket == null)
+                    return ConnectionState.Disconnected;
+                    
+                switch (_webSocket.State)
+                {
+                    case WebSocketState.Open:
+                        return ConnectionState.Connected;
+                    case WebSocketState.Connecting:
+                        return ConnectionState.Connecting;
+                    case WebSocketState.CloseSent:  // Still finalizing connection
+                    case WebSocketState.CloseReceived:  // Still finalizing connection
+                    case WebSocketState.None:
+                    case WebSocketState.Closed:
+                    case WebSocketState.Aborted:
+                    default:
+                        return ConnectionState.Disconnected;
+                }
+            }
+        }
         
         /// <summary>
         /// Private constructor to enforce singleton pattern
@@ -102,15 +134,19 @@ namespace McpUnity.Unity
         /// </summary>
         public async Task Connect(string url)
         {
-            if (_isConnected) return;
+            // Don't try to connect if already connected or connecting
+            if (ConnectionState != ConnectionState.Disconnected) return;
             
             try
             {
+                // Notify that we're connecting
+                OnConnecting?.Invoke();
+                Debug.Log($"[MCP Unity] Connecting to server at {url}...");
+                
                 _cts = new CancellationTokenSource();
                 _webSocket = new ClientWebSocket();
                 
                 await _webSocket.ConnectAsync(new Uri(url), _cts.Token);
-                _isConnected = true;
                 
                 Debug.Log($"[MCP Unity] Connected to server at {url}");
                 OnConnected?.Invoke();
@@ -130,13 +166,14 @@ namespace McpUnity.Unity
         /// </summary>
         public async Task Disconnect()
         {
-            if (!_isConnected) return;
+            // Only disconnect if connected
+            if (ConnectionState != ConnectionState.Connected) return;
             
             try
             {
-                _cts.Cancel();
+                _cts = null;
+                
                 await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
-                _isConnected = false;
                 
                 Debug.Log("[MCP Unity] Disconnected from server");
                 OnDisconnected?.Invoke();
@@ -153,7 +190,7 @@ namespace McpUnity.Unity
         /// </summary>
         public async Task<JObject> SendRequest(string method, JObject parameters)
         {
-            if (!_isConnected)
+            if (ConnectionState != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("Not connected to server");
             }
@@ -206,9 +243,9 @@ namespace McpUnity.Unity
         /// </summary>
         private async Task SendMessage(string message)
         {
-            if (!_isConnected || _webSocket.State != WebSocketState.Open)
+            if (ConnectionState != ConnectionState.Connected)
             {
-                throw new InvalidOperationException("WebSocket is not connected");
+                throw new InvalidOperationException("Not connected to server");
             }
             
             byte[] buffer = Encoding.UTF8.GetBytes(message);
@@ -225,7 +262,7 @@ namespace McpUnity.Unity
             
             try
             {
-                while (_isConnected && !_cts.Token.IsCancellationRequested)
+                while (ConnectionState == ConnectionState.Connected && !_cts.Token.IsCancellationRequested)
                 {
                     StringBuilder messageBuilder = new StringBuilder();
                     WebSocketReceiveResult result;
@@ -259,10 +296,9 @@ namespace McpUnity.Unity
                 Debug.LogError($"[MCP Unity] WebSocket error: {ex.Message}");
                 OnError?.Invoke(ex.Message);
                 
-                if (_isConnected)
+                if (ConnectionState == ConnectionState.Connected)
                 {
-                    _isConnected = false;
-                    OnDisconnected?.Invoke();
+                    await Disconnect();
                 }
             }
         }

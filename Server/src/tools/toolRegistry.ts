@@ -1,15 +1,30 @@
 import { z } from 'zod';
 import { Logger } from '../utils/logger.js';
 import { handleError } from '../utils/errors.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 // Define common response format for tools
 export interface ToolResponse {
   content: Array<{
-    type: string;
-    text?: string;
-    [key: string]: any;
+    type: "text";
+    text: string;
+  } | {
+    type: "image";
+    data: string;
+    mimeType: string;
+  } | {
+    type: "resource";
+    resource: {
+      text: string;
+      uri: string;
+      mimeType?: string;
+    } | {
+      uri: string;
+      blob: string;
+      mimeType?: string;
+    };
   }>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ToolDefinition {
@@ -36,7 +51,7 @@ export class ToolRegistry {
     return Array.from(this.tools.values());
   }
   
-  registerWithServer(server: any): void {
+  registerWithServer(server: McpServer): void {
     for (const tool of this.getAll()) {
       this.logger.info(`Registering tool with MCP server: ${tool.name}`);
       
