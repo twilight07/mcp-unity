@@ -1,4 +1,17 @@
 # MCP Unity
+[![](https://badge.mcpx.dev?type=server 'MCP Server')](https://modelcontextprotocol.io/introduction)
+[![smithery badge](https://smithery.ai/badge/@CoderGamester/mcp-unity)](https://smithery.ai/server/@CoderGamester/mcp-unity)
+[![](https://img.shields.io/badge/Unity-000000?style=flat&logo=unity&logoColor=white 'Unity')](https://unity.com/releases/editor/archive)
+[![](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white 'Node.js')](https://nodejs.org/en/download/)
+[![](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white 'TypeScript')](https://www.typescriptlang.org/)
+[![](https://img.shields.io/badge/WebSocket-4353FF?style=flat&logo=socket.io&logoColor=white 'WebSocket')](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+
+[![](https://img.shields.io/github/last-commit/CoderGamester/mcp-unity 'Last Commit')](https://github.com/CoderGamester/mcp-unity/commits/main)
+[![](https://img.shields.io/maintenance/yes/2025 'Maintained')](https://github.com/CoderGamester/mcp-unity)
+[![](https://img.shields.io/github/stars/CoderGamester/mcp-unity 'Stars')](https://github.com/CoderGamester/mcp-unity/stargazers)
+
+[![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
+[![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
 
 ## Overview
 MCP Unity is an implementation of the Model Context Protocol for Unity Editor, allowing AI assistants to interact with your Unity projects. This package provides a bridge between Unity and a Node.js server that implements the MCP protocol, enabling AI agents like Claude, Windsurf, and Cursor to execute operations within the Unity Editor.
@@ -23,7 +36,7 @@ await tools.execute_menu_item({
 ```
 
 ## Requirements
-- Unity 2021.3 or later
+- Unity 2022.3 or later
 - Node.js 18 or later (for running the server)
 - npm 9 or later (for building the server)
 
@@ -196,7 +209,7 @@ Contributions are welcome! Please feel free to submit a Pull Request or open an 
 
 MIT License
 
-Copyright (c) 2023-2025 Miguel Tomás
+Copyright (c) 2023-2025 CoderGamester
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
