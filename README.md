@@ -42,6 +42,14 @@ await tools.execute_menu_item({
 
 ## Installation
 
+### Installing via Smithery
+
+To install MCP Unity for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@CoderGamester/mcp-unity):
+
+```bash
+npx -y @smithery/cli install @CoderGamester/mcp-unity --client claude
+```
+
 ### Installing the Unity MCP Server package via Unity Package Manager
 1. Open the Unity Package Manager (Window > Package Manager)
 2. Click the "+" button in the top-left corner
