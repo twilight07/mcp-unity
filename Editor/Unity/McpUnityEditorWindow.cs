@@ -141,13 +141,33 @@ namespace McpUnity.Unity
             EditorGUILayout.LabelField(statusText, statusStyle);
             EditorGUILayout.EndHorizontal();
             
+            var settings = McpUnitySettings.Instance;
+            var mcpUnityBridge = McpUnityBridge.Instance;
+            
             // Auto-start server option
             EditorGUILayout.BeginHorizontal();
-            bool newAutoStart = EditorGUILayout.Toggle("Auto-start Server", McpUnitySettings.Instance.AutoStartServer);
-            if (newAutoStart != McpUnitySettings.Instance.AutoStartServer)
+            bool newAutoStart = EditorGUILayout.Toggle("Auto-start Server", settings.AutoStartServer);
+            if (newAutoStart != settings.AutoStartServer)
             {
-                McpUnitySettings.Instance.AutoStartServer = newAutoStart;
-                McpUnitySettings.Instance.SaveSettings();
+                settings.AutoStartServer = newAutoStart;
+                settings.SaveSettings();
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            // Port configuration
+            EditorGUILayout.BeginHorizontal();
+            int newPort = EditorGUILayout.IntField("WebSocket Port", settings.Port);
+            if (newPort < 1 || newPort > 65536)
+            {
+                newPort = settings.Port;
+                Debug.LogError($"{newPort} is an invalid port number. Please enter a number between 1 and 65535.");
+            }
+            
+            if (newPort != settings.Port)
+            {
+                settings.Port = newPort;
+                settings.SaveSettings();
+                _ = mcpUnityBridge.Reconnect();
             }
             EditorGUILayout.EndHorizontal();
             
@@ -157,20 +177,20 @@ namespace McpUnity.Unity
             EditorGUILayout.BeginHorizontal();
             
             // Determine button states based on connection state
-            ConnectionState currentState = McpUnityBridge.Instance.ConnectionState;
+            ConnectionState currentState = mcpUnityBridge.ConnectionState;
             
             // Connect button - enabled only when disconnected
             GUI.enabled = currentState == ConnectionState.Disconnected;
             if (GUILayout.Button("Start Server", GUILayout.Height(30)))
             {
-                _ = McpUnityBridge.Instance.Connect(McpUnitySettings.Instance.WebSocketUrl);
+                _ = mcpUnityBridge.Connect();
             }
             
             // Disconnect button - enabled only when connected
             GUI.enabled = currentState == ConnectionState.Connected;
             if (GUILayout.Button("Stop Server", GUILayout.Height(30)))
             {
-                _ = McpUnityBridge.Instance.Disconnect();
+                _ = mcpUnityBridge.Disconnect();
             }
             
             GUI.enabled = true;
@@ -293,7 +313,7 @@ namespace McpUnity.Unity
                 serializer.Serialize(jsonWriter, config);
             }
             
-            _mcpConfigJson = stringWriter.ToString().Replace("\\\\", "\\").Replace("//", "/");
+            _mcpConfigJson = stringWriter.ToString().Replace("\\", "/").Replace("//", "/");
         }
 
         /// <summary>

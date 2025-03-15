@@ -47,12 +47,8 @@ export class McpUnity {
         this.logger.info(`MCP Node WebSocket Connected: ${id}`);
         
         socket.on('message', (data: WebSocket.Data) => {
-          try {
-            const message = JSON.parse(data.toString());
-            this.handleMessage(message);
-          } catch (error) {
-            this.logger.error('MCP Node WebSocket Error parsing message', error);
-          }
+          const message = JSON.parse(data.toString());
+          this.handleMessage(message);
         });
         
         socket.on('close', () => {

@@ -33,7 +33,7 @@ export declare class ToolRegistry {
     private tools;
     private logger;
     constructor(logger: Logger);
-    register(tool: ToolDefinition): void;
+    add(tool: ToolDefinition): void;
     getAll(): ToolDefinition[];
     registerWithServer(server: McpServer): void;
 }

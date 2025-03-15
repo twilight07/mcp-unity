@@ -111,7 +111,7 @@ namespace McpUnity.Unity
             // Auto-connect if configured to do so
             if (McpUnitySettings.Instance.AutoStartServer)
             {
-                Connect(McpUnitySettings.Instance.WebSocketUrl).ConfigureAwait(false);
+                Connect().ConfigureAwait(false);
             }
         }
         
@@ -132,10 +132,12 @@ namespace McpUnity.Unity
         /// <summary>
         /// Connect to the Node.js server
         /// </summary>
-        public async Task Connect(string url)
+        public async Task Connect(int port = -1)
         {
             // Don't try to connect if already connected or connecting
             if (ConnectionState != ConnectionState.Disconnected) return;
+            
+            var url = $"ws://localhost:{McpUnitySettings.Instance.Port}";
             
             try
             {
@@ -183,6 +185,28 @@ namespace McpUnity.Unity
                 Debug.LogError($"[MCP Unity] Disconnection error: {ex.Message}");
                 OnError?.Invoke(ex.Message);
             }
+        }
+        
+        /// <summary>
+        /// Reconnect to the Node.js server
+        /// If disconnected, it will connect.
+        /// If connected or connecting, it will disconnect first and then connect again.
+        /// </summary>
+        public async Task Reconnect()
+        {
+            Debug.Log("[MCP Unity] Reconnecting to server...");
+            
+            // If already connected or connecting, disconnect first
+            if (ConnectionState != ConnectionState.Disconnected)
+            {
+                await Disconnect();
+                
+                // Small delay to ensure clean disconnect
+                await Task.Delay(500);
+            }
+            
+            // Now connect
+            await Connect();
         }
         
         /// <summary>

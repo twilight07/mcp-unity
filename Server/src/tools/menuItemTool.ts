@@ -21,29 +21,24 @@ export function createMenuItemTool(mcpUnity: McpUnity, logger: Logger): ToolDefi
         );
       }
       
-      try {
-        const response = await mcpUnity.sendRequest({
-          method: 'executeMenuItem',
-          params: { menuPath }
-        });
-        
-        if (!response.success) {
-          throw new McpUnityError(
-            ErrorType.TOOL_EXECUTION,
-            response.message || `Failed to execute menu item: ${menuPath}`
-          );
-        }
-        
-        return {
-          content: [{ 
-            type: 'text', 
-            text: response.message || `Successfully executed menu item: ${menuPath}` 
-          }]
-        };
-      } catch (error) {
-        logger.error(`Error executing menu item: ${menuPath}`, error);
-        throw error;
+      const response = await mcpUnity.sendRequest({
+        method: 'executeMenuItem',
+        params: { menuPath }
+      });
+      
+      if (!response.success) {
+        throw new McpUnityError(
+          ErrorType.TOOL_EXECUTION,
+          response.message || `Failed to execute menu item: ${menuPath}`
+        );
       }
+      
+      return {
+        content: [{ 
+          type: 'text', 
+          text: response.message || `Successfully executed menu item: ${menuPath}` 
+        }]
+      };
     }
   };
 }

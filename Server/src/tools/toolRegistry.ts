@@ -42,9 +42,9 @@ export class ToolRegistry {
     this.logger = logger;
   }
   
-  register(tool: ToolDefinition): void {
+  add(tool: ToolDefinition): void {
     this.tools.set(tool.name, tool);
-    this.logger.info(`Registered tool: ${tool.name}`);
+    this.logger.info(`Added tool: ${tool.name}`);
   }
   
   getAll(): ToolDefinition[] {

@@ -1,6 +1,8 @@
 // Import MCP SDK components
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
 
 import { McpUnity } from './unity/mcpUnity.js';
 import { Logger, LogLevel } from './utils/logger.js';
@@ -11,6 +13,29 @@ import { createMenuItemTool } from './tools/menuItemTool.js';
 const serverLogger = new Logger('Server', LogLevel.INFO);
 const unityLogger = new Logger('Unity', LogLevel.INFO);
 const toolLogger = new Logger('Tools', LogLevel.INFO);
+
+// Read port from port.txt file or use default
+function getPort(): number {
+  try {
+    // Get the directory above the current working directory
+    const parentDir = dirname(process.cwd());
+    const portFilePath = join(parentDir, 'port.txt');
+    
+    if (existsSync(portFilePath)) {
+      const portStr = readFileSync(portFilePath, 'utf-8').trim();
+      const port = parseInt(portStr, 10);
+      if (!isNaN(port) && port > 0 && port < 65536) {
+        serverLogger.info(`Using port from port.txt: ${port}`);
+        return port;
+      }
+    }
+  } catch (error) {
+    serverLogger.warn(`Error reading port.txt: ${error}`);
+  }
+  
+  serverLogger.info('Using default port: 8080');
+  return 8080;
+}
 
 // Initialize the MCP server
 const server = new McpServer (
@@ -25,19 +50,19 @@ const server = new McpServer (
   }
 );
 
-// Initialize Unity bridge
-const mcpUnity = new McpUnity(8080, unityLogger);
+// Initialize Unity WebSocket bridge with port from port.txt
+const mcpUnity = new McpUnity(getPort(), unityLogger);
 
 // Initialize tool registry
 const toolRegistry = new ToolRegistry(toolLogger);
 
-// Register the menu item tool
-toolRegistry.register(createMenuItemTool(mcpUnity, toolLogger));
+// Add the menu item tool
+toolRegistry.add(createMenuItemTool(mcpUnity, toolLogger));
 
 // Register all tools with the MCP server
 toolRegistry.registerWithServer(server);
 
-// Start the server
+// Server startup function
 async function startServer() {
   try {
     // Initialize STDIO transport for MCP client communication
@@ -56,7 +81,7 @@ async function startServer() {
   }
 }
 
-// Actually start the server
+// Start the server
 startServer();
 
 // Handle shutdown

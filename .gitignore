@@ -113,5 +113,5 @@ GvhProjectSettings.xml
 #Project Specific
 **/Server/node_modules/
 **/Server/node_modules.meta
-**/Server/package-lock.json
-**/Server/package-lock.json.meta
+**/package-lock.json
+**/package-lock.json.meta

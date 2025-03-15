@@ -16,36 +16,44 @@ export class McpUnity {
             this.logger.warn('MCP Node WebSocket Connection already started');
             return;
         }
-        return new Promise((resolve) => {
-            this.ws = new WebSocketServer({ port: this.port });
-            this.ws.on('listening', () => {
-                this.logger.info(`MCP Node WebSocket listening on port ${this.port}`);
-                resolve();
-            });
-            this.ws.on('connection', (socket) => {
-                const id = uuidv4();
-                this.connections.set(id, socket);
-                this.logger.info(`MCP Node WebSocket Connected: ${id}`);
-                socket.on('message', (data) => {
-                    try {
-                        const message = JSON.parse(data.toString());
-                        this.handleMessage(message);
-                    }
-                    catch (error) {
-                        this.logger.error('MCP Node WebSocket Error parsing message', error);
-                    }
+        return new Promise((resolve, reject) => {
+            try {
+                this.logger.info(`Starting WebSocket server on port ${this.port}`);
+                this.ws = new WebSocketServer({ port: this.port });
+                this.ws.on('listening', () => {
+                    this.logger.info(`MCP Node WebSocket listening on port ${this.port}`);
+                    resolve();
                 });
-                socket.on('close', () => {
-                    this.connections.delete(id);
-                    this.logger.info(`MCP Node WebSocket disconnected: ${id}`);
+                this.ws.on('error', (error) => {
+                    this.logger.error('WebSocket server error', error);
+                    reject(error);
                 });
-                socket.on('error', (error) => {
-                    this.logger.error(`MCP Node WebSocket error for connection ${id}`, error);
+                this.ws.on('connection', (socket) => {
+                    const id = uuidv4();
+                    this.connections.set(id, socket);
+                    this.logger.info(`MCP Node WebSocket Connected: ${id}`);
+                    socket.on('message', (data) => {
+                        try {
+                            const message = JSON.parse(data.toString());
+                            this.handleMessage(message);
+                        }
+                        catch (error) {
+                            this.logger.error(`Error parsing message from ${id}`, error);
+                        }
+                    });
+                    socket.on('close', () => {
+                        this.connections.delete(id);
+                        this.logger.info(`MCP Node WebSocket disconnected: ${id}`);
+                    });
+                    socket.on('error', (error) => {
+                        this.logger.error(`MCP Node WebSocket error for connection ${id}`, error);
+                    });
                 });
-            });
-            this.ws.on('error', (error) => {
-                this.logger.error('MCP Node WebSocket server error', error);
-            });
+            }
+            catch (error) {
+                this.logger.error('Failed to create WebSocket server', error);
+                reject(error);
+            }
         });
     }
     async stop() {

@@ -5,9 +5,9 @@ export class ToolRegistry {
     constructor(logger) {
         this.logger = logger;
     }
-    register(tool) {
+    add(tool) {
         this.tools.set(tool.name, tool);
-        this.logger.info(`Registered tool: ${tool.name}`);
+        this.logger.info(`Added tool: ${tool.name}`);
     }
     getAll() {
         return Array.from(this.tools.values());
