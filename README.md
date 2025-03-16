@@ -7,13 +7,41 @@
 [![](https://img.shields.io/badge/WebSocket-4353FF?style=flat&logo=socket.io&logoColor=white 'WebSocket')](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
 
 [![](https://img.shields.io/github/last-commit/CoderGamester/mcp-unity 'Last Commit')](https://github.com/CoderGamester/mcp-unity/commits/main)
-[![](https://img.shields.io/maintenance/yes/2025 'Maintained')](https://github.com/CoderGamester/mcp-unity)
 [![](https://img.shields.io/github/stars/CoderGamester/mcp-unity 'Stars')](https://github.com/CoderGamester/mcp-unity/stargazers)
-
 [![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
 [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
 
-## Overview
+```                                                                        
+                              ,/(/.   *(/,                                  
+                          */(((((/.   *((((((*.                             
+                     .*((((((((((/.   *((((((((((/.                         
+                 ./((((((((((((((/    *((((((((((((((/,                     
+             ,/(((((((((((((/*.           */(((((((((((((/*.                
+            ,%%#((/((((((*                    ,/(((((/(#&@@(                
+            ,%%##%%##((((((/*.             ,/((((/(#&@@@@@@(                
+            ,%%######%%##((/(((/*.    .*/(((//(%@@@@@@@@@@@(                
+            ,%%####%#(%%#%%##((/((((((((//#&@@@@@@&@@@@@@@@(                
+            ,%%####%(    /#%#%%%##(//(#@@@@@@@%,   #@@@@@@@(                
+            ,%%####%(        *#%###%@@@@@@(        #@@@@@@@(                
+            ,%%####%(           #%#%@@@@,          #@@@@@@@(                
+            ,%%##%%%(           #%#%@@@@,          #@@@@@@@(                
+            ,%%%#*              #%#%@@@@,             *%@@@(                
+            .,      ,/##*.      #%#%@@@@,     ./&@#*      *`                
+                ,/#%#####%%#/,  #%#%@@@@, ,/&@@@@@@@@@&\.                    
+                 `*#########%%%%###%@@@@@@@@@@@@@@@@@@&*´                   
+                    `*%%###########%@@@@@@@@@@@@@@&*´                        
+                        `*%%%######%@@@@@@@@@@&*´                            
+                            `*#%%##%@@@@@&*´                                 
+                               `*%#%@&*´                                     
+                                                       
+     ███╗   ███╗ ██████╗██████╗         ██╗   ██╗███╗   ██╗██╗████████╗██╗   ██╗
+     ████╗ ████║██╔════╝██╔══██╗        ██║   ██║████╗  ██║██║╚══██╔══╝╚██╗ ██╔╝
+     ██╔████╔██║██║     ██████╔╝        ██║   ██║██╔██╗ ██║██║   ██║    ╚████╔╝ 
+     ██║╚██╔╝██║██║     ██╔═══╝         ██║   ██║██║╚██╗██║██║   ██║     ╚██╔╝  
+     ██║ ╚═╝ ██║╚██████╗██║             ╚██████╔╝██║ ╚████║██║   ██║      ██║   
+     ╚═╝     ╚═╝ ╚═════╝╚═╝              ╚═════╝ ╚═╝  ╚═══╝╚═╝   ╚═╝      ╚═╝   
+```
+
 MCP Unity is an implementation of the Model Context Protocol for Unity Editor, allowing AI assistants to interact with your Unity projects. This package provides a bridge between Unity and a Node.js server that implements the MCP protocol, enabling AI agents like Claude, Windsurf, and Cursor to execute operations within the Unity Editor.
 
 ## Features
@@ -23,32 +51,12 @@ MCP Unity currently provides the following tools:
 
 More tools will be added in future updates.
 
-## Usage Examples
-
-### Executing a Menu Item
-AI assistants can execute Unity menu items using the `execute_menu_item` tool:
-
-```typescript
-// Example: Creating a new scene in Unity
-await tools.execute_menu_item({
-  menuPath: "File/New Scene"
-});
-```
-
 ## Requirements
 - Unity 2022.3 or later
 - Node.js 18 or later (for running the server)
 - npm 9 or later (for building the server)
 
 ## Installation
-
-### Installing via Smithery
-
-To install MCP Unity for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@CoderGamester/mcp-unity):
-
-```bash
-npx -y @smithery/cli install @CoderGamester/mcp-unity --client claude
-```
 
 ### Installing the Unity MCP Server package via Unity Package Manager
 1. Open the Unity Package Manager (Window > Package Manager)
@@ -65,7 +73,7 @@ Before installing MCP Unity, you'll need to have Node.js 18 or later installed o
 2. Download the Windows Installer (.msi) for the LTS version (recommended)
 3. Run the installer and follow the installation wizard
 4. Verify the installation by opening PowerShell and running:
-   ```shell
+   ```bash
    node --version
    npm --version
    ```
@@ -75,54 +83,33 @@ Before installing MCP Unity, you'll need to have Node.js 18 or later installed o
 2. Download the macOS Installer (.pkg) for the LTS version (recommended)
 3. Run the installer and follow the installation wizard
 4. Alternatively, if you have Homebrew installed, you can run:
-   ```shell
+   ```bash
    brew install node@18
    ```
 5. Verify the installation by opening Terminal and running:
-   ```shell
+   ```bash
    node --version
    npm --version
    ```
-
-## Running the Server
-You need to run 2 servers for this MCP to work, in the following ways:
-
-### Run Node.js Server
-1. Navigate to this `mcp-unity` package directory in your device with the terminal.
-   ```powershell
-   cd ABSOLUTE/PATH/TO/mcp-unity
-   ```
-2. Run the server using Node.js:
-   ```powershell
-   node Server/build/index.js
-   ```
-
-### Run Unity Editor MCP Server
-1. Open the Unity Editor
-2. Navigate to Tools > MCP Unity > Server Window
-3. Click "Start Server" to start the WebSocket server
-
-### Configuring the WebSocket Port
-By default, the WebSocket server runs on port 8080. You can change this port in two ways:
-
-#### Option 1: Using the Unity Editor
-1. Open the Unity Editor
-2. Navigate to Tools > MCP Unity > Server Window
-3. Change the "WebSocket Port" value to your desired port number
-4. The Unity Editor MCP server will automatically reconnect with the new port
-5. Restart the Node.js server
-
-#### Option 2: Editing the port.txt file
-1. Navigate to the root directory of the MCP Unity package
-2. Open or create the `port.txt` file
-3. Enter your desired port number (e.g., `8081`)
-4. Save the file
-5. Restart the Node.js server and Unity Editor MCP Server
 
 ## Configuring AI Clients
 
 Replace `ABSOLUTE/PATH/TO` with the actual path to your MCP Unity installation.
 The right configuration can be accessed in the Unity Editor MCP Server window. (Tools > MCP Unity > Server Window)
+
+### Installing via Smithery
+
+To install MCP Unity via [Smithery](https://smithery.ai/server/@CoderGamester/mcp-unity):
+
+```bash
+npx -y @smithery/cli@latest install @CoderGamester/mcp-unity --client claude
+```
+```bash
+npx -y @smithery/cli@latest install @CoderGamester/mcp-unity --client windsurf
+```
+```bash
+npx -y @smithery/cli@latest install @CoderGamester/mcp-unity --client cursor
+```
 
 ### Claude Desktop
 Add the following configuration to your Claude Desktop Developer claude_desktop_config.json:
@@ -160,30 +147,65 @@ Add the following configuration to your Windsurf mcp_config.json settings:
 Add the following configuration to your Cursor MCP Configure settings:
 
 - Name: MCP Unity
-- Command: node
-- Args: ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js
+- Type: commmand
+- Command: node ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js
+
+## Running the Server
+You need to run 2 servers for this MCP to work, in the following ways:
+
+### Run Node.js Server
+1. Navigate to this `mcp-unity` package directory in your device with the terminal.
+   ```bash
+   cd ABSOLUTE/PATH/TO/mcp-unity
+   ```
+2. Run the server using Node.js:
+   ```bash
+   node Server/build/index.js
+   ```
+
+### Run Unity Editor MCP Server
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Click "Start Server" to start the WebSocket server
+
+### Configuring the WebSocket Port
+By default, the WebSocket server runs on port 8080. You can change this port in two ways:
+
+#### Option 1: Using the Unity Editor
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Change the "WebSocket Port" value to your desired port number
+4. The Unity Editor MCP server will automatically reconnect with the new port
+5. Restart the Node.js server
+
+#### Option 2: Editing the port.txt file
+1. Navigate to the root directory of the MCP Unity package
+2. Open or create the `port.txt` file
+3. Enter your desired port number (e.g., `8081`)
+4. Save the file
+5. Restart the Node.js server and Unity Editor MCP Server
 
 ## Building and Debugging the Server
 The MCP Unity server is built using Node.js and TypeScript. It requires to compile the TypeScript code to JavaScript in the `build` directory.
 To build the server, open a terminal and:
 
 1. Navigate to the Server directory:
-   ```shell
+   ```bash
    cd ABSOLUTE/PATH/TO/mcp-unity/Server
    ```
 
 2. Install dependencies:
-   ```shell
+   ```bash
    npm install
    ```
 
 3. Build the server:
-   ```shell
+   ```bash
    npm run build
    ```
    
 4. Debug the server with [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector):
-   ```shell
+   ```bash
    npx @modelcontextprotocol/inspector node build/index.js
    ```
 
