@@ -5,6 +5,9 @@ export enum LogLevel {
   ERROR = 3
 }
 
+// Check environment variable for logging
+const isLoggingEnabled = process.env.LOGGING === 'true';
+
 export class Logger {
   private level: LogLevel;
   private prefix: string;
@@ -30,8 +33,12 @@ export class Logger {
     this.log(LogLevel.ERROR, message, error);
   }
   
+  isEnabled(): boolean {
+    return isLoggingEnabled;
+  }
+  
   private log(level: LogLevel, message: string, data?: any) {
-    if (level < this.level) return;
+    if (level < this.level || !this.isEnabled()) return;
     
     const timestamp = new Date().toISOString();
     const levelStr = LogLevel[level];

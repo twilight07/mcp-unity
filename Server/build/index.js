@@ -13,10 +13,12 @@ const unityLogger = new Logger('Unity', LogLevel.INFO);
 const toolLogger = new Logger('Tools', LogLevel.INFO);
 // Read port from port.txt file or use default
 function getPort() {
+    // Get the directory where this script is located and go up one level
+    let portFilePath = join(dirname(new URL(import.meta.url).pathname), '..', '..', 'port.txt');
+    if (portFilePath.startsWith('\\')) {
+        portFilePath = portFilePath.substring(1);
+    }
     try {
-        // Get the directory above the current working directory
-        const parentDir = dirname(process.cwd());
-        const portFilePath = join(parentDir, 'port.txt');
         if (existsSync(portFilePath)) {
             const portStr = readFileSync(portFilePath, 'utf-8').trim();
             const port = parseInt(portStr, 10);
@@ -29,8 +31,8 @@ function getPort() {
     catch (error) {
         serverLogger.warn(`Error reading port.txt: ${error}`);
     }
-    serverLogger.info('Using default port: 8080');
-    return 8080;
+    serverLogger.info(`Could not find port.txt in path ${portFilePath}, using default port: 8090`);
+    return 8090;
 }
 // Initialize the MCP server
 const server = new McpServer({
@@ -56,15 +58,8 @@ async function startServer() {
         const stdioTransport = new StdioServerTransport();
         // Connect the server to the transport
         await server.connect(stdioTransport);
-        // Start Unity WebSocket connection with better error handling
-        try {
-            await mcpUnity.start();
-            serverLogger.info(`MCP Unity WebSocket server started on port ${getPort()}`);
-        }
-        catch (wsError) {
-            serverLogger.error('Failed to start WebSocket server', wsError);
-            // Don't exit process here, just log the error
-        }
+        // Start Unity WebSocket connection
+        await mcpUnity.start();
         serverLogger.info('MCP Server started and ready');
     }
     catch (error) {

@@ -8,6 +8,7 @@
 
 [![](https://img.shields.io/github/last-commit/CoderGamester/mcp-unity 'Last Commit')](https://github.com/CoderGamester/mcp-unity/commits/main)
 [![](https://img.shields.io/github/stars/CoderGamester/mcp-unity 'Stars')](https://github.com/CoderGamester/mcp-unity/stargazers)
+[![](https://img.shields.io/github/forks/CoderGamester/mcp-unity 'Forks')](https://github.com/CoderGamester/mcp-unity/network/members)
 [![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
 [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
 
@@ -92,26 +93,25 @@ Before installing MCP Unity, you'll need to have Node.js 18 or later installed o
    npm --version
    ```
 
-## Configuring AI Clients
-
-Replace `ABSOLUTE/PATH/TO` with the actual path to your MCP Unity installation.
-The right configuration can be accessed in the Unity Editor MCP Server window. (Tools > MCP Unity > Server Window)
-
 ### Installing via Smithery
 
 To install MCP Unity via [Smithery](https://smithery.ai/server/@CoderGamester/mcp-unity):
 
-```bash
-npx -y @smithery/cli@latest install @CoderGamester/mcp-unity --client claude
 ```
-```bash
-npx -y @smithery/cli@latest install @CoderGamester/mcp-unity --client windsurf
-```
-```bash
-npx -y @smithery/cli@latest install @CoderGamester/mcp-unity --client cursor
+Currently not available
 ```
 
-### Claude Desktop
+## Configure MCP Server
+
+Replace `ABSOLUTE/PATH/TO` with the actual path to your MCP Unity installation.
+The right configuration can be accessed in the Unity Editor MCP Server window. (Tools > MCP Unity > Server Window)
+
+### Configure Unity Editor MCP Server
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Click "Start Server" to start the WebSocket server
+
+### Configure Claude Desktop
 Add the following configuration to your Claude Desktop Developer claude_desktop_config.json:
 
 ```json
@@ -127,7 +127,7 @@ Add the following configuration to your Claude Desktop Developer claude_desktop_
 }
 ```
 
-### Windsurf IDE
+### Configure Windsurf IDE
 Add the following configuration to your Windsurf mcp_config.json settings:
 
 ```json
@@ -143,7 +143,7 @@ Add the following configuration to your Windsurf mcp_config.json settings:
 }
 ```
 
-### Cursor
+### Configure Cursor IDE
 Add the following configuration to your Cursor MCP Configure settings:
 
 - Name: MCP Unity
@@ -163,25 +163,20 @@ You need to run 2 servers for this MCP to work, in the following ways:
    node Server/build/index.js
    ```
 
-### Run Unity Editor MCP Server
-1. Open the Unity Editor
-2. Navigate to Tools > MCP Unity > Server Window
-3. Click "Start Server" to start the WebSocket server
-
-### Configuring the WebSocket Port
+## Configure the WebSocket Port
 By default, the WebSocket server runs on port 8080. You can change this port in two ways:
 
-#### Option 1: Using the Unity Editor
+### Option 1: Using the Unity Editor
 1. Open the Unity Editor
 2. Navigate to Tools > MCP Unity > Server Window
 3. Change the "WebSocket Port" value to your desired port number
 4. The Unity Editor MCP server will automatically reconnect with the new port
 5. Restart the Node.js server
 
-#### Option 2: Editing the port.txt file
+### Option 2: Editing the port.txt file
 1. Navigate to the root directory of the MCP Unity package
 2. Open or create the `port.txt` file
-3. Enter your desired port number (e.g., `8081`)
+3. Enter your desired port number (e.g., `8090`)
 4. Save the file
 5. Restart the Node.js server and Unity Editor MCP Server
 
@@ -203,10 +198,22 @@ To build the server, open a terminal and:
    ```bash
    npm run build
    ```
+
+### Debugging
    
-4. Debug the server with [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector):
+1. Debug the server with [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector):
    ```bash
    npx @modelcontextprotocol/inspector node build/index.js
+   ```
+
+2. Enable logging on Powershell:
+   ```powershell
+   $env:LOGGING = "true"
+   ```
+
+3. Enable logging on Command Prompt or Terminal:
+   ```bash
+   set LOGGING=true
    ```
 
 Don't forget to shutdown the server with `Ctrl + C` before closing the terminal or debugging it with the [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector).

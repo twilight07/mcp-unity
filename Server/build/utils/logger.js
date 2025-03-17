@@ -5,6 +5,8 @@ export var LogLevel;
     LogLevel[LogLevel["WARN"] = 2] = "WARN";
     LogLevel[LogLevel["ERROR"] = 3] = "ERROR";
 })(LogLevel || (LogLevel = {}));
+// Check environment variable for logging
+const isLoggingEnabled = process.env.LOGGING === 'true';
 export class Logger {
     level;
     prefix;
@@ -24,8 +26,11 @@ export class Logger {
     error(message, error) {
         this.log(LogLevel.ERROR, message, error);
     }
+    isEnabled() {
+        return isLoggingEnabled;
+    }
     log(level, message, data) {
-        if (level < this.level)
+        if (level < this.level || !this.isEnabled())
             return;
         const timestamp = new Date().toISOString();
         const levelStr = LogLevel[level];

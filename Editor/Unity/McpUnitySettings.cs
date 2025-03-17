@@ -21,7 +21,7 @@ namespace McpUnity.Unity
 
         // Server settings
         public bool AutoStartServer = true;
-        public int Port = 8080;
+        public int Port = 8090;
         
         /// <summary>
         /// Singleton instance of settings

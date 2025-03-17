@@ -2,8 +2,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { readFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-
+import { join, dirname} from 'path';
 import { McpUnity } from './unity/mcpUnity.js';
 import { Logger, LogLevel } from './utils/logger.js';
 import { ToolRegistry } from './tools/toolRegistry.js';
@@ -16,11 +15,12 @@ const toolLogger = new Logger('Tools', LogLevel.INFO);
 
 // Read port from port.txt file or use default
 function getPort(): number {
+  // Get the directory where this script is located and go up one level
+  let portFilePath = join(dirname(new URL(import.meta.url).pathname), '..', '..', 'port.txt');
+  if (portFilePath.startsWith('\\')) {
+    portFilePath = portFilePath.substring(1);
+  }
   try {
-    // Get the directory above the current working directory
-    const parentDir = dirname(process.cwd());
-    const portFilePath = join(parentDir, 'port.txt');
-    
     if (existsSync(portFilePath)) {
       const portStr = readFileSync(portFilePath, 'utf-8').trim();
       const port = parseInt(portStr, 10);
@@ -33,8 +33,8 @@ function getPort(): number {
     serverLogger.warn(`Error reading port.txt: ${error}`);
   }
   
-  serverLogger.info('Using default port: 8080');
-  return 8080;
+  serverLogger.info(`Could not find port.txt in path ${portFilePath}, using default port: 8090`);
+  return 8090;
 }
 
 // Initialize the MCP server
