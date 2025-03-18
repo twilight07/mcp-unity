@@ -130,10 +130,13 @@ namespace McpUnity.Unity
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Server Status:", GUILayout.Width(120));
             
-            var connectionState = McpUnityBridge.Instance.ConnectionState;
-            var statusText = connectionState == ConnectionState.Connected ? "Connected" : "Disconnected";
-            var statusColor = connectionState == ConnectionState.Connected  ? Color.green : Color.red;
+            McpUnitySettings settings = McpUnitySettings.Instance;
+            McpUnityBridge mcpUnityBridge = McpUnityBridge.Instance;
+            ConnectionState connectionState = mcpUnityBridge.ConnectionState;
+            string statusText = connectionState == ConnectionState.Connected ? "Connected" : "Disconnected";
+            Color statusColor = connectionState == ConnectionState.Connected  ? Color.green : Color.red;
             statusColor = connectionState == ConnectionState.Connecting  ? Color.yellow : statusColor;
+            statusText = connectionState == ConnectionState.Connecting ? "Connecting..." : statusText;
             
             GUIStyle statusStyle = new GUIStyle(EditorStyles.boldLabel);
             statusStyle.normal.textColor = statusColor;
@@ -141,9 +144,7 @@ namespace McpUnity.Unity
             EditorGUILayout.LabelField(statusText, statusStyle);
             EditorGUILayout.EndHorizontal();
             
-            var settings = McpUnitySettings.Instance;
-            var mcpUnityBridge = McpUnityBridge.Instance;
-            
+            EditorGUILayout.Space();
             // Auto-start server option
             EditorGUILayout.BeginHorizontal();
             bool newAutoStart = EditorGUILayout.Toggle("Auto-start Server", settings.AutoStartServer);

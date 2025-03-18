@@ -46,47 +46,30 @@ namespace McpUnity.Tools
         /// <param name="parameters">Tool parameters as a JObject</param>
         public override JObject Execute(JObject parameters)
         {
-            try
+            // Extract parameters with defaults
+            string menuPath = GetParameterValue<string>(parameters?["menuPath"]);
+            if (string.IsNullOrEmpty(menuPath))
             {
-                // Extract parameters with defaults
-                var menuPath = GetParameterValue<string>(parameters?["menuPath"]);
-                if (string.IsNullOrEmpty(menuPath))
-                {
-                    return CreateErrorResponse(
-                        "Required parameter 'menuPath' not provided", 
-                        "validation_error"
-                    );
-                }
-                
-                // Log the execution
-                Debug.Log($"[MCP Unity] Executing menu item: {menuPath}");
-                
-                // Execute the menu item
-                var success = EditorApplication.ExecuteMenuItem(menuPath);
-                
-                // Create the response
-                return new JObject
-                {
-                    ["success"] = success,
-                    ["message"] = success 
-                        ? $"Successfully executed menu item: {menuPath}" 
-                        : $"Failed to execute menu item: {menuPath}"
-                };
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MCP Unity] Error executing menu item: {ex.Message}");
-                
                 return CreateErrorResponse(
-                    $"Error executing menu item: {ex.Message}",
-                    "tool_execution_error",
-                    new JObject
-                    {
-                        ["exception"] = ex.GetType().Name,
-                        ["stackTrace"] = ex.StackTrace
-                    }
+                    "Required parameter 'menuPath' not provided", 
+                    "validation_error"
                 );
             }
+                
+            // Log the execution
+            Debug.Log($"[MCP Unity] Executing menu item: {menuPath}");
+                
+            // Execute the menu item
+            bool success = EditorApplication.ExecuteMenuItem(menuPath);
+                
+            // Create the response
+            return new JObject
+            {
+                ["success"] = success,
+                ["message"] = success 
+                    ? $"Successfully executed menu item: {menuPath}" 
+                    : $"Failed to execute menu item: {menuPath}"
+            };
         }
     }
 }

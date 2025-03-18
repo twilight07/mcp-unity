@@ -67,7 +67,7 @@ More tools will be added in future updates.
 5. Click "Add"
 
 ### Installing Node.js 
-Before installing MCP Unity, you'll need to have Node.js 18 or later installed on your computer to run the server:
+To run MCP Unity server, you'll need to have Node.js 18 or later installed on your computer:
 
 #### Windows
 1. Visit the [Node.js download page](https://nodejs.org/en/download/)
@@ -151,9 +151,8 @@ Add the following configuration to your Cursor MCP Configure settings:
 - Command: node ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js
 
 ## Running the Server
-You need to run 2 servers for this MCP to work, in the following ways:
+You need to run the MCP Unity server for this to work, in the following ways:
 
-### Run Node.js Server
 1. Navigate to this `mcp-unity` package directory in your device with the terminal.
    ```bash
    cd ABSOLUTE/PATH/TO/mcp-unity
@@ -161,6 +160,10 @@ You need to run 2 servers for this MCP to work, in the following ways:
 2. Run the server using Node.js:
    ```bash
    node Server/build/index.js
+   ```
+3. Run Websocket connection in Unity Editor (if not already running)
+   ```
+   Tools > MCP Unity > Server Window > Start Server
    ```
 
 ## Configure the WebSocket Port
@@ -206,14 +209,16 @@ To build the server, open a terminal and:
    npx @modelcontextprotocol/inspector node build/index.js
    ```
 
-2. Enable logging on Powershell:
+2. Enable logging on Powershell or into a log.txt file:
    ```powershell
    $env:LOGGING = "true"
+   $env:LOGGING_FILE = "true"
    ```
 
-3. Enable logging on Command Prompt or Terminal:
+3. Enable logging on Command Prompt/Terminal or into a log.txt file:
    ```bash
    set LOGGING=true
+   set LOGGING_FILE=true
    ```
 
 Don't forget to shutdown the server with `Ctrl + C` before closing the terminal or debugging it with the [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector).

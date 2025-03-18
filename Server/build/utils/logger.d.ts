@@ -12,6 +12,7 @@ export declare class Logger {
     info(message: string, data?: any): void;
     warn(message: string, data?: any): void;
     error(message: string, error?: any): void;
-    isEnabled(): boolean;
+    isLoggingEnabled(): boolean;
+    isLoggingFileEnabled(): boolean;
     private log;
 }

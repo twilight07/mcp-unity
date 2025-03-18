@@ -1,17 +1,18 @@
 import { z } from 'zod';
 import { McpUnity } from '../unity/mcpUnity.js';
 import { Logger } from '../utils/logger.js';
-import { ToolDefinition } from './toolRegistry.js';
+import { ToolDefinition, ToolResponse } from './toolRegistry.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 
 export function createMenuItemTool(mcpUnity: McpUnity, logger: Logger): ToolDefinition {
+  const toolName = 'execute_menu_item';
   return {
-    name: 'execute_menu_item',
+    name: toolName,
     description: 'Executes a Unity menu item by path',
     parameters: z.object({
       menuPath: z.string().describe('The path to the menu item to execute (e.g. "GameObject/Create Empty")')
     }),
-    handler: async ({ menuPath }) => {
+    handler: async ({ menuPath }): Promise<ToolResponse> => {
       logger.info(`Executing menu item: ${menuPath}`);
       
       if (!mcpUnity.isConnected) {
@@ -22,7 +23,7 @@ export function createMenuItemTool(mcpUnity: McpUnity, logger: Logger): ToolDefi
       }
       
       const response = await mcpUnity.sendRequest({
-        method: 'executeMenuItem',
+        method: toolName,
         params: { menuPath }
       });
       
@@ -34,6 +35,7 @@ export function createMenuItemTool(mcpUnity: McpUnity, logger: Logger): ToolDefi
       }
       
       return {
+        success: true,
         content: [{ 
           type: 'text', 
           text: response.message || `Successfully executed menu item: ${menuPath}` 

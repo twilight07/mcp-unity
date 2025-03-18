@@ -1,3 +1,5 @@
+import { appendFileSync } from 'fs';
+
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -7,6 +9,9 @@ export enum LogLevel {
 
 // Check environment variable for logging
 const isLoggingEnabled = process.env.LOGGING === 'true';
+
+// Check environment variable for logging in a file
+const isLoggingFileEnabled = process.env.LOGGING_FILE === 'true';
 
 export class Logger {
   private level: LogLevel;
@@ -33,21 +38,40 @@ export class Logger {
     this.log(LogLevel.ERROR, message, error);
   }
   
-  isEnabled(): boolean {
+  isLoggingEnabled(): boolean {
     return isLoggingEnabled;
   }
   
+  isLoggingFileEnabled(): boolean {
+    return true;
+  }
+  
   private log(level: LogLevel, message: string, data?: any) {
-    if (level < this.level || !this.isEnabled()) return;
+    if (level < this.level) return;
     
     const timestamp = new Date().toISOString();
     const levelStr = LogLevel[level];
     const logMessage = `[${timestamp}] [${levelStr}] [${this.prefix}] ${message}`;
+
+    // Write to file if file logging is enabled
+    if (this.isLoggingFileEnabled()) {
+      try {
+          appendFileSync('log.txt', logMessage + '\n');
+          if (data) {
+              appendFileSync('log.txt', JSON.stringify(data, null, 2) + '\n');
+          }
+      } catch (error) {
+          console.error('Failed to write to log file:', error);
+      }
+    }
     
-    if (data) {
-      console.log(logMessage, data);
-    } else {
-      console.log(logMessage);
+    // Write to console if logging is enabled
+    if (this.isLoggingEnabled()) {
+      if (data) {
+        console.log(logMessage, data);
+      } else {
+        console.log(logMessage);
+      }
     }
   }
 }

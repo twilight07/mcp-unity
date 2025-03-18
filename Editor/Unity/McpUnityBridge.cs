@@ -32,7 +32,6 @@ namespace McpUnity.Unity
         private static McpUnityBridge _instance;
         private ClientWebSocket _webSocket;
         private CancellationTokenSource _cts;
-        private Dictionary<string, TaskCompletionSource<JObject>> _pendingRequests = new Dictionary<string, TaskCompletionSource<JObject>>();
         
         // Dictionary to store tool instances
         private Dictionary<string, McpToolBase> _tools = new Dictionary<string, McpToolBase>();
@@ -50,8 +49,6 @@ namespace McpUnity.Unity
         {
             // Initialize the singleton instance when Unity loads
             // This ensures the bridge is available as soon as Unity starts
-            _ = Instance;
-            
             // Subscribe to editor quitting event to clean up
             EditorApplication.quitting += () => Instance.Disconnect().ConfigureAwait(false);
         }
@@ -93,6 +90,7 @@ namespace McpUnity.Unity
                     case WebSocketState.None:
                     case WebSocketState.Closed:
                     case WebSocketState.Aborted:
+                        return ConnectionState.Disconnected;
                     default:
                         return ConnectionState.Disconnected;
                 }
@@ -121,7 +119,7 @@ namespace McpUnity.Unity
         private void RegisterTools()
         {
             // Register MenuItemTool
-            var menuItemTool = new MenuItemTool();
+            MenuItemTool menuItemTool = new MenuItemTool();
             _tools.Add(menuItemTool.Name, menuItemTool);
             
             Debug.Log($"[MCP Unity] Registered tool: {menuItemTool.Name}");
@@ -137,7 +135,7 @@ namespace McpUnity.Unity
             // Don't try to connect if already connected or connecting
             if (ConnectionState != ConnectionState.Disconnected) return;
             
-            var url = $"ws://localhost:{McpUnitySettings.Instance.Port}";
+            string url = $"ws://localhost:{McpUnitySettings.Instance.Port}";
             
             try
             {
@@ -210,59 +208,6 @@ namespace McpUnity.Unity
         }
         
         /// <summary>
-        /// Send a request to the Node.js server and wait for response
-        /// </summary>
-        public async Task<JObject> SendRequest(string method, JObject parameters)
-        {
-            if (ConnectionState != ConnectionState.Connected)
-            {
-                throw new InvalidOperationException("Not connected to server");
-            }
-            
-            string requestId = Guid.NewGuid().ToString();
-            var request = new JObject
-            {
-                ["id"] = requestId,
-                ["type"] = "request",
-                ["method"] = method,
-                ["params"] = parameters
-            };
-            
-            var tcs = new TaskCompletionSource<JObject>();
-            _pendingRequests[requestId] = tcs;
-            
-            await SendMessage(request.ToString());
-            
-            // Wait for response with timeout
-            var timeoutTask = Task.Delay(5000);
-            var responseTask = tcs.Task;
-            
-            if (await Task.WhenAny(responseTask, timeoutTask) == timeoutTask)
-            {
-                _pendingRequests.Remove(requestId);
-                throw new TimeoutException("Request timed out");
-            }
-            
-            return await responseTask;
-        }
-        
-        /// <summary>
-        /// Get metadata about all registered tools
-        /// </summary>
-        /// <returns>A JArray containing tool metadata</returns>
-        public JArray GetToolsMetadata()
-        {
-            var metadata = new JArray();
-            
-            foreach (var tool in _tools.Values)
-            {
-                metadata.Add(tool.GetMetadata());
-            }
-            
-            return metadata;
-        }
-        
-        /// <summary>
         /// Send a message to the Node.js server
         /// </summary>
         private async Task SendMessage(string message)
@@ -282,34 +227,40 @@ namespace McpUnity.Unity
         /// </summary>
         private async Task ReceiveLoop()
         {
-            var buffer = new byte[4096];
+            byte[] buffer = new byte[4096];
+            StringBuilder messageBuilder = new StringBuilder();
             
+            while (ConnectionState == ConnectionState.Connected && !_cts.Token.IsCancellationRequested)
+            {
+                WebSocketReceiveResult result;
+                    
+                do
+                {
+                    result = await ReceiveAsync(buffer);
+                        
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        await Disconnect();
+                        return;
+                    }
+                        
+                    messageBuilder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                }
+                while (!result.EndOfMessage);
+                
+                ProcessMessage(messageBuilder.ToString());
+                messageBuilder.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Get received a message from the Node.js server
+        /// </summary>
+        private async Task<WebSocketReceiveResult> ReceiveAsync(byte[] buffer)
+        {
             try
             {
-                while (ConnectionState == ConnectionState.Connected && !_cts.Token.IsCancellationRequested)
-                {
-                    StringBuilder messageBuilder = new StringBuilder();
-                    WebSocketReceiveResult result;
-                    
-                    do
-                    {
-                        result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
-                        
-                        if (result.MessageType == WebSocketMessageType.Close)
-                        {
-                            await Disconnect();
-                            return;
-                        }
-                        
-                        string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                        messageBuilder.Append(message);
-                    }
-                    while (!result.EndOfMessage);
-                    
-                    string fullMessage = messageBuilder.ToString();
-                    Debug.Log($"[MCP Unity] Received message: {fullMessage}");
-                    ProcessMessage(fullMessage);
-                }
+                return await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
             }
             catch (OperationCanceledException)
             {
@@ -317,14 +268,12 @@ namespace McpUnity.Unity
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] WebSocket error: {ex.Message}");
+                Debug.LogError($"[MCP Unity] WebSocket Receive error: {ex.Message}");
                 OnError?.Invoke(ex.Message);
-                
-                if (ConnectionState == ConnectionState.Connected)
-                {
-                    await Disconnect();
-                }
             }
+            
+            // Return a web socket result to close the connection in the ReceiveLoop method
+            return new WebSocketReceiveResult(0, WebSocketMessageType.Close, true);
         }
         
         /// <summary>
@@ -332,44 +281,34 @@ namespace McpUnity.Unity
         /// </summary>
         private void ProcessMessage(string message)
         {
-            try
+            var json = JObject.Parse(message);
+            var id = json["id"]?.ToString();
+            var type = json["type"]?.ToString();
+                
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(type))
             {
-                var json = JObject.Parse(message);
-                var id = json["id"]?.ToString();
-                var type = json["type"]?.ToString();
-                
-                if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(type))
-                {
-                    Debug.LogWarning($"[MCP Unity] Invalid message format: {message}");
-                    return;
-                }
-                
-                if (type == "request")
-                {
-                    // Handle request from Node.js server
-                    ProcessRequest(json);
-                }
-                else if (type == "response" || type == "error")
-                {
-                    // Handle response to a previous request
-                    if (_pendingRequests.TryGetValue(id, out var tcs))
-                    {
-                        _pendingRequests.Remove(id);
-                        
-                        if (type == "error")
-                        {
-                            tcs.SetException(new Exception(json["error"]?.ToString() ?? "Unknown error"));
-                        }
-                        else
-                        {
-                            tcs.SetResult(json);
-                        }
-                    }
-                }
+                Debug.LogWarning($"[MCP Unity] Invalid message format: {message}");
+                return;
             }
-            catch (Exception ex)
+                
+            if (type == "request")
             {
-                Debug.LogError($"[MCP Unity] Error processing message: {ex.Message}");
+                Debug.Log($"[MCP Unity] Request message: {message}");
+                
+                // Handle request from Node.js server
+                ProcessRequest(json);
+            }
+            else if (type == "response")
+            {
+                Debug.Log($"[MCP Unity] Response message: {message}");
+            }
+            else if (type == "error")
+            {
+                Debug.LogError($"[MCP Unity] Error message: {message}");
+            }
+            else
+            {
+                Debug.LogWarning($"[MCP Unity] Unknown type {type} message: {message}");
             }
         }
         
@@ -387,49 +326,56 @@ namespace McpUnity.Unity
                 ["type"] = "response"
             };
             
-            try
+            // Find the tool by method name
+            if (_tools.TryGetValue(method, out var tool))
             {
-                // Find the tool by method name
-                if (_tools.TryGetValue(method, out var tool))
-                {
-                    // Execute the tool with the provided parameters
-                    var result = tool.Execute(parameters);
+                // Execute the tool with the provided parameters
+                var result = ExecuteTool(tool, parameters);
                     
-                    // Check if the result contains an error
-                    if (result.ContainsKey("error"))
-                    {
-                        response["type"] = "error";
-                        response["error"] = result["error"];
-                    }
-                    else
-                    {
-                        response["result"] = result;
-                    }
+                // Check if the result contains an error
+                if (result.TryGetValue("error", out var error))
+                {
+                    response["type"] = "error";
+                    response["error"] = error;
                 }
                 else
                 {
-                    response["type"] = "error";
-                    response["error"] = new JObject
-                    {
-                        ["type"] = "method_not_found",
-                        ["message"] = $"Method not implemented: {method}"
-                    };
-                    Debug.LogWarning($"[MCP Unity] Method not implemented: {method}");
+                    response["result"] = result;
                 }
             }
-            catch (Exception ex)
+            else
             {
                 response["type"] = "error";
                 response["error"] = new JObject
                 {
-                    ["type"] = "internal_error",
-                    ["message"] = ex.Message,
-                    ["stack"] = ex.StackTrace
+                    ["type"] = "method_not_found",
+                    ["message"] = $"Method not implemented: {method}"
                 };
-                Debug.LogError($"[MCP Unity] Error processing request: {ex.Message}");
+                Debug.LogWarning($"[MCP Unity] Method not implemented: {method}");
             }
             
             await SendMessage(response.ToString());
+        }
+
+        private JObject ExecuteTool(McpToolBase tool, JObject parameters)
+        {
+            try
+            {
+                return tool.Execute(parameters);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[MCP Unity] Error executing tool {tool.Name} with the following error: {ex.Message}");
+                return new JObject
+                {
+                    ["error"] = new JObject
+                    {
+                        ["type"] = "internal_error",
+                        ["message"] = ex.Message,
+                        ["stack"] = ex.StackTrace
+                    }
+                };
+            }
         }
     }
 }
