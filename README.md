@@ -66,6 +66,9 @@ More tools will be added in future updates.
 4. Enter: `https://github.com/CoderGamester/mcp-unity.git`
 5. Click "Add"
 
+![package manager](https://github.com/user-attachments/assets/a72bfca4-ae52-48e7-a876-e99c701b0497)
+
+
 ### Installing Node.js 
 To run MCP Unity server, you'll need to have Node.js 18 or later installed on your computer:
 
@@ -106,10 +109,15 @@ Currently not available
 Replace `ABSOLUTE/PATH/TO` with the actual path to your MCP Unity installation.
 The right configuration can be accessed in the Unity Editor MCP Server window. (Tools > MCP Unity > Server Window)
 
+![MCP configuration](https://github.com/user-attachments/assets/ea9bb912-94a7-4409-81c1-3af39158dac0)
+
+
 ### Configure Unity Editor MCP Server
 1. Open the Unity Editor
 2. Navigate to Tools > MCP Unity > Server Window
 3. Click "Start Server" to start the WebSocket server
+   
+![connect](https://github.com/user-attachments/assets/2e266a8b-8ba3-4902-b585-b220b11ab9a2)
 
 ### Configure Claude Desktop
 Add the following configuration to your Claude Desktop Developer claude_desktop_config.json:
