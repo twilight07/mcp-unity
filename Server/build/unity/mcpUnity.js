@@ -7,9 +7,13 @@ export class McpUnity {
     pendingRequests = new Map();
     logger;
     port;
-    constructor(port = 8080, logger) {
-        this.port = port;
+    constructor(logger) {
         this.logger = logger;
+        // Initialize port from environment variable or use default
+        const envPort = process.env.UNITY_PORT;
+        this.port = envPort ? parseInt(envPort, 10) : 8090;
+        // Log the port being used
+        this.logger.info(`Using port: ${this.port}`);
     }
     async start() {
         if (this.ws) {

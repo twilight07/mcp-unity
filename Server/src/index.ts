@@ -13,30 +13,6 @@ const serverLogger = new Logger('Server', LogLevel.INFO);
 const unityLogger = new Logger('Unity', LogLevel.INFO);
 const toolLogger = new Logger('Tools', LogLevel.INFO);
 
-// Read port from port.txt file or use default
-function getPort(): number {
-  // Get the directory where this script is located and go up one level
-  let portFilePath = join(dirname(new URL(import.meta.url).pathname), '..', '..', 'port.txt');
-  if (portFilePath.startsWith('\\')) {
-    portFilePath = portFilePath.substring(1);
-  }
-  try {
-    if (existsSync(portFilePath)) {
-      const portStr = readFileSync(portFilePath, 'utf-8').trim();
-      const port = parseInt(portStr, 10);
-      if (!isNaN(port) && port > 0 && port < 65536) {
-        serverLogger.info(`Using port from port.txt: ${port}`);
-        return port;
-      }
-    }
-  } catch (error) {
-    serverLogger.warn(`Error reading port.txt: ${error}`);
-  }
-  
-  serverLogger.info(`Could not find port.txt in path ${portFilePath}, using default port: 8090`);
-  return 8090;
-}
-
 // Initialize the MCP server
 const server = new McpServer (
   {
@@ -51,7 +27,7 @@ const server = new McpServer (
 );
 
 // Initialize Unity WebSocket bridge with port from port.txt
-const mcpUnity = new McpUnity(getPort(), unityLogger);
+const mcpUnity = new McpUnity(unityLogger);
 
 // Initialize tool registry
 const toolRegistry = new ToolRegistry(toolLogger);

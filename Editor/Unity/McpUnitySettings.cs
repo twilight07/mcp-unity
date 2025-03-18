@@ -17,7 +17,6 @@ namespace McpUnity.Unity
         
         private static McpUnitySettings _instance;
         private static readonly string SettingsPath = "ProjectSettings/McpUnitySettings.json";
-        private static readonly string PortFileName = "port.txt";
 
         // Server settings
         public bool AutoStartServer = true;
@@ -45,35 +44,6 @@ namespace McpUnity.Unity
         private McpUnitySettings() { }
 
         /// <summary>
-        /// Get the absolute path to the port.txt file
-        /// </summary>
-        private string GetPortFilePath()
-        {
-            // Try to find the script's location
-            var scriptPath = AssetDatabase.FindAssets($"t:Script {nameof(McpUnitySettings)}");
-            if (scriptPath != null && scriptPath.Length > 0)
-            {
-                // Get the path to the script
-                var assetPath = AssetDatabase.GUIDToAssetPath(scriptPath[0]);
-                
-                // Get the full path to the script
-                var editorDir = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Application.dataPath), assetPath));
-                
-                // Navigate up to the Editor parent directory
-                do
-                {
-                    editorDir = Path.GetDirectoryName(editorDir);
-                } while (!editorDir.EndsWith("Editor"));
-                editorDir = Path.GetDirectoryName(editorDir);
-                
-                return Path.Combine(editorDir, PortFileName);
-            }
-            
-            // Fallback to project root
-            return Path.Combine(Path.GetDirectoryName(Application.dataPath), PortFileName);
-        }
-
-        /// <summary>
         /// Load settings from disk
         /// </summary>
         public void LoadSettings()
@@ -87,16 +57,11 @@ namespace McpUnity.Unity
                     JsonUtility.FromJsonOverwrite(json, this);
                 }
                 
-                // Load port from port.txt if it exists
-                string portFilePath = GetPortFilePath();
-                
-                if (File.Exists(portFilePath))
+                // Check for environment variable PORT
+                string envPort = System.Environment.GetEnvironmentVariable("UNITY_PORT");
+                if (!string.IsNullOrEmpty(envPort) && int.TryParse(envPort, out int port))
                 {
-                    string portStr = File.ReadAllText(portFilePath).Trim();
-                    if (int.TryParse(portStr, out int port))
-                    {
-                        Port = port;
-                    }
+                    Port = port;
                 }
             }
             catch (Exception ex)
@@ -116,8 +81,9 @@ namespace McpUnity.Unity
                 string json = JsonUtility.ToJson(this, true);
                 File.WriteAllText(SettingsPath, json);
                 
-                // Save port to port.txt
-                File.WriteAllText(GetPortFilePath(), Port.ToString());
+                // Set environment variable PORT for the Node.js process
+                // Note: This will only affect processes started after this point
+                System.Environment.SetEnvironmentVariable("UNITY_PORT", Port.ToString(), System.EnvironmentVariableTarget.Process);
             }
             catch (Exception ex)
             {

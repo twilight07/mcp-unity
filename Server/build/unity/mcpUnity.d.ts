@@ -10,7 +10,7 @@ export declare class McpUnity {
     private pendingRequests;
     private logger;
     private port;
-    constructor(port: number | undefined, logger: Logger);
+    constructor(logger: Logger);
     start(): Promise<void>;
     stop(): Promise<void>;
     sendRequest(request: UnityRequest): Promise<any>;

@@ -1,4 +1,5 @@
-# MCP Unity
+# MCP Unity [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
+
 [![](https://badge.mcpx.dev?type=server 'MCP Server')](https://modelcontextprotocol.io/introduction)
 [![smithery badge](https://smithery.ai/badge/@CoderGamester/mcp-unity)](https://smithery.ai/server/@CoderGamester/mcp-unity)
 [![](https://img.shields.io/badge/Unity-000000?style=flat&logo=unity&logoColor=white 'Unity')](https://unity.com/releases/editor/archive)
@@ -10,7 +11,6 @@
 [![](https://img.shields.io/github/stars/CoderGamester/mcp-unity 'Stars')](https://github.com/CoderGamester/mcp-unity/stargazers)
 [![](https://img.shields.io/github/forks/CoderGamester/mcp-unity 'Forks')](https://github.com/CoderGamester/mcp-unity/network/members)
 [![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
-[![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
 
 ```                                                                        
                               ,/(/.   *(/,                                  
@@ -106,21 +106,29 @@ Currently not available
 
 ## Configure MCP Server
 
-Replace `ABSOLUTE/PATH/TO` with the actual path to your MCP Unity installation.
-The right configuration can be accessed in the Unity Editor MCP Server window. (Tools > MCP Unity > Server Window)
+Replace `ABSOLUTE/PATH/TO` with the absolute path to your MCP Unity installation.
+
+The right configuration can be accessed in the Unity Editor MCP Server window (Tools > MCP Unity > Server Window)
 
 ![MCP configuration](https://github.com/user-attachments/assets/ea9bb912-94a7-4409-81c1-3af39158dac0)
 
 
-### Configure Unity Editor MCP Server
-1. Open the Unity Editor
-2. Navigate to Tools > MCP Unity > Server Window
-3. Click "Start Server" to start the WebSocket server
-   
-![connect](https://github.com/user-attachments/assets/2e266a8b-8ba3-4902-b585-b220b11ab9a2)
+### Configure your AI client
 
-### Configure Claude Desktop
-Add the following configuration to your Claude Desktop Developer claude_desktop_config.json:
+To configure Cursor IDE:
+- Add the following configuration to your Cursor MCP Configure settings:
+
+```
+Name: MCP Unity
+Type: commmand
+Command: env UNITY_PORT=8090 node ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js
+```
+
+To configure Claude Desktop:
+- Open the MCP configuration file (claude_desktop_config.json) in Claude Desktop Developer in (File > Settings > Developer > Edit Config)
+
+To configure Windsurf IDE:
+- Open the MCP configuration file (mcp_config.json) in Windsurf IDE in (Windsurf Settings > Advanced Settings > General > Add Sever)
 
 ```json
 {
@@ -129,37 +137,19 @@ Add the following configuration to your Claude Desktop Developer claude_desktop_
       "command": "node",
       "args": [
         "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
-      ]
+      ],
+      "env": {
+        "UNITY_PORT": "8090"
+      }
     }
   }
 }
 ```
-
-### Configure Windsurf IDE
-Add the following configuration to your Windsurf mcp_config.json settings:
-
-```json
-{
-  "mcpServers": {
-    "mcp-unity": {
-      "command": "node",
-      "args": [
-        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
-      ]
-    }
-  }
-}
-```
-
-### Configure Cursor IDE
-Add the following configuration to your Cursor MCP Configure settings:
-
-- Name: MCP Unity
-- Type: commmand
-- Command: node ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js
 
 ## Running the Server
 You need to run the MCP Unity server for this to work, in the following ways:
+
+### Start Node.js Server
 
 1. Navigate to this `mcp-unity` package directory in your device with the terminal.
    ```bash
@@ -169,10 +159,13 @@ You need to run the MCP Unity server for this to work, in the following ways:
    ```bash
    node Server/build/index.js
    ```
-3. Run Websocket connection in Unity Editor (if not already running)
-   ```
-   Tools > MCP Unity > Server Window > Start Server
-   ```
+
+### Start Unity Editor MCP Server
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Click "Start Server" to start the WebSocket server
+   
+![connect](https://github.com/user-attachments/assets/2e266a8b-8ba3-4902-b585-b220b11ab9a2)
 
 ## Configure the WebSocket Port
 By default, the WebSocket server runs on port 8080. You can change this port in two ways:
@@ -181,15 +174,22 @@ By default, the WebSocket server runs on port 8080. You can change this port in 
 1. Open the Unity Editor
 2. Navigate to Tools > MCP Unity > Server Window
 3. Change the "WebSocket Port" value to your desired port number
-4. The Unity Editor MCP server will automatically reconnect with the new port
+4. Unity will setup the system environment variable UNITY_PORT to the new port number
 5. Restart the Node.js server
+6. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
 
-### Option 2: Editing the port.txt file
-1. Navigate to the root directory of the MCP Unity package
-2. Open or create the `port.txt` file
-3. Enter your desired port number (e.g., `8090`)
-4. Save the file
-5. Restart the Node.js server and Unity Editor MCP Server
+### Option 2: Change the system environment variable UNITY_PORT in the terminal
+1. Set the UNITY_PORT environment variable in the terminal
+   - Powershell
+   ```powershell
+   $env:UNITY_PORT = "8090"
+   ```
+   - Command Prompt/Terminal
+   ```cmd
+   set UNITY_PORT=8090
+   ```
+2. Restart the Node.js server
+3. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
 
 ## Building and Debugging the Server
 The MCP Unity server is built using Node.js and TypeScript. It requires to compile the TypeScript code to JavaScript in the `build` directory.
@@ -217,14 +217,14 @@ To build the server, open a terminal and:
    npx @modelcontextprotocol/inspector node build/index.js
    ```
 
-2. Enable logging on Powershell or into a log.txt file:
+2. Enable logging on your terminal or into a log.txt file:
+   - Powershell
    ```powershell
    $env:LOGGING = "true"
    $env:LOGGING_FILE = "true"
    ```
-
-3. Enable logging on Command Prompt/Terminal or into a log.txt file:
-   ```bash
+   - Command Prompt/Terminal
+   ```cmd
    set LOGGING=true
    set LOGGING_FILE=true
    ```
@@ -257,24 +257,4 @@ Contributions are welcome! Please feel free to submit a Pull Request or open an 
 
 ## License
 
-MIT License
-
-Copyright (c) 2023-2025 CoderGamester
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This project is under MIT license

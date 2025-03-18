@@ -168,7 +168,7 @@ namespace McpUnity.Unity
             {
                 settings.Port = newPort;
                 settings.SaveSettings();
-                _ = mcpUnityBridge.Reconnect();
+                _ = mcpUnityBridge.Disconnect();
             }
             EditorGUILayout.EndHorizontal();
             
@@ -284,7 +284,12 @@ namespace McpUnity.Unity
                         { "mcp-unity", new Dictionary<string, object>
                             {
                                 { "command", "node" },
-                                { "args", new[] { Path.Combine(GetServerPath(), "build", "index.js") } }
+                                { "args", new[] { Path.Combine(GetServerPath(), "build", "index.js") } },
+                                { "env", new Dictionary<string, string>
+                                    {
+                                        { "PORT", McpUnitySettings.Instance.Port.ToString() }
+                                    }
+                                }
                             }
                         }
                     }

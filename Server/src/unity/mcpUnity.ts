@@ -22,9 +22,15 @@ export class McpUnity {
   private logger: Logger;
   private port: number;
   
-  constructor(port: number = 8080, logger: Logger) {
-    this.port = port;
+  constructor(logger: Logger) {
     this.logger = logger;
+    
+    // Initialize port from environment variable or use default
+    const envPort = process.env.UNITY_PORT;
+    this.port = envPort ? parseInt(envPort, 10) : 8090;
+    
+    // Log the port being used
+    this.logger.info(`Using port: ${this.port}`);
   }
   
   public async start(): Promise<void> {
