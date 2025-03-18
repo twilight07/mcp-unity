@@ -50,7 +50,9 @@ MCP Unity currently provides the following tools:
 
 - **execute_menu_item**: Executes Unity menu items (functions tagged with the MenuItem attribute)
 
-More tools will be added in future updates.
+MCP Unity currently provides the following resources:
+
+- **get_menu_items**: Retrieves a list of all available menu items in the Unity Editor to facilitate **execute_menu_item** tool
 
 ## Requirements
 - Unity 2022.3 or later

@@ -16,7 +16,7 @@ export class ToolRegistry {
         for (const tool of this.getAll()) {
             this.logger.info(`Registering tool with MCP server: ${tool.name}`);
             // Use the pattern from the restructuring plan
-            server.tool(tool.name, tool.description, tool.parameters.shape, async (params) => {
+            server.tool(tool.name, tool.description, tool.paramsSchema.shape, async (params) => {
                 try {
                     this.logger.info(`Executing tool: ${tool.name}`, params);
                     const result = await tool.handler(params);

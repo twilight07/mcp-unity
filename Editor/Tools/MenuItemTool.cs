@@ -1,4 +1,5 @@
 using System;
+using McpUnity.Unity;
 using UnityEngine;
 using UnityEditor;
 using Newtonsoft.Json.Linq;
@@ -47,10 +48,10 @@ namespace McpUnity.Tools
         public override JObject Execute(JObject parameters)
         {
             // Extract parameters with defaults
-            string menuPath = GetParameterValue<string>(parameters?["menuPath"]);
+            string menuPath = parameters["menuPath"].ToObject<string>();
             if (string.IsNullOrEmpty(menuPath))
             {
-                return CreateErrorResponse(
+                return McpUnityBridge.CreateErrorResponse(
                     "Required parameter 'menuPath' not provided", 
                     "validation_error"
                 );

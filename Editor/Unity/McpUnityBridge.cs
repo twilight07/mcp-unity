@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEditor;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using McpUnity.Tools;
+using McpUnity.Resources;
 
 namespace McpUnity.Unity
 {
@@ -35,6 +35,9 @@ namespace McpUnity.Unity
         
         // Dictionary to store tool instances
         private Dictionary<string, McpToolBase> _tools = new Dictionary<string, McpToolBase>();
+        
+        // Dictionary to store resource instances
+        private Dictionary<string, McpResourceBase> _resources = new Dictionary<string, McpResourceBase>();
         
         // Events
         public static event Action OnConnected;
@@ -104,6 +107,7 @@ namespace McpUnity.Unity
         {
             // Initialize tools
             RegisterTools();
+            RegisterResources();
             
             // Initialize the bridge
             // Auto-connect if configured to do so
@@ -114,17 +118,29 @@ namespace McpUnity.Unity
         }
         
         /// <summary>
-        /// Register all available tools
+        /// Create a standardized error response
         /// </summary>
-        private void RegisterTools()
+        /// <param name="message">Error message</param>
+        /// <param name="errorType">Type of error</param>
+        /// <param name="details">Additional error details (optional)</param>
+        /// <returns>A JObject containing the error information</returns>
+        public static JObject CreateErrorResponse(string message, string errorType = "resource_fetch_error", JObject details = null)
         {
-            // Register MenuItemTool
-            MenuItemTool menuItemTool = new MenuItemTool();
-            _tools.Add(menuItemTool.Name, menuItemTool);
+            var error = new JObject
+            {
+                ["type"] = errorType,
+                ["message"] = message
+            };
             
-            Debug.Log($"[MCP Unity] Registered tool: {menuItemTool.Name}");
+            if (details != null)
+            {
+                error["details"] = details;
+            }
             
-            // Register additional tools here as needed
+            return new JObject
+            {
+                ["error"] = error
+            };
         }
         
         /// <summary>
@@ -205,6 +221,34 @@ namespace McpUnity.Unity
             
             // Now connect
             await Connect();
+        }
+        
+        /// <summary>
+        /// Register all available tools
+        /// </summary>
+        private void RegisterTools()
+        {
+            // Register MenuItemTool
+            MenuItemTool menuItemTool = new MenuItemTool();
+            _tools.Add(menuItemTool.Name, menuItemTool);
+            
+            Debug.Log($"[MCP Unity] Registered tool: {menuItemTool.Name}");
+            
+            // Register additional tools here as needed
+        }
+        
+        /// <summary>
+        /// Register all available resources
+        /// </summary>
+        private void RegisterResources()
+        {
+            // Register MenuItemResource
+            MenuItemResource menuItemResource = new MenuItemResource();
+            _resources.Add(menuItemResource.Name, menuItemResource);
+            
+            Debug.Log($"[MCP Unity] Registered resource: {menuItemResource.Name}");
+            
+            // Register additional resources here as needed
         }
         
         /// <summary>
@@ -317,6 +361,7 @@ namespace McpUnity.Unity
         /// </summary>
         private async void ProcessRequest(JObject request)
         {
+            JObject result = null;
             var id = request["id"].ToString();
             var method = request["method"].ToString();
             var parameters = (JObject)request["params"];
@@ -330,18 +375,13 @@ namespace McpUnity.Unity
             if (_tools.TryGetValue(method, out var tool))
             {
                 // Execute the tool with the provided parameters
-                var result = ExecuteTool(tool, parameters);
-                    
-                // Check if the result contains an error
-                if (result.TryGetValue("error", out var error))
-                {
-                    response["type"] = "error";
-                    response["error"] = error;
-                }
-                else
-                {
-                    response["result"] = result;
-                }
+                result = ExecuteTool(tool, parameters);
+            }
+            // Find the resource by method name
+            else if (_resources.TryGetValue(method, out var resource))
+            {
+                // Fetch the resource with the provided parameters
+                result = FetchResource(resource, parameters);
             }
             else
             {
@@ -352,6 +392,17 @@ namespace McpUnity.Unity
                     ["message"] = $"Method not implemented: {method}"
                 };
                 Debug.LogWarning($"[MCP Unity] Method not implemented: {method}");
+            }
+                    
+            // Check if the result contains an error
+            if (result != null && result.TryGetValue("error", out var error))
+            {
+                response["type"] = "error";
+                response["error"] = error;
+            }
+            else
+            {
+                response["result"] = result;
             }
             
             await SendMessage(response.ToString());
@@ -366,6 +417,27 @@ namespace McpUnity.Unity
             catch (Exception ex)
             {
                 Debug.LogError($"[MCP Unity] Error executing tool {tool.Name} with the following error: {ex.Message}");
+                return new JObject
+                {
+                    ["error"] = new JObject
+                    {
+                        ["type"] = "internal_error",
+                        ["message"] = ex.Message,
+                        ["stack"] = ex.StackTrace
+                    }
+                };
+            }
+        }
+        
+        private JObject FetchResource(McpResourceBase resource, JObject parameters)
+        {
+            try
+            {
+                return resource.Fetch(parameters);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[MCP Unity] Error fetching resource {resource.Name} with the following error: {ex.Message}");
                 return new JObject
                 {
                     ["error"] = new JObject

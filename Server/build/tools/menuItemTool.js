@@ -5,7 +5,7 @@ export function createMenuItemTool(mcpUnity, logger) {
     return {
         name: toolName,
         description: 'Executes a Unity menu item by path',
-        parameters: z.object({
+        paramsSchema: z.object({
             menuPath: z.string().describe('The path to the menu item to execute (e.g. "GameObject/Create Empty")')
         }),
         handler: async ({ menuPath }) => {
@@ -22,8 +22,9 @@ export function createMenuItemTool(mcpUnity, logger) {
             }
             return {
                 success: true,
+                message: response.message,
                 content: [{
-                        type: 'text',
+                        type: response.type,
                         text: response.message || `Successfully executed menu item: ${menuPath}`
                     }]
             };
