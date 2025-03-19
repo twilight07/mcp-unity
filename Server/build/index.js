@@ -6,7 +6,9 @@ import { Logger, LogLevel } from './utils/logger.js';
 import { ToolRegistry } from './tools/toolRegistry.js';
 import { ResourceRegistry } from './resources/resourceRegistry.js';
 import { createMenuItemTool } from './tools/menuItemTool.js';
-import { createMenuItemResource } from './resources/menuItemResource.js';
+import { createGetMenuItemsResource } from './resources/getMenuItemResource.js';
+import { createGetConsoleLogsResource } from './resources/getConsoleLogResource.js';
+import { createGetHierarchyResource } from './resources/getHierarchyResource.js';
 // Initialize loggers
 const serverLogger = new Logger('Server', LogLevel.INFO);
 const unityLogger = new Logger('Unity', LogLevel.INFO);
@@ -30,7 +32,9 @@ const resourceRegistry = new ResourceRegistry(resourceLogger);
 // Add all tools to the registry
 toolRegistry.add(createMenuItemTool(mcpUnity, toolLogger));
 // Add all resources to the registry
-resourceRegistry.add(createMenuItemResource(mcpUnity, resourceLogger));
+resourceRegistry.add(createGetMenuItemsResource(mcpUnity, resourceLogger));
+resourceRegistry.add(createGetConsoleLogsResource(mcpUnity, resourceLogger));
+resourceRegistry.add(createGetHierarchyResource(mcpUnity, resourceLogger));
 // Register all tools with the MCP server
 toolRegistry.registerWithServer(server);
 // Register all resources with the MCP server
