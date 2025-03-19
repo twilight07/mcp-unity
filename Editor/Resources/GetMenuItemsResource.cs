@@ -11,24 +11,16 @@ namespace McpUnity.Resources
     /// <summary>
     /// Resource for retrieving all available Unity menu items
     /// </summary>
-    public class MenuItemResource : McpResourceBase
+    public class GetMenuItemsResource : McpResourceBase
     {
-        public MenuItemResource()
+        private string _description;
+
+        public GetMenuItemsResource()
         {
             Name = "get_menu_items";
             Description = "Retrieves a list of all available Unity menu items";
         }
-        
-        /// <summary>
-        /// Get the parameter schema for this resource
-        /// </summary>
-        /// <returns>A JObject describing the parameter schema</returns>
-        protected override JObject GetParameterSchema()
-        {
-            // No parameters needed for this resource
-            return new JObject();
-        }
-        
+
         /// <summary>
         /// Fetch all available menu items in the Unity Editor
         /// </summary>

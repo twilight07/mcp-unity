@@ -1,5 +1,5 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
-export function createMenuItemResource(mcpUnity, logger) {
+export function createGetMenuItemResource(mcpUnity, logger) {
     const resourceName = 'get_menu_items';
     const resourceUri = `unity://${resourceName}`;
     const resourceMimeType = 'application/json';

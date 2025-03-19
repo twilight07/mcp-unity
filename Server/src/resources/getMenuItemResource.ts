@@ -4,7 +4,7 @@ import { ResourceDefinition } from './resourceRegistry.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
-export function createMenuItemResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
+export function createGetMenuItemsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_menu_items';
   const resourceUri = `unity://${resourceName}`;
   const resourceMimeType = 'application/json';
@@ -38,17 +38,11 @@ export function createMenuItemResource(mcpUnity: McpUnity, logger: Logger): Reso
         );
       }
       
-      // Ensure we have menu items data
-      const menuItems = response.menuItems || [];
-      
-      // Create a JSON string representation of the menu items
-      const menuItemsText = JSON.stringify(menuItems, null, 2);
-      
       return {
         contents: [{ 
           uri: resourceUri,
           mimeType: resourceMimeType,
-          text: menuItemsText
+          text: response.menuItems
         }]
       };
     }

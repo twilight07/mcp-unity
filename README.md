@@ -53,6 +53,8 @@ MCP Unity currently provides the following tools:
 MCP Unity currently provides the following resources:
 
 - **get_menu_items**: Retrieves a list of all available menu items in the Unity Editor to facilitate **execute_menu_item** tool
+- **get_hierarchy**: Retrieves a list of all game objects in the Unity hierarchy
+- **get_console_logs**: Retrieves a list of all logs from the Unity console
 
 ## Requirements
 - Unity 2022.3 or later

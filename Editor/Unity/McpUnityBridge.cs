@@ -106,8 +106,8 @@ namespace McpUnity.Unity
         private McpUnityBridge()
         {
             // Initialize tools
-            RegisterTools();
             RegisterResources();
+            RegisterTools();
             
             // Initialize the bridge
             // Auto-connect if configured to do so
@@ -242,11 +242,23 @@ namespace McpUnity.Unity
         /// </summary>
         private void RegisterResources()
         {
-            // Register MenuItemResource
-            MenuItemResource menuItemResource = new MenuItemResource();
-            _resources.Add(menuItemResource.Name, menuItemResource);
+            // Register ConsoleLogsResource
+            GetConsoleLogsResource getConsoleLogsResource = new GetConsoleLogsResource();
+            _resources.Add(getConsoleLogsResource.Name, getConsoleLogsResource);
             
-            Debug.Log($"[MCP Unity] Registered resource: {menuItemResource.Name}");
+            Debug.Log($"[MCP Unity] Registered resource: {getConsoleLogsResource.Name}");
+
+            // Register MenuItemResource
+            GetMenuItemsResource getMenuItemsResource = new GetMenuItemsResource();
+            _resources.Add(getMenuItemsResource.Name, getMenuItemsResource);
+            
+            Debug.Log($"[MCP Unity] Registered resource: {getMenuItemsResource.Name}");
+            
+            // Register HierarchyResource
+            GetHierarchyResource getHierarchyResource = new GetHierarchyResource();
+            _resources.Add(getHierarchyResource.Name, getHierarchyResource);
+            
+            Debug.Log($"[MCP Unity] Registered resource: {getHierarchyResource.Name}");
             
             // Register additional resources here as needed
         }
