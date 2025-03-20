@@ -234,6 +234,30 @@ namespace McpUnity.Unity
             
             Debug.Log($"[MCP Unity] Registered tool: {menuItemTool.Name}");
             
+            // Register SelectObjectTool
+            SelectObjectTool selectObjectTool = new SelectObjectTool();
+            _tools.Add(selectObjectTool.Name, selectObjectTool);
+            
+            Debug.Log($"[MCP Unity] Registered tool: {selectObjectTool.Name}");
+            
+            // Register PackageManagerTool
+            PackageManagerTool packageManagerTool = new PackageManagerTool();
+            _tools.Add(packageManagerTool.Name, packageManagerTool);
+            
+            Debug.Log($"[MCP Unity] Registered tool: {packageManagerTool.Name}");
+            
+            // Register RunTestsTool
+            RunTestsTool runTestsTool = new RunTestsTool();
+            _tools.Add(runTestsTool.Name, runTestsTool);
+            
+            Debug.Log($"[MCP Unity] Registered tool: {runTestsTool.Name}");
+            
+            // Register NotifyMessageTool
+            NotifyMessageTool notifyMessageTool = new NotifyMessageTool();
+            _tools.Add(notifyMessageTool.Name, notifyMessageTool);
+            
+            Debug.Log($"[MCP Unity] Registered tool: {notifyMessageTool.Name}");
+            
             // Register additional tools here as needed
         }
         
@@ -242,23 +266,41 @@ namespace McpUnity.Unity
         /// </summary>
         private void RegisterResources()
         {
-            // Register ConsoleLogsResource
-            GetConsoleLogsResource getConsoleLogsResource = new GetConsoleLogsResource();
-            _resources.Add(getConsoleLogsResource.Name, getConsoleLogsResource);
-            
-            Debug.Log($"[MCP Unity] Registered resource: {getConsoleLogsResource.Name}");
-
-            // Register MenuItemResource
+            // Register GetMenuItemsResource
             GetMenuItemsResource getMenuItemsResource = new GetMenuItemsResource();
             _resources.Add(getMenuItemsResource.Name, getMenuItemsResource);
             
             Debug.Log($"[MCP Unity] Registered resource: {getMenuItemsResource.Name}");
             
-            // Register HierarchyResource
+            // Register GetConsoleLogsResource
+            GetConsoleLogsResource getConsoleLogsResource = new GetConsoleLogsResource();
+            _resources.Add(getConsoleLogsResource.Name, getConsoleLogsResource);
+            
+            Debug.Log($"[MCP Unity] Registered resource: {getConsoleLogsResource.Name}");
+            
+            // Register GetHierarchyResource
             GetHierarchyResource getHierarchyResource = new GetHierarchyResource();
             _resources.Add(getHierarchyResource.Name, getHierarchyResource);
             
             Debug.Log($"[MCP Unity] Registered resource: {getHierarchyResource.Name}");
+            
+            // Register GetPackagesResource
+            GetPackagesResource getPackagesResource = new GetPackagesResource();
+            _resources.Add(getPackagesResource.Name, getPackagesResource);
+            
+            Debug.Log($"[MCP Unity] Registered resource: {getPackagesResource.Name}");
+            
+            // Register GetAssetsResource
+            GetAssetsResource getAssetsResource = new GetAssetsResource();
+            _resources.Add(getAssetsResource.Name, getAssetsResource);
+            
+            Debug.Log($"[MCP Unity] Registered resource: {getAssetsResource.Name}");
+            
+            // Register GetAddressablesResource
+            GetAddressablesResource getAddressablesResource = new GetAddressablesResource();
+            _resources.Add(getAddressablesResource.Name, getAddressablesResource);
+            
+            Debug.Log($"[MCP Unity] Registered resource: {getAddressablesResource.Name}");
             
             // Register additional resources here as needed
         }

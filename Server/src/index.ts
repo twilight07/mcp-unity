@@ -1,16 +1,20 @@
 // Import MCP SDK components
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { readFileSync, existsSync } from 'fs';
-import { join, dirname} from 'path';
 import { McpUnity } from './unity/mcpUnity.js';
 import { Logger, LogLevel } from './utils/logger.js';
 import { ToolRegistry } from './tools/toolRegistry.js';
 import { ResourceRegistry } from './resources/resourceRegistry.js';
 import { createMenuItemTool } from './tools/menuItemTool.js';
+import { createSelectObjectTool } from './tools/selectObjectTool.js';
+import { createPackageManagerTool } from './tools/packageManagerTool.js';
+import { createRunTestsTool } from './tools/runTestsTool.js';
+import { createNotifyMessageTool } from './tools/notifyMessageTool.js';
 import { createGetMenuItemsResource } from './resources/getMenuItemResource.js';
 import { createGetConsoleLogsResource } from './resources/getConsoleLogResource.js';
 import { createGetHierarchyResource } from './resources/getHierarchyResource.js';
+import { createGetPackagesResource } from './resources/getPackagesResource.js';
+import { createGetAssetsResource } from './resources/getAssetsResource.js';
 
 // Initialize loggers
 const serverLogger = new Logger('Server', LogLevel.INFO);
@@ -41,16 +45,20 @@ const resourceRegistry = new ResourceRegistry(resourceLogger);
 
 // Add all tools to the registry
 toolRegistry.add(createMenuItemTool(mcpUnity, toolLogger));
+toolRegistry.add(createSelectObjectTool(mcpUnity, toolLogger));
+toolRegistry.add(createPackageManagerTool(mcpUnity, toolLogger));
+toolRegistry.add(createRunTestsTool(mcpUnity, toolLogger));
+toolRegistry.add(createNotifyMessageTool(mcpUnity, toolLogger));
 
 // Add all resources to the registry
 resourceRegistry.add(createGetMenuItemsResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetConsoleLogsResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetHierarchyResource(mcpUnity, resourceLogger));
+resourceRegistry.add(createGetPackagesResource(mcpUnity, resourceLogger));
+resourceRegistry.add(createGetAssetsResource(mcpUnity, resourceLogger));
 
-// Register all tools with the MCP server
+// Register all tools and resources with the MCP server
 toolRegistry.registerWithServer(server);
-
-// Register all resources with the MCP server
 resourceRegistry.registerWithServer(server);
 
 // Server startup function

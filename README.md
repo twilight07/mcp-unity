@@ -49,12 +49,18 @@ MCP Unity is an implementation of the Model Context Protocol for Unity Editor, a
 MCP Unity currently provides the following tools:
 
 - **execute_menu_item**: Executes Unity menu items (functions tagged with the MenuItem attribute)
+- **select_object**: Selects game objects in the Unity hierarchy
+- **package_manager**: Installs, removes, and updates packages in the Unity Package Manager
+- **run_tests**: Runs tests using the Unity Test Runner
+- **notify_message**: Displays messages in the Unity Editor
 
 MCP Unity currently provides the following resources:
 
 - **get_menu_items**: Retrieves a list of all available menu items in the Unity Editor to facilitate **execute_menu_item** tool
 - **get_hierarchy**: Retrieves a list of all game objects in the Unity hierarchy
 - **get_console_logs**: Retrieves a list of all logs from the Unity console
+- **get_packages**: Retrieves information about installed and available packages from the Unity Package Manager
+- **get_assets**: Retrieves information about assets in the Unity Asset Database
 
 ## Requirements
 - Unity 2022.3 or later
@@ -74,7 +80,7 @@ MCP Unity currently provides the following resources:
 
 
 ### Installing Node.js 
-To run MCP Unity server, you'll need to have Node.js 18 or later installed on your computer:
+> To run MCP Unity server, you'll need to have Node.js 18 or later installed on your computer:
 
 #### Windows
 1. Visit the [Node.js download page](https://nodejs.org/en/download/)
@@ -110,7 +116,7 @@ Currently not available
 
 ## Configure MCP Server
 
-Replace `ABSOLUTE/PATH/TO` with the absolute path to your MCP Unity installation.
+> Replace `ABSOLUTE/PATH/TO` with the absolute path to your MCP Unity installation.
 
 The right configuration can be accessed in the Unity Editor MCP Server window (Tools > MCP Unity > Server Window)
 
