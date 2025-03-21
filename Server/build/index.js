@@ -59,7 +59,7 @@ async function startServer() {
         const stdioTransport = new StdioServerTransport();
         // Connect the server to the transport
         await server.connect(stdioTransport);
-        // Start Unity WebSocket connection
+        // Start Unity Bridge connection
         await mcpUnity.start();
         serverLogger.info('MCP Server started and ready');
     }

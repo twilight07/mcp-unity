@@ -7,7 +7,6 @@ export class ToolRegistry {
     }
     add(tool) {
         this.tools.set(tool.name, tool);
-        this.logger.info(`Added tool: ${tool.name}`);
     }
     getAll() {
         return Array.from(this.tools.values());

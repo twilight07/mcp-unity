@@ -30,13 +30,6 @@ namespace McpUnity.Unity
             window.minSize = new Vector2(600, 400);
         }
 
-        private void OnEnable()
-        {
-            titleContent = new GUIContent("MCP Unity");
-            
-            InitializeStyles();
-        }
-
         private void OnGUI()
         {
             InitializeStyles();
@@ -307,6 +300,9 @@ namespace McpUnity.Unity
         private void InitializeStyles()
         {
             if (_isInitialized) return;
+            
+            // Window title
+            titleContent = new GUIContent("MCP Unity");
             
             // Header style
             _headerStyle = new GUIStyle(EditorStyles.largeLabel)

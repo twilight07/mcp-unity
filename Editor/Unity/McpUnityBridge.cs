@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,13 +18,13 @@ namespace McpUnity.Unity
 {
     /// <summary>
     /// Bridge between Unity and Node.js MCP server.
-    /// Now uses HttpListener to receive requests from Node.js.
+    /// Now uses TcpListener to receive requests from Node.js.
     /// </summary>
     [InitializeOnLoad]
     public class McpUnityBridge
     {
         private static McpUnityBridge _instance;
-        private HttpListener _httpListener;
+        private TcpListener _tcpListener;
         private CancellationTokenSource _cts;
         private Task _listenerTask;
         private Dictionary<string, McpToolBase> _tools = new Dictionary<string, McpToolBase>();
@@ -100,7 +101,7 @@ namespace McpUnity.Unity
         }
         
         /// <summary>
-        /// Start the HTTP Listener to receive requests from Node.js
+        /// Start the TCP Listener to receive requests from Node.js
         /// </summary>
         public void StartListener(int port = -1)
         {
@@ -110,13 +111,11 @@ namespace McpUnity.Unity
             {
                 // Use the port from settings or the provided port
                 int listenerPort = port > 0 ? port : McpUnitySettings.Instance.Port;
-                string prefix = $"http://localhost:{listenerPort}/";
                 
-                Debug.Log($"[MCP Unity] Starting HTTP listener on {prefix}");
+                Debug.Log($"[MCP Unity] Starting TCP listener on port {listenerPort}");
                 
-                _httpListener = new HttpListener();
-                _httpListener.Prefixes.Add(prefix);
-                _httpListener.Start();
+                _tcpListener = new TcpListener(IPAddress.Loopback, listenerPort);
+                _tcpListener.Start();
                 
                 _cts = new CancellationTokenSource();
                 IsListening = true;
@@ -124,17 +123,17 @@ namespace McpUnity.Unity
                 // Start the listener loop in a background task
                 _listenerTask = ListenerLoop(_cts.Token);
                 
-                Debug.Log("[MCP Unity] HTTP listener started");
+                Debug.Log("[MCP Unity] TCP listener started");
             }
             catch (Exception ex)
             {
                 IsListening = false;
-                Debug.LogError($"[MCP Unity] Failed to start HTTP listener: {ex.Message}");
+                Debug.LogError($"[MCP Unity] Failed to start TCP listener: {ex.Message}");
             }
         }
         
         /// <summary>
-        /// Stop the HTTP listener
+        /// Stop the TCP listener
         /// </summary>
         public async Task StopListener()
         {
@@ -146,7 +145,7 @@ namespace McpUnity.Unity
                 _cts?.Cancel();
                 
                 // Close the listener to interrupt any pending GetContextAsync calls
-                _httpListener?.Close();
+                _tcpListener?.Stop();
                 IsListening = false;
                 
                 // Wait for the listener task to complete
@@ -155,100 +154,124 @@ namespace McpUnity.Unity
                     await _listenerTask;
                 }
                 
-                Debug.Log("[MCP Unity] HTTP listener stopped");
+                Debug.Log("[MCP Unity] TCP listener stopped");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Error stopping HTTP listener: {ex.Message}");
+                Debug.LogError($"[MCP Unity] Error stopping TCP listener: {ex.Message}");
             }
         }
         
         /// <summary>
-        /// Main listener loop for HTTP requests
+        /// Main listener loop for TCP requests
         /// </summary>
         private async Task ListenerLoop(CancellationToken cancellationToken)
         {
             while (IsListening && !cancellationToken.IsCancellationRequested)
             {
-                HttpListenerContext context;
+                TcpClient client = null;
                 
                 try
                 {
                     // Use a timeout to check cancellation more frequently
-                    Task<HttpListenerContext> contextTask = _httpListener.GetContextAsync();
+                    Task<TcpClient> acceptTask = _tcpListener.AcceptTcpClientAsync();
                     Task completedTask = await Task.WhenAny(
-                        contextTask,
+                        acceptTask,
                         Task.Delay(200, cancellationToken)
                     );
                     
-                    // Check if the GetContextAsync completed or the delay/cancellation occurred
-                    if (completedTask != contextTask)
+                    // Check if the AcceptTcpClientAsync completed or the delay/cancellation occurred
+                    if (completedTask != acceptTask)
                     {
                         // Check if cancellation was requested
                         cancellationToken.ThrowIfCancellationRequested();
                         continue;
                     }
                     
-                    // Get the context from the completed task
-                    context = await contextTask;
+                    // Get the client from the completed task
+                    client = await acceptTask;
+                    
+                    // Handle health check and other requests in a separate task
+                    _ = ProcessClientAsync(client, cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
                     // Cancellation was requested
                     break;
                 }
-                catch (HttpListenerException)
-                {
-                    // Listener was closed
-                    break;
-                }
-                catch (ObjectDisposedException)
-                {
-                    // Listener was disposed
-                    break;
-                }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[MCP Unity] Error getting HTTP context: {ex.Message}");
+                    Debug.LogError($"[MCP Unity] Error accepting TCP client: {ex.Message}");
+                    client?.Close();
                     continue;
                 }
-                
-                // Handle health check endpoint
-                if (context.Request.Url.LocalPath == "/health")
-                {
-                    Debug.LogError($"[MCP Unity] Health Check");
-                    
-                    var responseJson = new JObject
-                    {
-                        ["status"] = "ok",
-                        ["connected"] = true
-                    };
-                        
-                    await SendHttpResponse(context, responseJson);
-                    continue;
-                }
-                    
-                await ProcessRequestAsync(context);
             }
             
             Debug.Log("[MCP Unity] ListenerLoop exited");
         }
         
         /// <summary>
-        /// Process an HTTP request from the Node.js server
+        /// Process a TCP client connection
         /// </summary>
-        private async Task ProcessRequestAsync(HttpListenerContext context)
+        private async Task ProcessClientAsync(TcpClient client, CancellationToken cancellationToken)
         {
-            string requestBody;
-            
-            // Read the request body
-            using (var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+            using (client)
+            using (NetworkStream stream = client.GetStream())
             {
-                requestBody = await reader.ReadToEndAsync();
+                // Enable basic socket keepalive
+                client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                
+                // Set timeouts
+                client.ReceiveTimeout = 10000; // 10 seconds
+                client.SendTimeout = 10000;    // 10 seconds
+                
+                // Read the incoming request
+                string requestBody = await ReadMessageAsync(stream);
+                
+                Debug.Log($"[MCP Unity] TCP message received: {requestBody}");
+                
+                // Process the regular request
+                await ProcessRequestAsync(stream, requestBody);
             }
-            
-            Debug.Log($"[MCP Unity] HTTP message received: {requestBody}");
-            
+        }
+        
+        /// <summary>
+        /// Read a message from a TCP stream
+        /// </summary>
+        private async Task<string> ReadMessageAsync(NetworkStream stream)
+        {
+            // Using a memory stream to accumulate data
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                
+                // Read until client closes the connection or we have a complete message
+                // This assumes the client properly closes the connection after sending the full message
+                // or that we can process JSON as it arrives
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    await memoryStream.WriteAsync(buffer, 0, bytesRead);
+                    
+                    // For simpler implementation, we assume each message is sent in a single TCP packet
+                    // A more robust implementation would need to implement a message framing protocol
+                    break;
+                }
+                
+                // Convert the accumulated data to a string
+                memoryStream.Position = 0;
+                using (StreamReader reader = new StreamReader(memoryStream, Encoding.UTF8))
+                {
+                    return await reader.ReadToEndAsync();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Process a request from the Node.js server
+        /// </summary>
+        private async Task ProcessRequestAsync(NetworkStream stream, string requestBody)
+        {
             var requestJson = JObject.Parse(requestBody);
             var method = requestJson["method"]?.ToString();
             var parameters = requestJson["params"] as JObject ?? new JObject();
@@ -258,6 +281,11 @@ namespace McpUnity.Unity
             if (string.IsNullOrEmpty(method))
             {
                 responseJson = CreateErrorResponse("Missing method in request", "invalid_request");
+            }
+            else if (method == "ping")
+            {
+                // Handle MCP Protocol ping request - respond with an empty result object
+                responseJson = new JObject();
             }
             else if (_tools.TryGetValue(method, out var tool))
             {
@@ -274,33 +302,42 @@ namespace McpUnity.Unity
                 responseJson = CreateErrorResponse($"Unknown method: {method}", "unknown_method");
             }
                 
-            // Add success flag and ID to the response
-            responseJson["success"] = !responseJson.ContainsKey("error");
-            responseJson["id"] = requestJson["id"]?.ToString();
+            // Format as JSON-RPC 2.0 response
+            JObject jsonRpcResponse = new JObject
+            {
+                ["jsonrpc"] = "2.0",
+                ["id"] = requestJson["id"]?.ToString()
+            };
             
-            await SendHttpResponse(context, responseJson);
+            // Add result or error
+            if (responseJson.ContainsKey("error"))
+            {
+                var errorObj = responseJson["error"];
+                jsonRpcResponse["error"] = errorObj;
+            }
+            else
+            {
+                jsonRpcResponse["result"] = responseJson;
+            }
+            
+            await SendTcpResponseAsync(stream, jsonRpcResponse);
         }
         
         /// <summary>
-        /// Send an HTTP response to the Node.js server
+        /// Send a TCP response to the Node.js server
         /// </summary>
-        private async Task SendHttpResponse(HttpListenerContext context, JObject responseData)
+        private async Task SendTcpResponseAsync(NetworkStream stream, JObject responseData)
         {
             try
             {
                 byte[] buffer = Encoding.UTF8.GetBytes(responseData.ToString(Formatting.None));
                 
-                context.Response.ContentType = "application/json";
-                context.Response.ContentLength64 = buffer.Length;
-                await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                // Send the response
+                await stream.WriteAsync(buffer, 0, buffer.Length);
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Error sending HTTP response: {ex.Message}");
-            }
-            finally
-            {
-                context.Response.Close();
+                Debug.LogError($"[MCP Unity] Error sending TCP response: {ex.Message}");
             }
         }
         

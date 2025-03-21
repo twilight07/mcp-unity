@@ -7,7 +7,6 @@ export class ResourceRegistry {
     }
     add(resource) {
         this.resources.set(resource.name, resource);
-        this.logger.info(`Added resource: ${resource.name}`);
     }
     getAll() {
         return Array.from(this.resources.values());

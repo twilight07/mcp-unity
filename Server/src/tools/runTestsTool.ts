@@ -30,54 +30,38 @@ export function createRunTestsTool(mcpUnity: McpUnity, logger: Logger): ToolDefi
         );
       }
 
-      // Create a promise for the test run
-      const testRunPromise = mcpUnity.sendRequest({
-        method: toolName,
-        params: { 
-          testMode,
-          testFilter
-        }
-      });
-
       // Setup ping interval to check Unity connection during test run
       let pingIntervalId: NodeJS.Timeout | null = null;
-      let isConnected = true;
-
-      // Set up a ping interval that runs every 5 seconds
-      pingIntervalId = setInterval(async () => {
-        try {
-          // Ping Unity using the health endpoint
-          await mcpUnity.checkUnityConnection();
-        } catch (error) {
-          // If ping fails, mark as disconnected
-          isConnected = false;
-          
-          if (pingIntervalId) {
-            clearInterval(pingIntervalId);
-            pingIntervalId = null;
-          }
-          
-          logger.error('Lost connection to Unity during test run');
-        }
-      }, PING_INTERVAL);
       
       try {
-        // Wait for the test run to complete or for a connection error
-        const response = await Promise.race([
-          testRunPromise,
-          // Check connection status every second
-          (async () => {
-            while (isConnected) {
-              await wait(1000);
+        // Set up a ping interval that runs every 5 seconds
+        pingIntervalId = setInterval(async () => {
+          try {
+            // Ping Unity using the MCP ping method
+            const connected = await mcpUnity.ping();
+            if (!connected) {
+              logger.error('Lost connection to Unity during test run');
+              if (pingIntervalId) {
+                clearInterval(pingIntervalId);
+                pingIntervalId = null;
+              }
             }
-            throw new McpUnityError(
-              ErrorType.CONNECTION,
-              'Lost connection to Unity during test run'
-            );
-          })()
-        ]);
+          } catch (error) {
+            // If ping fails, log error
+            logger.error(`Error pinging Unity: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }, PING_INTERVAL);
         
-        // Clean up the ping interval
+        // Create and wait for the test run
+        const response = await mcpUnity.sendRequest({
+          method: toolName,
+          params: { 
+            testMode,
+            testFilter
+          }
+        });
+
+        // Tests completed successfully
         if (pingIntervalId) {
           clearInterval(pingIntervalId);
         }
@@ -123,19 +107,20 @@ export function createRunTestsTool(mcpUnity: McpUnity, logger: Logger): ToolDefi
             }
           ]
         };
-      } catch (error: unknown) {
-        // Clean up the ping interval
+      } catch (error) {
+        // Clean up ping interval if it exists
         if (pingIntervalId) {
           clearInterval(pingIntervalId);
         }
         
-        // Handle and rethrow errors
-        if (error instanceof Error) {
-          logger.error(`Test run failed: ${error.message}`);
-        } else {
-          logger.error('Test run failed with an unknown error');
-        }
-        throw error;
+        // Handle any errors that occurred
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Error running tests: ${errorMessage}`);
+        
+        throw new McpUnityError(
+          ErrorType.TOOL_EXECUTION,
+          `Failed to run tests: ${errorMessage}`
+        );
       }
     }
   };
