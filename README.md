@@ -61,6 +61,7 @@ MCP Unity currently provides the following resources:
 - **get_console_logs**: Retrieves a list of all logs from the Unity console
 - **get_packages**: Retrieves information about installed and available packages from the Unity Package Manager
 - **get_assets**: Retrieves information about assets in the Unity Asset Database
+- **get_tests**: Retrieves information about tests in the Unity Test Runner
 
 ## Requirements
 - Unity 2022.3 or later

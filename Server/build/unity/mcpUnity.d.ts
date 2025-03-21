@@ -5,16 +5,16 @@ interface UnityRequest {
     params: any;
 }
 export declare class McpUnity {
-    private ws;
-    private connections;
-    private pendingRequests;
     private logger;
     private port;
+    private unityUrl;
+    private isUnityAvailable;
+    private pendingRequests;
     constructor(logger: Logger);
     start(): Promise<void>;
+    checkUnityConnection(): Promise<void>;
     stop(): Promise<void>;
     sendRequest(request: UnityRequest): Promise<any>;
-    private handleMessage;
     get isConnected(): boolean;
     get connectionCount(): number;
 }

@@ -23,10 +23,10 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Execute the PackageManager tool with the provided parameters
+        /// Execute the PackageManager tool with the provided parameters asynchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override JObject Execute(JObject parameters)
+        public override async Task<JObject> ExecuteAsync(JObject parameters)
         {
             // Extract method parameter
             string method = parameters["methodSource"]?.ToObject<string>();
@@ -42,11 +42,11 @@ namespace McpUnity.Tools
             switch (method.ToLowerInvariant())
             {
                 case "registry":
-                    return AddFromRegistry(parameters);
+                    return await AddFromRegistryAsync(parameters);
                 case "github":
-                    return AddFromGitHub(parameters);
+                    return await AddFromGitHubAsync(parameters);
                 case "disk":
-                    return AddFromDisk(parameters);
+                    return await AddFromDiskAsync(parameters);
                 default:
                     return McpUnityBridge.CreateErrorResponse(
                         $"Unknown method '{method}'. Valid methods are: registry, github, disk",
@@ -56,9 +56,9 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Add a package from the Unity registry
+        /// Add a package from the Unity registry asynchronously
         /// </summary>
-        private JObject AddFromRegistry(JObject parameters)
+        private async Task<JObject> AddFromRegistryAsync(JObject parameters)
         {
             // Extract parameters
             string packageName = parameters["packageName"]?.ToObject<string>();
@@ -86,10 +86,10 @@ namespace McpUnity.Tools
                 // Add the package
                 _addRequest = Client.Add(packageIdentifier);
                 
-                // Wait for the request to complete
+                // Wait for the request to complete asynchronously
                 while (!_addRequest.IsCompleted)
                 {
-                    System.Threading.Thread.Sleep(100);
+                    await Task.Delay(100);
                 }
                 
                 return ProcessAddRequestResult();
@@ -104,9 +104,9 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Add a package from GitHub
+        /// Add a package from GitHub asynchronously
         /// </summary>
-        private JObject AddFromGitHub(JObject parameters)
+        private async Task<JObject> AddFromGitHubAsync(JObject parameters)
         {
             // Extract parameters
             string repositoryUrl = parameters["repositoryUrl"]?.ToObject<string>();
@@ -158,10 +158,10 @@ namespace McpUnity.Tools
                 // Add the package
                 _addRequest = Client.Add(packageUrl);
                 
-                // Wait for the request to complete
+                // Wait for the request to complete asynchronously
                 while (!_addRequest.IsCompleted)
                 {
-                    System.Threading.Thread.Sleep(100);
+                    await Task.Delay(100);
                 }
                 
                 return ProcessAddRequestResult();
@@ -176,9 +176,9 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Add a package from disk
+        /// Add a package from disk asynchronously
         /// </summary>
-        private JObject AddFromDisk(JObject parameters)
+        private async Task<JObject> AddFromDiskAsync(JObject parameters)
         {
             // Extract parameters
             string path = parameters["path"]?.ToObject<string>();
@@ -200,10 +200,10 @@ namespace McpUnity.Tools
                 // Add the package
                 _addRequest = Client.Add(packageUrl);
                 
-                // Wait for the request to complete
+                // Wait for the request to complete asynchronously
                 while (!_addRequest.IsCompleted)
                 {
-                    System.Threading.Thread.Sleep(100);
+                    await Task.Delay(100);
                 }
                 
                 return ProcessAddRequestResult();

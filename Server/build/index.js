@@ -15,6 +15,7 @@ import { createGetConsoleLogsResource } from './resources/getConsoleLogResource.
 import { createGetHierarchyResource } from './resources/getHierarchyResource.js';
 import { createGetPackagesResource } from './resources/getPackagesResource.js';
 import { createGetAssetsResource } from './resources/getAssetsResource.js';
+import { createGetTestsResource } from './resources/getTestsResource.js';
 // Initialize loggers
 const serverLogger = new Logger('Server', LogLevel.INFO);
 const unityLogger = new Logger('Unity', LogLevel.INFO);
@@ -30,7 +31,7 @@ const server = new McpServer({
         resources: {},
     },
 });
-// Initialize Unity WebSocket bridge with port from port.txt
+// Initialize MCP HTTP bridge with Unity editor
 const mcpUnity = new McpUnity(unityLogger);
 // Initialize the registries
 const toolRegistry = new ToolRegistry(toolLogger);
@@ -47,6 +48,7 @@ resourceRegistry.add(createGetConsoleLogsResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetHierarchyResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetPackagesResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetAssetsResource(mcpUnity, resourceLogger));
+resourceRegistry.add(createGetTestsResource(mcpUnity, resourceLogger));
 // Register all tools and resources with the MCP server
 toolRegistry.registerWithServer(server);
 resourceRegistry.registerWithServer(server);

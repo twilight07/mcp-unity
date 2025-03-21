@@ -21,7 +21,6 @@ export class ToolRegistry {
   
   add(tool: ToolDefinition): void {
     this.tools.set(tool.name, tool);
-    this.logger.info(`Added tool: ${tool.name}`);
   }
   
   getAll(): ToolDefinition[] {

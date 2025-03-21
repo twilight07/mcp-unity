@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using McpUnity.Unity;
 using UnityEngine;
 using UnityEditor;
@@ -18,43 +19,19 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Get the parameter schema for this tool
-        /// </summary>
-        /// <returns>A JObject describing the parameter schema</returns>
-        protected override JObject GetParameterSchema()
-        {
-            return new JObject
-            {
-                ["menuPath"] = new JObject
-                {
-                    ["type"] = "string",
-                    ["description"] = "Path to the menu item to execute",
-                    ["required"] = true
-                },
-                ["requireConfirmation"] = new JObject
-                {
-                    ["type"] = "boolean",
-                    ["description"] = "Whether to require confirmation before execution",
-                    ["required"] = false,
-                    ["default"] = true
-                }
-            };
-        }
-        
-        /// <summary>
-        /// Execute the MenuItem tool with the provided parameters
+        /// Execute the MenuItem tool with the provided parameters asynchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override JObject Execute(JObject parameters)
+        public override Task<JObject> ExecuteAsync(JObject parameters)
         {
             // Extract parameters with defaults
-            string menuPath = parameters["menuPath"].ToObject<string>();
+            string menuPath = parameters["menuPath"]?.ToObject<string>();
             if (string.IsNullOrEmpty(menuPath))
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return Task.FromResult(McpUnityBridge.CreateErrorResponse(
                     "Required parameter 'menuPath' not provided", 
                     "validation_error"
-                );
+                ));
             }
                 
             // Log the execution
@@ -64,13 +41,13 @@ namespace McpUnity.Tools
             bool success = EditorApplication.ExecuteMenuItem(menuPath);
                 
             // Create the response
-            return new JObject
+            return Task.FromResult(new JObject
             {
                 ["success"] = success,
                 ["message"] = success 
                     ? $"Successfully executed menu item: {menuPath}" 
                     : $"Failed to execute menu item: {menuPath}"
-            };
+            });
         }
     }
 }

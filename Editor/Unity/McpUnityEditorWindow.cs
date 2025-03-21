@@ -13,7 +13,6 @@ namespace McpUnity.Unity
     /// </summary>
     public class McpUnityEditorWindow : EditorWindow
     {
-        private string _statusMessage = "";
         private GUIStyle _headerStyle;
         private GUIStyle _subHeaderStyle;
         private GUIStyle _boxStyle;
@@ -34,52 +33,8 @@ namespace McpUnity.Unity
         private void OnEnable()
         {
             titleContent = new GUIContent("MCP Unity");
-            _statusMessage = "Ready";
-            
-            // Subscribe to McpUnityBridge events
-            McpUnityBridge.OnConnected += HandleConnected;
-            McpUnityBridge.OnDisconnected += HandleDisconnected;
-            McpUnityBridge.OnConnecting += HandleConnecting;
-            McpUnityBridge.OnError += HandleError;
             
             InitializeStyles();
-        }
-
-        private void OnDisable()
-        {
-            // Unsubscribe from McpUnityBridge events
-            McpUnityBridge.OnConnected -= HandleConnected;
-            McpUnityBridge.OnDisconnected -= HandleDisconnected;
-            McpUnityBridge.OnConnecting -= HandleConnecting;
-            McpUnityBridge.OnError -= HandleError;
-        }
-
-        private void HandleConnected()
-        {
-            _statusMessage = "Connected";
-            
-            Repaint();
-        }
-
-        private void HandleDisconnected()
-        {
-            _statusMessage = "Disconnected";
-            
-            Repaint();
-        }
-
-        private void HandleConnecting()
-        {
-            _statusMessage = "Connecting...";
-            
-            Repaint();
-        }
-
-        private void HandleError(string errorMessage)
-        {
-            _statusMessage = $"Error: {errorMessage}";
-            
-            Repaint();
         }
 
         private void OnGUI()
@@ -90,7 +45,7 @@ namespace McpUnity.Unity
             
             // Header
             EditorGUILayout.Space();
-            WrappedLabel("MCP Unity Server", _headerStyle);
+            WrappedLabel("MCP Unity", _headerStyle);
             EditorGUILayout.Space();
             
             // Tabs
@@ -107,15 +62,9 @@ namespace McpUnity.Unity
                     break;
             }
             
-            // Bottom Status bar
-            if (!string.IsNullOrEmpty(_statusMessage))
-            {
-                EditorGUILayout.HelpBox(_statusMessage, MessageType.Info);
-            }
-            
             // Version info at the bottom
             GUILayout.FlexibleSpace();
-            WrappedLabel($"MCP Unity Server v{McpUnitySettings.ServerVersion}", EditorStyles.miniLabel, GUILayout.Width(150));
+            WrappedLabel($"MCP Unity v{McpUnitySettings.ServerVersion}", EditorStyles.miniLabel, GUILayout.Width(150));
             
             EditorGUILayout.EndVertical();
         }
@@ -128,15 +77,12 @@ namespace McpUnity.Unity
             
             // Server status
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Server Status:", GUILayout.Width(120));
+            EditorGUILayout.LabelField("Status:", GUILayout.Width(120));
             
             McpUnitySettings settings = McpUnitySettings.Instance;
             McpUnityBridge mcpUnityBridge = McpUnityBridge.Instance;
-            ConnectionState connectionState = mcpUnityBridge.ConnectionState;
-            string statusText = connectionState == ConnectionState.Connected ? "Connected" : "Disconnected";
-            Color statusColor = connectionState == ConnectionState.Connected  ? Color.green : Color.red;
-            statusColor = connectionState == ConnectionState.Connecting  ? Color.yellow : statusColor;
-            statusText = connectionState == ConnectionState.Connecting ? "Connecting..." : statusText;
+            string statusText = mcpUnityBridge.IsListening ? "Server Online" : "Server Offline";
+            Color statusColor = mcpUnityBridge.IsListening  ? Color.green : Color.red;
             
             GUIStyle statusStyle = new GUIStyle(EditorStyles.boldLabel);
             statusStyle.normal.textColor = statusColor;
@@ -145,19 +91,10 @@ namespace McpUnity.Unity
             EditorGUILayout.EndHorizontal();
             
             EditorGUILayout.Space();
-            // Auto-start server option
-            EditorGUILayout.BeginHorizontal();
-            bool newAutoStart = EditorGUILayout.Toggle("Auto-start Server", settings.AutoStartServer);
-            if (newAutoStart != settings.AutoStartServer)
-            {
-                settings.AutoStartServer = newAutoStart;
-                settings.SaveSettings();
-            }
-            EditorGUILayout.EndHorizontal();
             
             // Port configuration
             EditorGUILayout.BeginHorizontal();
-            int newPort = EditorGUILayout.IntField("WebSocket Port", settings.Port);
+            int newPort = EditorGUILayout.IntField("Connection Port", settings.Port);
             if (newPort < 1 || newPort > 65536)
             {
                 newPort = settings.Port;
@@ -168,7 +105,7 @@ namespace McpUnity.Unity
             {
                 settings.Port = newPort;
                 settings.SaveSettings();
-                _ = mcpUnityBridge.Disconnect();
+                _ = mcpUnityBridge.StopListener();
             }
             EditorGUILayout.EndHorizontal();
             
@@ -177,21 +114,18 @@ namespace McpUnity.Unity
             // Server control buttons
             EditorGUILayout.BeginHorizontal();
             
-            // Determine button states based on connection state
-            ConnectionState currentState = mcpUnityBridge.ConnectionState;
-            
             // Connect button - enabled only when disconnected
-            GUI.enabled = currentState == ConnectionState.Disconnected;
-            if (GUILayout.Button("Start Server", GUILayout.Height(30)))
+            GUI.enabled = !mcpUnityBridge.IsListening;
+            if (GUILayout.Button("Connect", GUILayout.Height(30)))
             {
-                _ = mcpUnityBridge.Connect();
+                mcpUnityBridge.StartListener();
             }
             
             // Disconnect button - enabled only when connected
-            GUI.enabled = currentState == ConnectionState.Connected;
-            if (GUILayout.Button("Stop Server", GUILayout.Height(30)))
+            GUI.enabled = mcpUnityBridge.IsListening;
+            if (GUILayout.Button("Disconnect", GUILayout.Height(30)))
             {
-                _ = mcpUnityBridge.Disconnect();
+                _ = mcpUnityBridge.StopListener();
             }
             
             GUI.enabled = true;
@@ -287,7 +221,7 @@ namespace McpUnity.Unity
                                 { "args", new[] { Path.Combine(GetServerPath(), "build", "index.js") } },
                                 { "env", new Dictionary<string, string>
                                     {
-                                        { "PORT", McpUnitySettings.Instance.Port.ToString() }
+                                        { "UNITY_PORT", McpUnitySettings.Instance.Port.ToString() }
                                     }
                                 }
                             }

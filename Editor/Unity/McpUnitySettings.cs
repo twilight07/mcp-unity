@@ -19,8 +19,7 @@ namespace McpUnity.Unity
         private static readonly string SettingsPath = "ProjectSettings/McpUnitySettings.json";
 
         // Server settings
-        public bool AutoStartServer = true;
-        public int Port = 8090;
+        public int Port { get; set; } = 8090;
         
         /// <summary>
         /// Singleton instance of settings

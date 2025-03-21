@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using McpUnity.Unity;
 using UnityEngine;
 using UnityEditor;
@@ -18,36 +19,19 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Get the parameter schema for this tool
-        /// </summary>
-        /// <returns>A JObject describing the parameter schema</returns>
-        protected override JObject GetParameterSchema()
-        {
-            return new JObject
-            {
-                ["objectPath"] = new JObject
-                {
-                    ["type"] = "string",
-                    ["description"] = "The path or ID of the object to select (e.g. \"Main Camera\" or a Unity object ID)",
-                    ["required"] = true
-                }
-            };
-        }
-        
-        /// <summary>
-        /// Execute the SelectObject tool with the provided parameters
+        /// Execute the SelectObject tool with the provided parameters asynchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override JObject Execute(JObject parameters)
+        public override Task<JObject> ExecuteAsync(JObject parameters)
         {
             // Extract parameters
-            string objectPath = parameters["objectPath"].ToObject<string>();
+            string objectPath = parameters["objectPath"]?.ToObject<string>();
             if (string.IsNullOrEmpty(objectPath))
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return Task.FromResult(McpUnityBridge.CreateErrorResponse(
                     "Required parameter 'objectPath' not provided", 
                     "validation_error"
-                );
+                ));
             }
                 
             // Log the execution
@@ -91,14 +75,14 @@ namespace McpUnity.Tools
             }
                 
             // Create the response
-            return new JObject
+            return Task.FromResult(new JObject
             {
                 ["success"] = success,
                 ["message"] = success 
                     ? $"Successfully selected object: {objectPath}" 
                     : $"Failed to find object: {objectPath}",
                 ["type"] = "text"
-            };
+            });
         }
     }
 }

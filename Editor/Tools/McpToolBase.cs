@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
 
@@ -21,41 +22,21 @@ namespace McpUnity.Tools
         public string Description { get; protected set; }
         
         /// <summary>
-        /// Whether this tool is enabled and available for use
-        /// </summary>
-        public bool IsEnabled { get; protected set; } = true;
-        
-        /// <summary>
-        /// Get metadata about the tool for API documentation
-        /// </summary>
-        /// <returns>A JObject containing tool metadata</returns>
-        public virtual JObject GetMetadata()
-        {
-            return new JObject
-            {
-                ["name"] = Name,
-                ["description"] = Description,
-                ["enabled"] = IsEnabled,
-                ["parameters"] = GetParameterSchema()
-            };
-        }
-        
-        /// <summary>
-        /// Get the parameter schema for this tool
-        /// </summary>
-        /// <returns>A JObject describing the parameter schema</returns>
-        protected virtual JObject GetParameterSchema()
-        {
-            // Base implementation returns an empty schema
-            // Override in derived classes to provide specific parameter schemas
-            return new JObject();
-        }
-        
-        /// <summary>
         /// Execute the tool with the provided parameters
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
         /// <returns>The result of the tool execution as a JObject</returns>
-        public abstract JObject Execute(JObject parameters);
+        public abstract Task<JObject> ExecuteAsync(JObject parameters);
+        
+        /// <summary>
+        /// Synchronous execution method for backward compatibility
+        /// </summary>
+        /// <param name="parameters">Tool parameters as a JObject</param>
+        /// <returns>The result of the tool execution as a JObject</returns>
+        public virtual JObject Execute(JObject parameters)
+        {
+            // Call the async method and wait for it to complete
+            return ExecuteAsync(parameters).GetAwaiter().GetResult();
+        }
     }
 }

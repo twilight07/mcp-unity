@@ -21,7 +21,6 @@ export class ResourceRegistry {
   
   add(resource: ResourceDefinition): void {
     this.resources.set(resource.name, resource);
-    this.logger.info(`Added resource: ${resource.name}`);
   }
   
   getAll(): ResourceDefinition[] {

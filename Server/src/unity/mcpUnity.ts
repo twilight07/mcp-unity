@@ -1,4 +1,4 @@
-import { WebSocketServer, WebSocket } from 'ws';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '../utils/logger.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
@@ -15,12 +15,24 @@ interface UnityRequest {
   params: any;
 }
 
+// Define response interface
+interface UnityResponse {
+  id: string;
+  type: 'response' | 'error';
+  result?: any;
+  error?: {
+    message: string;
+    type: string;
+    details?: any;
+  };
+}
+
 export class McpUnity {
-  private ws: WebSocketServer | null = null;
-  private connections: Map<string, WebSocket> = new Map<string, WebSocket>();
-  private pendingRequests: Map<string, PendingRequest> = new Map<string, PendingRequest>();
   private logger: Logger;
   private port: number;
+  private unityUrl: string;
+  private isUnityAvailable: boolean = false;
+  private pendingRequests: Map<string, PendingRequest> = new Map<string, PendingRequest>();
   
   constructor(logger: Logger) {
     this.logger = logger;
@@ -29,77 +41,53 @@ export class McpUnity {
     const envPort = process.env.UNITY_PORT;
     this.port = envPort ? parseInt(envPort, 10) : 8090;
     
+    // Set Unity server URL
+    this.unityUrl = `http://localhost:${this.port}`;
+    
     // Log the port being used
-    this.logger.info(`Using port: ${this.port}`);
+    this.logger.info(`Using port: ${this.port} for Unity HTTP server at ${this.unityUrl}`);
   }
   
   public async start(): Promise<void> {
-    if (this.ws) {
-      this.logger.warn('MCP Node WebSocket Connection already started');
-      return;
+    // Check if Unity HTTP server is available
+    try {
+      await this.checkUnityConnection();
+      this.isUnityAvailable = true;
+      this.logger.info('Successfully connected to Unity HTTP server');
+    } catch (error) {
+      this.isUnityAvailable = false;
+      this.logger.warn('Could not connect to Unity HTTP server. Will retry on next request.');
     }
     
-    return new Promise((resolve) => {
-      this.ws = new WebSocketServer({ port: this.port });
-      
-      this.ws.on('listening', () => {
-        this.logger.info(`MCP Node WebSocket listening on port ${this.port}`);
-        resolve();
-      });
-      
-      this.ws.on('connection', (socket: WebSocket) => {
-        const id = uuidv4();
-        this.connections.set(id, socket);
-        this.logger.info(`MCP Node WebSocket Connected: ${id}`);
-        
-        socket.on('message', (data: WebSocket.Data) => {
-          const message = JSON.parse(data.toString());
-          this.handleMessage(message);
-        });
-        
-        socket.on('close', () => {
-          this.connections.delete(id);
-          this.logger.info(`MCP Node WebSocket disconnected: ${id}`);
-        });
-        
-        socket.on('error', (error: Error) => {
-          this.logger.error(`MCP Node WebSocket error for connection ${id}`, error);
-        });
-      });
-      
-      this.ws.on('error', (error: Error) => {
-        this.logger.error('MCP Node WebSocket server error', error);
-      });
-    });
+    return Promise.resolve();
+  }
+  
+  public async checkUnityConnection(): Promise<void> {
+    try {
+      await axios.get(`${this.unityUrl}/health`, { timeout: 1000 });
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(new McpUnityError(ErrorType.CONNECTION, 'Unity HTTP server not available'));
+    }
   }
   
   public async stop(): Promise<void> {
-    if (!this.ws) {
-      return;
-    }
-    
-    return new Promise((resolve) => {
-      this.ws!.close(() => {
-        this.logger.info('Unity bridge stopped');
-        this.ws = null;
-        this.connections.clear();
-        resolve();
-      });
-    });
+    // Nothing to clean up for HTTP client
+    this.logger.info('Unity HTTP client stopped');
+    return Promise.resolve();
   }
   
   public async sendRequest(request: UnityRequest): Promise<any> {
-    if (this.connections.size === 0) {
-      throw new McpUnityError(ErrorType.CONNECTION, 'No Unity connections available');
+    // If we haven't successfully connected yet, try to check connection first
+    if (!this.isUnityAvailable) {
+      try {
+        await this.checkUnityConnection();
+        this.isUnityAvailable = true;
+      } catch (error) {
+        throw new McpUnityError(ErrorType.CONNECTION, 'No Unity connections available');
+      }
     }
     
-    // Use the first available connection
-    const firstEntry = this.connections.entries().next();
-    if (firstEntry.done) {
-      throw new McpUnityError(ErrorType.CONNECTION, 'No Unity connections available');
-    }
-    
-    const [id, socket] = firstEntry.value;
     const requestId = request.id || uuidv4();
     
     const message = {
@@ -125,51 +113,51 @@ export class McpUnity {
         timeout
       });
       
-      // Send the request
-      socket.send(JSON.stringify(message), (error: Error | undefined) => {
-        if (error) {
-          clearTimeout(timeout);
-          this.pendingRequests.delete(requestId);
-          reject(new McpUnityError(ErrorType.CONNECTION, `Failed to send request: ${error.message}`));
+      // Send the request to Unity via HTTP
+      this.logger.debug(`Sending request to Unity: ${JSON.stringify(message)}`);
+      
+      axios.post<UnityResponse>(this.unityUrl, message, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 5000
+      })
+      .then((response: AxiosResponse<UnityResponse>) => {
+        clearTimeout(timeout);
+        this.pendingRequests.delete(requestId);
+        
+        const responseData = response.data;
+        
+        if (responseData.type === 'error') {
+          reject(new McpUnityError(
+            ErrorType.TOOL_EXECUTION,
+            responseData.error?.message || 'Unknown error',
+            responseData.error?.details
+          ));
         } else {
-          this.logger.debug(`Sent request to Unity: ${JSON.stringify(message)}`);
+          resolve(responseData.result);
+        }
+      })
+      .catch((error: AxiosError) => {
+        clearTimeout(timeout);
+        this.pendingRequests.delete(requestId);
+        
+        if (error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED') {
+          this.isUnityAvailable = false;
+          reject(new McpUnityError(ErrorType.CONNECTION, 'Unity HTTP server not available'));
+        } else {
+          reject(new McpUnityError(
+            ErrorType.CONNECTION,
+            `Failed to send request: ${error.message}`
+          ));
         }
       });
     });
   }
   
-  private handleMessage(message: any): void {
-    const { id, type, result, error } = message;
-    
-    if (!id || !type) {
-      this.logger.warn('Received message with missing id or type', message);
-      return;
-    }
-    
-    this.logger.debug(`Received message: ${JSON.stringify(message)}`);
-    
-    if ((type === 'response' || type === 'error') && this.pendingRequests.has(id)) {
-      const pendingRequest = this.pendingRequests.get(id)!;
-      this.pendingRequests.delete(id);
-      clearTimeout(pendingRequest.timeout);
-      
-      if (type === 'error') {
-        pendingRequest.reject(new McpUnityError(
-          ErrorType.TOOL_EXECUTION,
-          error?.message || 'Unknown error',
-          error?.details
-        ));
-      } else {
-        pendingRequest.resolve(result);
-      }
-    }
-  }
-  
   public get isConnected(): boolean {
-    return this.connections.size > 0;
+    return this.isUnityAvailable;
   }
   
   public get connectionCount(): number {
-    return this.connections.size;
+    return this.isUnityAvailable ? 1 : 0;
   }
 }

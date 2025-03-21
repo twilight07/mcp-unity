@@ -16,8 +16,8 @@ COPY . .
 # Build the project
 RUN npm run build
 
-# Expose WebSocket port, default 8080
-EXPOSE 8080
+# Expose WebSocket port, default 8090
+EXPOSE 8090
 
 # Command to run the MCP server
 CMD ["node", "build/index.js"]

@@ -1,49 +1,34 @@
 using System;
 using System.Collections.Generic;
-using System.Net.WebSockets;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
 using UnityEngine;
 using UnityEditor;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using McpUnity.Tools;
 using McpUnity.Resources;
+using McpUnity.Services;
 
 namespace McpUnity.Unity
 {
     /// <summary>
-    /// Connection state for the MCP Unity Bridge
-    /// </summary>
-    public enum ConnectionState
-    {
-        Disconnected,
-        Connecting,
-        Connected
-    }
-
-    /// <summary>
     /// Bridge between Unity and Node.js MCP server.
-    /// Handles WebSocket communication and request processing.
+    /// Now uses HttpListener to receive requests from Node.js.
     /// </summary>
     [InitializeOnLoad]
     public class McpUnityBridge
     {
         private static McpUnityBridge _instance;
-        private ClientWebSocket _webSocket;
+        private HttpListener _httpListener;
         private CancellationTokenSource _cts;
-        
-        // Dictionary to store tool instances
+        private Task _listenerTask;
         private Dictionary<string, McpToolBase> _tools = new Dictionary<string, McpToolBase>();
-        
-        // Dictionary to store resource instances
         private Dictionary<string, McpResourceBase> _resources = new Dictionary<string, McpResourceBase>();
-        
-        // Events
-        public static event Action OnConnected;
-        public static event Action OnDisconnected;
-        public static event Action OnConnecting;
-        public static event Action<string> OnError;
+        private TestRunnerService _testRunnerService;
         
         /// <summary>
         /// Static constructor that gets called when Unity loads due to InitializeOnLoad attribute
@@ -53,7 +38,7 @@ namespace McpUnity.Unity
             // Initialize the singleton instance when Unity loads
             // This ensures the bridge is available as soon as Unity starts
             // Subscribe to editor quitting event to clean up
-            EditorApplication.quitting += () => Instance.Disconnect().ConfigureAwait(false);
+            EditorApplication.quitting += () => Instance.StopListener().ConfigureAwait(false);
         }
         
         /// <summary>
@@ -73,48 +58,19 @@ namespace McpUnity.Unity
         }
         
         /// <summary>
-        /// Current connection state mapped from WebSocket state
+        /// Current Listening state
         /// </summary>
-        public ConnectionState ConnectionState
-        {
-            get
-            {
-                if (_webSocket == null)
-                    return ConnectionState.Disconnected;
-                    
-                switch (_webSocket.State)
-                {
-                    case WebSocketState.Open:
-                        return ConnectionState.Connected;
-                    case WebSocketState.Connecting:
-                        return ConnectionState.Connecting;
-                    case WebSocketState.CloseSent:  // Still finalizing connection
-                    case WebSocketState.CloseReceived:  // Still finalizing connection
-                    case WebSocketState.None:
-                    case WebSocketState.Closed:
-                    case WebSocketState.Aborted:
-                        return ConnectionState.Disconnected;
-                    default:
-                        return ConnectionState.Disconnected;
-                }
-            }
-        }
+        public bool IsListening { get; private set; }
         
         /// <summary>
         /// Private constructor to enforce singleton pattern
         /// </summary>
         private McpUnityBridge()
         {
-            // Initialize tools
+            InitializeServices();
             RegisterResources();
             RegisterTools();
-            
-            // Initialize the bridge
-            // Auto-connect if configured to do so
-            if (McpUnitySettings.Instance.AutoStartServer)
-            {
-                Connect().ConfigureAwait(false);
-            }
+            StartListener();
         }
         
         /// <summary>
@@ -144,83 +100,272 @@ namespace McpUnity.Unity
         }
         
         /// <summary>
-        /// Connect to the Node.js server
+        /// Start the HTTP Listener to receive requests from Node.js
         /// </summary>
-        public async Task Connect(int port = -1)
+        public void StartListener(int port = -1)
         {
-            // Don't try to connect if already connected or connecting
-            if (ConnectionState != ConnectionState.Disconnected) return;
-            
-            string url = $"ws://localhost:{McpUnitySettings.Instance.Port}";
+            if (IsListening) return;
             
             try
             {
-                // Notify that we're connecting
-                OnConnecting?.Invoke();
-                Debug.Log($"[MCP Unity] Connecting to server at {url}...");
+                // Use the port from settings or the provided port
+                int listenerPort = port > 0 ? port : McpUnitySettings.Instance.Port;
+                string prefix = $"http://localhost:{listenerPort}/";
+                
+                Debug.Log($"[MCP Unity] Starting HTTP listener on {prefix}");
+                
+                _httpListener = new HttpListener();
+                _httpListener.Prefixes.Add(prefix);
+                _httpListener.Start();
                 
                 _cts = new CancellationTokenSource();
-                _webSocket = new ClientWebSocket();
+                IsListening = true;
                 
-                await _webSocket.ConnectAsync(new Uri(url), _cts.Token);
+                // Start the listener loop in a background task
+                _listenerTask = ListenerLoop(_cts.Token);
                 
-                Debug.Log($"[MCP Unity] Connected to server at {url}");
-                OnConnected?.Invoke();
-                
-                // Start listening for messages
-                _ = ReceiveLoop();
+                Debug.Log("[MCP Unity] HTTP listener started");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Connection error: {ex.Message}");
-                OnError?.Invoke(ex.Message);
+                IsListening = false;
+                Debug.LogError($"[MCP Unity] Failed to start HTTP listener: {ex.Message}");
             }
         }
         
         /// <summary>
-        /// Disconnect from the Node.js server
+        /// Stop the HTTP listener
         /// </summary>
-        public async Task Disconnect()
+        public async Task StopListener()
         {
-            // Only disconnect if connected
-            if (ConnectionState != ConnectionState.Connected) return;
+            if (!IsListening) return;
             
             try
             {
-                _cts = null;
+                // Signal cancellation
+                _cts?.Cancel();
                 
-                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                // Close the listener to interrupt any pending GetContextAsync calls
+                _httpListener?.Close();
+                IsListening = false;
                 
-                Debug.Log("[MCP Unity] Disconnected from server");
-                OnDisconnected?.Invoke();
+                // Wait for the listener task to complete
+                if (_listenerTask != null)
+                {
+                    await _listenerTask;
+                }
+                
+                Debug.Log("[MCP Unity] HTTP listener stopped");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Disconnection error: {ex.Message}");
-                OnError?.Invoke(ex.Message);
+                Debug.LogError($"[MCP Unity] Error stopping HTTP listener: {ex.Message}");
             }
         }
         
         /// <summary>
-        /// Reconnect to the Node.js server
-        /// If disconnected, it will connect.
-        /// If connected or connecting, it will disconnect first and then connect again.
+        /// Main listener loop for HTTP requests
         /// </summary>
-        public async Task Reconnect()
+        private async Task ListenerLoop(CancellationToken cancellationToken)
         {
-            Debug.Log("[MCP Unity] Reconnecting to server...");
-            
-            // If already connected or connecting, disconnect first
-            if (ConnectionState != ConnectionState.Disconnected)
+            while (IsListening && !cancellationToken.IsCancellationRequested)
             {
-                await Disconnect();
+                HttpListenerContext context;
                 
-                // Small delay to ensure clean disconnect
-                await Task.Delay(500);
+                try
+                {
+                    // Use a timeout to check cancellation more frequently
+                    Task<HttpListenerContext> contextTask = _httpListener.GetContextAsync();
+                    Task completedTask = await Task.WhenAny(
+                        contextTask,
+                        Task.Delay(200, cancellationToken)
+                    );
+                    
+                    // Check if the GetContextAsync completed or the delay/cancellation occurred
+                    if (completedTask != contextTask)
+                    {
+                        // Check if cancellation was requested
+                        cancellationToken.ThrowIfCancellationRequested();
+                        continue;
+                    }
+                    
+                    // Get the context from the completed task
+                    context = await contextTask;
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancellation was requested
+                    break;
+                }
+                catch (HttpListenerException)
+                {
+                    // Listener was closed
+                    break;
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Listener was disposed
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[MCP Unity] Error getting HTTP context: {ex.Message}");
+                    continue;
+                }
+                
+                // Handle health check endpoint
+                if (context.Request.Url.LocalPath == "/health")
+                {
+                    Debug.LogError($"[MCP Unity] Health Check");
+                    
+                    var responseJson = new JObject
+                    {
+                        ["status"] = "ok",
+                        ["connected"] = true
+                    };
+                        
+                    await SendHttpResponse(context, responseJson);
+                    continue;
+                }
+                    
+                await ProcessRequestAsync(context);
             }
             
-            // Now connect
-            await Connect();
+            Debug.Log("[MCP Unity] ListenerLoop exited");
+        }
+        
+        /// <summary>
+        /// Process an HTTP request from the Node.js server
+        /// </summary>
+        private async Task ProcessRequestAsync(HttpListenerContext context)
+        {
+            string requestBody;
+            
+            // Read the request body
+            using (var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding))
+            {
+                requestBody = await reader.ReadToEndAsync();
+            }
+            
+            Debug.Log($"[MCP Unity] HTTP message received: {requestBody}");
+            
+            var requestJson = JObject.Parse(requestBody);
+            var method = requestJson["method"]?.ToString();
+            var parameters = requestJson["params"] as JObject ?? new JObject();
+            
+            JObject responseJson;
+            
+            if (string.IsNullOrEmpty(method))
+            {
+                responseJson = CreateErrorResponse("Missing method in request", "invalid_request");
+            }
+            else if (_tools.TryGetValue(method, out var tool))
+            {
+                // Execute the tool
+                responseJson = await ExecuteToolAsync(tool, parameters);
+            }
+            else if (_resources.TryGetValue(method, out var resource))
+            {
+                // Fetch the resource
+                responseJson = FetchResource(resource, parameters);
+            }
+            else
+            {
+                responseJson = CreateErrorResponse($"Unknown method: {method}", "unknown_method");
+            }
+                
+            // Add success flag and ID to the response
+            responseJson["success"] = !responseJson.ContainsKey("error");
+            responseJson["id"] = requestJson["id"]?.ToString();
+            
+            await SendHttpResponse(context, responseJson);
+        }
+        
+        /// <summary>
+        /// Send an HTTP response to the Node.js server
+        /// </summary>
+        private async Task SendHttpResponse(HttpListenerContext context, JObject responseData)
+        {
+            try
+            {
+                byte[] buffer = Encoding.UTF8.GetBytes(responseData.ToString(Formatting.None));
+                
+                context.Response.ContentType = "application/json";
+                context.Response.ContentLength64 = buffer.Length;
+                await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[MCP Unity] Error sending HTTP response: {ex.Message}");
+            }
+            finally
+            {
+                context.Response.Close();
+            }
+        }
+        
+        /// <summary>
+        /// Execute a tool with the provided parameters
+        /// </summary>
+        private async Task<JObject> ExecuteToolAsync(McpToolBase tool, JObject parameters)
+        {
+            // We need to dispatch to Unity's main thread
+            var tcs = new TaskCompletionSource<JObject>();
+                
+            EditorApplication.delayCall += () =>
+            {
+                try
+                {
+                    _ = DelayTaskCall(tool, parameters, tcs);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[MCP Unity] Error executing tool {tool.Name}: {ex.Message}");
+                    tcs.SetResult(CreateErrorResponse(
+                        $"Failed to execute tool {tool.Name}: {ex.Message}",
+                        "tool_execution_error"
+                    ));
+                }
+            };
+                
+            // Wait for the task to complete
+            return await tcs.Task;
+        }
+        
+        // TODO: Add summary
+        private async Task DelayTaskCall(McpToolBase tool, JObject parameters, TaskCompletionSource<JObject> tcs)
+        {
+            var result = await tool.ExecuteAsync(parameters);
+            tcs.SetResult(result);
+        }
+        
+        /// <summary>
+        /// Fetch a resource with the provided parameters
+        /// </summary>
+        private JObject FetchResource(McpResourceBase resource, JObject parameters)
+        {
+            // We need to dispatch to Unity's main thread and wait for completion
+            var tcs = new TaskCompletionSource<JObject>();
+                
+            EditorApplication.delayCall += () =>
+            {
+                try
+                {
+                    var result = resource.Fetch(parameters);
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"[MCP Unity] Error fetching resource {resource.Name}: {ex.Message}");
+                    tcs.SetResult(CreateErrorResponse(
+                        $"Failed to fetch resource {resource.Name}: {ex.Message}",
+                        "resource_fetch_error"
+                    ));
+                }
+            };
+                
+            // Wait for the task to complete
+            return tcs.Task.GetAwaiter().GetResult();
         }
         
         /// <summary>
@@ -232,31 +377,21 @@ namespace McpUnity.Unity
             MenuItemTool menuItemTool = new MenuItemTool();
             _tools.Add(menuItemTool.Name, menuItemTool);
             
-            Debug.Log($"[MCP Unity] Registered tool: {menuItemTool.Name}");
-            
             // Register SelectObjectTool
             SelectObjectTool selectObjectTool = new SelectObjectTool();
             _tools.Add(selectObjectTool.Name, selectObjectTool);
-            
-            Debug.Log($"[MCP Unity] Registered tool: {selectObjectTool.Name}");
             
             // Register PackageManagerTool
             PackageManagerTool packageManagerTool = new PackageManagerTool();
             _tools.Add(packageManagerTool.Name, packageManagerTool);
             
-            Debug.Log($"[MCP Unity] Registered tool: {packageManagerTool.Name}");
-            
             // Register RunTestsTool
-            RunTestsTool runTestsTool = new RunTestsTool();
+            RunTestsTool runTestsTool = new RunTestsTool(_testRunnerService);
             _tools.Add(runTestsTool.Name, runTestsTool);
-            
-            Debug.Log($"[MCP Unity] Registered tool: {runTestsTool.Name}");
             
             // Register NotifyMessageTool
             NotifyMessageTool notifyMessageTool = new NotifyMessageTool();
             _tools.Add(notifyMessageTool.Name, notifyMessageTool);
-            
-            Debug.Log($"[MCP Unity] Registered tool: {notifyMessageTool.Name}");
             
             // Register additional tools here as needed
         }
@@ -270,238 +405,36 @@ namespace McpUnity.Unity
             GetMenuItemsResource getMenuItemsResource = new GetMenuItemsResource();
             _resources.Add(getMenuItemsResource.Name, getMenuItemsResource);
             
-            Debug.Log($"[MCP Unity] Registered resource: {getMenuItemsResource.Name}");
-            
             // Register GetConsoleLogsResource
             GetConsoleLogsResource getConsoleLogsResource = new GetConsoleLogsResource();
             _resources.Add(getConsoleLogsResource.Name, getConsoleLogsResource);
-            
-            Debug.Log($"[MCP Unity] Registered resource: {getConsoleLogsResource.Name}");
             
             // Register GetHierarchyResource
             GetHierarchyResource getHierarchyResource = new GetHierarchyResource();
             _resources.Add(getHierarchyResource.Name, getHierarchyResource);
             
-            Debug.Log($"[MCP Unity] Registered resource: {getHierarchyResource.Name}");
-            
             // Register GetPackagesResource
             GetPackagesResource getPackagesResource = new GetPackagesResource();
             _resources.Add(getPackagesResource.Name, getPackagesResource);
-            
-            Debug.Log($"[MCP Unity] Registered resource: {getPackagesResource.Name}");
             
             // Register GetAssetsResource
             GetAssetsResource getAssetsResource = new GetAssetsResource();
             _resources.Add(getAssetsResource.Name, getAssetsResource);
             
-            Debug.Log($"[MCP Unity] Registered resource: {getAssetsResource.Name}");
-            
-            // Register GetAddressablesResource
-            GetAddressablesResource getAddressablesResource = new GetAddressablesResource();
-            _resources.Add(getAddressablesResource.Name, getAddressablesResource);
-            
-            Debug.Log($"[MCP Unity] Registered resource: {getAddressablesResource.Name}");
+            // Register GetTestsResource
+            GetTestsResource getTestsResource = new GetTestsResource(_testRunnerService);
+            _resources.Add(getTestsResource.Name, getTestsResource);
             
             // Register additional resources here as needed
         }
         
         /// <summary>
-        /// Send a message to the Node.js server
+        /// Initialize services used by tools and resources
         /// </summary>
-        private async Task SendMessage(string message)
+        private void InitializeServices()
         {
-            if (ConnectionState != ConnectionState.Connected)
-            {
-                throw new InvalidOperationException("Not connected to server");
-            }
-            
-            byte[] buffer = Encoding.UTF8.GetBytes(message);
-            await _webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, _cts.Token);
-            Debug.Log($"[MCP Unity] Sent message: {message}");
-        }
-        
-        /// <summary>
-        /// Receive messages from the Node.js server
-        /// </summary>
-        private async Task ReceiveLoop()
-        {
-            byte[] buffer = new byte[4096];
-            StringBuilder messageBuilder = new StringBuilder();
-            
-            while (ConnectionState == ConnectionState.Connected && !_cts.Token.IsCancellationRequested)
-            {
-                WebSocketReceiveResult result;
-                    
-                do
-                {
-                    result = await ReceiveAsync(buffer);
-                        
-                    if (result.MessageType == WebSocketMessageType.Close)
-                    {
-                        await Disconnect();
-                        return;
-                    }
-                        
-                    messageBuilder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
-                }
-                while (!result.EndOfMessage);
-                
-                ProcessMessage(messageBuilder.ToString());
-                messageBuilder.Clear();
-            }
-        }
-
-        /// <summary>
-        /// Get received a message from the Node.js server
-        /// </summary>
-        private async Task<WebSocketReceiveResult> ReceiveAsync(byte[] buffer)
-        {
-            try
-            {
-                return await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected when cancellation is requested
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MCP Unity] WebSocket Receive error: {ex.Message}");
-                OnError?.Invoke(ex.Message);
-            }
-            
-            // Return a web socket result to close the connection in the ReceiveLoop method
-            return new WebSocketReceiveResult(0, WebSocketMessageType.Close, true);
-        }
-        
-        /// <summary>
-        /// Process incoming messages
-        /// </summary>
-        private void ProcessMessage(string message)
-        {
-            var json = JObject.Parse(message);
-            var id = json["id"]?.ToString();
-            var type = json["type"]?.ToString();
-                
-            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(type))
-            {
-                Debug.LogWarning($"[MCP Unity] Invalid message format: {message}");
-                return;
-            }
-                
-            if (type == "request")
-            {
-                Debug.Log($"[MCP Unity] Request message: {message}");
-                
-                // Handle request from Node.js server
-                ProcessRequest(json);
-            }
-            else if (type == "response")
-            {
-                Debug.Log($"[MCP Unity] Response message: {message}");
-            }
-            else if (type == "error")
-            {
-                Debug.LogError($"[MCP Unity] Error message: {message}");
-            }
-            else
-            {
-                Debug.LogWarning($"[MCP Unity] Unknown type {type} message: {message}");
-            }
-        }
-        
-        /// <summary>
-        /// Process a request from the Node.js server
-        /// </summary>
-        private async void ProcessRequest(JObject request)
-        {
-            JObject result = null;
-            var id = request["id"].ToString();
-            var method = request["method"].ToString();
-            var parameters = (JObject)request["params"];
-            var response = new JObject
-            {
-                ["id"] = id,
-                ["type"] = "response"
-            };
-            
-            // Find the tool by method name
-            if (_tools.TryGetValue(method, out var tool))
-            {
-                // Execute the tool with the provided parameters
-                result = ExecuteTool(tool, parameters);
-            }
-            // Find the resource by method name
-            else if (_resources.TryGetValue(method, out var resource))
-            {
-                // Fetch the resource with the provided parameters
-                result = FetchResource(resource, parameters);
-            }
-            else
-            {
-                response["type"] = "error";
-                response["error"] = new JObject
-                {
-                    ["type"] = "method_not_found",
-                    ["message"] = $"Method not implemented: {method}"
-                };
-                Debug.LogWarning($"[MCP Unity] Method not implemented: {method}");
-            }
-                    
-            // Check if the result contains an error
-            if (result != null && result.TryGetValue("error", out var error))
-            {
-                response["type"] = "error";
-                response["error"] = error;
-            }
-            else
-            {
-                response["result"] = result;
-            }
-            
-            await SendMessage(response.ToString());
-        }
-
-        private JObject ExecuteTool(McpToolBase tool, JObject parameters)
-        {
-            try
-            {
-                return tool.Execute(parameters);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MCP Unity] Error executing tool {tool.Name} with the following error: {ex.Message}");
-                return new JObject
-                {
-                    ["error"] = new JObject
-                    {
-                        ["type"] = "internal_error",
-                        ["message"] = ex.Message,
-                        ["stack"] = ex.StackTrace
-                    }
-                };
-            }
-        }
-        
-        private JObject FetchResource(McpResourceBase resource, JObject parameters)
-        {
-            try
-            {
-                return resource.Fetch(parameters);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MCP Unity] Error fetching resource {resource.Name} with the following error: {ex.Message}");
-                return new JObject
-                {
-                    ["error"] = new JObject
-                    {
-                        ["type"] = "internal_error",
-                        ["message"] = ex.Message,
-                        ["stack"] = ex.StackTrace
-                    }
-                };
-            }
+            // Create TestRunnerService
+            _testRunnerService = new TestRunnerService();
         }
     }
 }

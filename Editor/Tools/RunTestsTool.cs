@@ -1,10 +1,12 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using McpUnity.Unity;
 using UnityEngine;
-using UnityEditor;
-using UnityEditor.TestTools.TestRunner.Api;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using UnityEditor.TestTools.TestRunner.Api;
+using McpUnity.Services;
 
 namespace McpUnity.Tools
 {
@@ -13,9 +15,9 @@ namespace McpUnity.Tools
     /// </summary>
     public class RunTestsTool : McpToolBase, ICallbacks
     {
-        private readonly TestRunnerApi _testRunnerApi;
+        private readonly TestRunnerService _testRunnerService;
         private bool _isRunning = false;
-        private string _requestId = null;
+        private TaskCompletionSource<JObject> _testRunCompletionSource;
         private List<TestResult> _testResults = new List<TestResult>();
         
         // Structure to store test results
@@ -25,22 +27,26 @@ namespace McpUnity.Tools
             public string FullName { get; set; }
             public string ResultState { get; set; }
             public string Message { get; set; }
-            public float Duration { get; set; }
+            public double Duration { get; set; }
             public bool Passed => ResultState == "Passed";
         }
         
-        public RunTestsTool()
+        public RunTestsTool(TestRunnerService testRunnerService)
         {
             Name = "run_tests";
             Description = "Runs tests using Unity's Test Runner";
-            _testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
+            
+            _testRunnerService = testRunnerService;
+            
+            // Register callbacks with the TestRunnerApi
+            _testRunnerService.TestRunnerApi.RegisterCallbacks(this);
         }
         
         /// <summary>
-        /// Execute the RunTests tool with the provided parameters
+        /// Execute the RunTests tool with the provided parameters asynchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override JObject Execute(JObject parameters)
+        public override async Task<JObject> ExecuteAsync(JObject parameters)
         {
             // Check if tests are already running
             if (_isRunning)
@@ -76,47 +82,14 @@ namespace McpUnity.Tools
             // Reset state
             _isRunning = true;
             _testResults.Clear();
-            _requestId = Guid.NewGuid().ToString();
+            _testRunCompletionSource = new TaskCompletionSource<JObject>();
             
-            // Set up filter
-            var filter = new Filter
-            {
-                testMode = testMode
-            };
-            
-            // Apply name filter if provided
-            if (!string.IsNullOrEmpty(testFilter))
-            {
-                filter.testNames = new[] { testFilter };
-                filter.categoryNames = new[] { testFilter };
-            }
-            
-            try
-            {
-                // Run tests with provided filter
-                _testRunnerApi.RegisterCallbacks(this);
-                _testRunnerApi.Execute(new ExecutionSettings(filter));
-                
-                // Return immediate response
-                return new JObject
-                {
-                    ["success"] = true,
-                    ["message"] = $"Test run started: Mode={testMode}, Filter={testFilter}",
-                    ["type"] = "text",
-                    ["requestId"] = _requestId,
-                    ["status"] = "running"
-                };
-            }
-            catch (Exception ex)
-            {
-                _isRunning = false;
-                _testRunnerApi.UnregisterCallbacks(this);
-                
-                return McpUnityBridge.CreateErrorResponse(
-                    $"Failed to start test run: {ex.Message}",
-                    "test_runner_error"
-                );
-            }
+            // Execute tests using the TestRunnerService
+            return await _testRunnerService.ExecuteTests(
+                testMode, 
+                testFilter, 
+                _testRunCompletionSource
+            );
         }
         
         #region ICallbacks Implementation
@@ -154,7 +127,6 @@ namespace McpUnity.Tools
             Debug.Log($"[MCP Unity] Test run completed: {result.Test.Name} - {result.ResultState}");
             
             _isRunning = false;
-            _testRunnerApi.UnregisterCallbacks(this);
             
             // Create test results summary
             var summary = new JObject
@@ -163,7 +135,6 @@ namespace McpUnity.Tools
                 ["passCount"] = _testResults.FindAll(r => r.Passed).Count,
                 ["duration"] = result.Duration,
                 ["success"] = result.ResultState == "Passed",
-                ["requestId"] = _requestId,
                 ["status"] = "completed",
                 ["message"] = $"Test run completed: {result.Test.Name} - {result.ResultState}"
             };
@@ -183,26 +154,15 @@ namespace McpUnity.Tools
             }
             summary["results"] = resultArray;
             
-            // Send results through WebSocket
+            // Set the test run completion result
             try
             {
-                var message = new JObject
-                {
-                    ["id"] = _requestId,
-                    ["type"] = "notification",
-                    ["method"] = "test_run_completed",
-                    ["params"] = summary
-                };
-                
-                // Would normally send this through the WebSocket, but we'll log it for now
-                Debug.Log($"[MCP Unity] Test results: {message}");
-                
-                // In a real implementation, we would send this to the Node.js server
-                // McpUnityBridge.Instance.SendNotification("test_run_completed", summary);
+                _testRunCompletionSource.SetResult(summary);
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Failed to send test results: {ex.Message}");
+                Debug.LogError($"[MCP Unity] Failed to set test results: {ex.Message}");
+                _testRunCompletionSource.TrySetException(ex);
             }
         }
         

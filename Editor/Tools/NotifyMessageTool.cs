@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using McpUnity.Unity;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
@@ -16,19 +17,19 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Execute the NotifyMessage tool with the provided parameters
+        /// Execute the NotifyMessage tool with the provided parameters asynchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override JObject Execute(JObject parameters)
+        public override Task<JObject> ExecuteAsync(JObject parameters)
         {
             // Extract parameters
             string message = parameters["message"]?.ToObject<string>();
             if (string.IsNullOrEmpty(message))
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return Task.FromResult(McpUnityBridge.CreateErrorResponse(
                     "Required parameter 'message' not provided", 
                     "validation_error"
-                );
+                ));
             }
             
             string messageType = parameters["type"]?.ToObject<string>()?.ToLowerInvariant() ?? "info";
@@ -48,12 +49,12 @@ namespace McpUnity.Tools
                     break;
             }
             
-            return new JObject
+            return Task.FromResult(new JObject
             {
                 ["success"] = true,
                 ["message"] = $"Message displayed: {message}",
                 ["type"] = "text"
-            };
+            });
         }
     }
 }
