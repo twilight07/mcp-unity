@@ -31,10 +31,46 @@ namespace McpUnity.Resources
             
             // Register for log messages
             Application.logMessageReceived += OnLogMessageReceived;
-            // Add our own handler for EditorApplication.update
+
+#if UNITY_6000_0_OR_NEWER
+            // Unity 6 specific implementation
             ConsoleWindowUtility.consoleLogsChanged += OnConsoleCountChanged;
+#else
+            // Unity 2022.3 implementation using reflection
+            EditorApplication.update += CheckConsoleClearViaReflection;
+#endif
             
             Debug.Log("[MCP Unity] Console logs resource initialized");
+        }
+
+        /// <summary>
+        /// Check if console was cleared using reflection (for Unity 2022.3)
+        /// </summary>
+        private void CheckConsoleClearViaReflection()
+        {
+            try
+            {
+                // Get current log counts using LogEntries (internal Unity API)
+                var logEntriesType = Type.GetType("UnityEditor.LogEntries,UnityEditor");
+                if (logEntriesType == null) return;
+                
+                var getCountMethod = logEntriesType.GetMethod("GetCount",
+                    BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic);
+                if (getCountMethod == null) return;
+                
+                int currentTotalCount = (int)getCountMethod.Invoke(null, null);
+                        
+                // If we had logs before, but now we don't, console was likely cleared
+                if (currentTotalCount == 0 && _logEntries.Count > 0)
+                {
+                    ClearLogs();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Just log the error but don't break functionality
+                Debug.LogError($"[MCP Unity] Error checking console clear: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -88,6 +124,7 @@ namespace McpUnity.Resources
             });
         }
         
+#if UNITY_6000_0_OR_NEWER
         /// <summary>
         /// Called when the console logs count changes
         /// </summary>
@@ -99,6 +136,7 @@ namespace McpUnity.Resources
                 ClearLogs();
             }
         }
+#endif
         
         /// <summary>
         /// Clear all stored log entries
