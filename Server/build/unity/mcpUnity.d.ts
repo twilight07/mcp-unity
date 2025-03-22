@@ -10,6 +10,10 @@ export declare class McpUnity {
     private ws;
     private pendingRequests;
     private readonly REQUEST_TIMEOUT;
+    private lastPongTime;
+    private pingInterval;
+    private readonly PING_INTERVAL;
+    private readonly PONG_TIMEOUT;
     constructor(logger: Logger);
     /**
      * Start the Unity connection
@@ -19,6 +23,14 @@ export declare class McpUnity {
      * Connect to the Unity WebSocket
      */
     private connect;
+    /**
+     * Start ping interval to keep connection alive and detect disconnections
+     */
+    private startPingInterval;
+    /**
+     * Stop ping interval
+     */
+    private stopPingInterval;
     /**
      * Handle messages received from Unity
      */
@@ -32,15 +44,12 @@ export declare class McpUnity {
      */
     stop(): Promise<void>;
     /**
-     * Send a ping to validate the connection
-     */
-    ping(): Promise<boolean>;
-    /**
      * Send a request to the Unity server
      */
     sendRequest(request: UnityRequest): Promise<any>;
     /**
      * Check if connected to Unity
+     * Only returns true if the connection is guaranteed to be active
      */
     get isConnected(): boolean;
 }

@@ -20,16 +20,7 @@ export function createPackageManagerTool(mcpUnity: McpUnity, logger: Logger): To
     }),
     handler: async (params): Promise<CallToolResult> => {
       const { methodSource, packageName, version, repositoryUrl, branch, path } = params;
-      
-      logger.info(`Package Manager operation: source=${methodSource}`);
-      
-      if (!mcpUnity.isConnected) {
-        throw new McpUnityError(
-          ErrorType.CONNECTION, 
-          'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.'
-        );
-      }
-      
+            
       // Validate required parameters based on method
       if (methodSource === 'registry' && !packageName) {
         throw new McpUnityError(

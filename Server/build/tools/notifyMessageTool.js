@@ -11,10 +11,6 @@ export function createNotifyMessageTool(mcpUnity, logger) {
         }),
         handler: async (params) => {
             const { message, type = 'info' } = params;
-            logger.info(`Sending notification to Unity console: ${message} (${type})`);
-            if (!mcpUnity.isConnected) {
-                throw new McpUnityError(ErrorType.CONNECTION, 'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.');
-            }
             // Send to Unity
             const response = await mcpUnity.sendRequest({
                 method: toolName,

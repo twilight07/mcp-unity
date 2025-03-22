@@ -28,15 +28,6 @@ export function createGetTestsResource(mcpUnity: McpUnity, logger: Logger): Reso
     
     handler: async (params: { testMode?: string; nameFilter?: string }): Promise<ReadResourceResult> => {
       const { testMode, nameFilter } = params;
-      logger.info(`Fetching tests with filters: Mode=${testMode || 'All'}, Name=${nameFilter || 'none'}`);
-      
-      if (!mcpUnity.isConnected) {
-        throw new McpUnityError(
-          ErrorType.CONNECTION,
-          'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.'
-        );
-      }
-      
       const response = await mcpUnity.sendRequest({
         method: resourceName,
         params: {

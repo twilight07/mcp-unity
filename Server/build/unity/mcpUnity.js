@@ -6,7 +6,11 @@ export class McpUnity {
     port;
     ws = null;
     pendingRequests = new Map();
-    REQUEST_TIMEOUT = 5000;
+    REQUEST_TIMEOUT = 10000;
+    lastPongTime = 0;
+    pingInterval = null;
+    PING_INTERVAL = 30000; // 30 seconds
+    PONG_TIMEOUT = 10000; // 10 seconds
     constructor(logger) {
         this.logger = logger;
         // Initialize port from environment variable or use default
@@ -21,9 +25,7 @@ export class McpUnity {
         try {
             this.logger.info('Attempting to connect to Unity WebSocket...');
             await this.connect();
-            if (await this.ping()) {
-                this.logger.info('Successfully connected to Unity WebSocket');
-            }
+            this.logger.info('Successfully connected to Unity WebSocket');
         }
         catch (error) {
             this.logger.warn(`Could not connect to Unity WebSocket: ${error instanceof Error ? error.message : String(error)}`);
@@ -36,45 +38,92 @@ export class McpUnity {
      */
     async connect() {
         if (this.isConnected) {
+            this.logger.debug('Already connected to Unity WebSocket');
             return Promise.resolve();
         }
-        // Close any existing connection
+        // First, properly close any existing WebSocket connection
         this.disconnect();
         return new Promise((resolve, reject) => {
             const wsUrl = `ws://localhost:${this.port}/McpUnity`;
             this.logger.debug(`Connecting to ${wsUrl}...`);
-            try {
-                this.ws = new WebSocket(wsUrl);
-                const connectionTimeout = setTimeout(() => {
-                    if (this.ws && (this.ws.readyState === WebSocket.CONNECTING)) {
-                        this.ws.terminate();
-                        this.ws = null;
-                        reject(new McpUnityError(ErrorType.CONNECTION, 'Connection timeout'));
-                    }
-                }, this.REQUEST_TIMEOUT);
-                this.ws.onopen = () => {
-                    clearTimeout(connectionTimeout);
-                    this.logger.debug('WebSocket connected');
-                    resolve();
-                };
-                this.ws.onerror = (err) => {
-                    clearTimeout(connectionTimeout);
-                    this.logger.error(`WebSocket error: ${err.message || 'Unknown error'}`);
-                    reject(new McpUnityError(ErrorType.CONNECTION, `Connection failed: ${err.message || 'Unknown error'}`));
-                    this.disconnect();
-                };
-                this.ws.onmessage = (event) => {
-                    this.handleMessage(event.data.toString());
-                };
-                this.ws.onclose = () => {
-                    this.logger.debug('WebSocket closed');
-                    this.disconnect();
-                };
-            }
-            catch (err) {
-                reject(new McpUnityError(ErrorType.CONNECTION, `WebSocket creation failed: ${err instanceof Error ? err.message : String(err)}`));
-            }
+            // Create a new WebSocket
+            this.ws = new WebSocket(wsUrl);
+            const connectionTimeout = setTimeout(() => {
+                if (this.ws && (this.ws.readyState === WebSocket.CONNECTING)) {
+                    this.logger.warn('Connection timeout, terminating WebSocket');
+                    // If connection is taking too long, terminate it
+                    // Use terminate() not close() for CONNECTING state
+                    this.ws.terminate();
+                    this.ws = null;
+                    reject(new McpUnityError(ErrorType.CONNECTION, 'Connection timeout'));
+                }
+            }, this.REQUEST_TIMEOUT);
+            this.ws.onopen = () => {
+                clearTimeout(connectionTimeout);
+                this.logger.debug('WebSocket connected');
+                this.lastPongTime = Date.now(); // Initialize pong time on connection
+                this.startPingInterval();
+                resolve();
+            };
+            this.ws.onerror = (err) => {
+                clearTimeout(connectionTimeout);
+                this.logger.error(`WebSocket error: ${err.message || 'Unknown error'}`);
+                reject(new McpUnityError(ErrorType.CONNECTION, `Connection failed: ${err.message || 'Unknown error'}`));
+                this.disconnect();
+            };
+            this.ws.onmessage = (event) => {
+                this.handleMessage(event.data.toString());
+            };
+            this.ws.onclose = () => {
+                this.logger.debug('WebSocket closed');
+                this.disconnect();
+            };
+            this.ws.on('pong', () => {
+                this.lastPongTime = Date.now();
+            });
         });
+    }
+    /**
+     * Start ping interval to keep connection alive and detect disconnections
+     */
+    startPingInterval() {
+        // Clear any existing interval
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+        }
+        // Set up new ping interval
+        this.pingInterval = setInterval(() => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                // Check if we've received a pong recently
+                const timeSinceLastPong = Date.now() - this.lastPongTime;
+                if (timeSinceLastPong > this.PING_INTERVAL + this.PONG_TIMEOUT) {
+                    this.logger.warn(`No pong received for ${timeSinceLastPong}ms, considering connection dead`);
+                    this.disconnect();
+                    return;
+                }
+                // Send ping
+                try {
+                    this.ws.ping();
+                }
+                catch (err) {
+                    this.logger.error(`Error sending ping: ${err instanceof Error ? err.message : String(err)}`);
+                    this.disconnect();
+                }
+            }
+            else {
+                // WebSocket is not open, clear interval
+                this.stopPingInterval();
+            }
+        }, this.PING_INTERVAL);
+    }
+    /**
+     * Stop ping interval
+     */
+    stopPingInterval() {
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
     }
     /**
      * Handle messages received from Unity
@@ -102,14 +151,30 @@ export class McpUnity {
      * Disconnect from Unity
      */
     disconnect() {
+        // Stop ping interval
+        this.stopPingInterval();
         if (this.ws) {
+            this.logger.debug(`Disconnecting WebSocket in state: ${this.ws.readyState}`);
+            // First remove all event handlers to prevent callbacks during close
             this.ws.onopen = null;
             this.ws.onmessage = null;
             this.ws.onerror = null;
             this.ws.onclose = null;
-            if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
-                this.ws.close();
+            // Different handling based on WebSocket state
+            try {
+                if (this.ws.readyState === WebSocket.CONNECTING) {
+                    // For sockets still connecting, use terminate() to force immediate close
+                    this.ws.terminate();
+                }
+                else if (this.ws.readyState === WebSocket.OPEN) {
+                    // For open sockets, use close() for clean shutdown
+                    this.ws.close();
+                }
             }
+            catch (err) {
+                this.logger.error(`Error closing WebSocket: ${err instanceof Error ? err.message : String(err)}`);
+            }
+            // Clear the reference
             this.ws = null;
             // Reject all pending requests
             for (const [id, request] of this.pendingRequests.entries()) {
@@ -128,30 +193,12 @@ export class McpUnity {
         return Promise.resolve();
     }
     /**
-     * Send a ping to validate the connection
-     */
-    async ping() {
-        try {
-            const pingRequest = {
-                id: uuidv4(),
-                method: "ping",
-                params: {}
-            };
-            await this.sendRequest(pingRequest);
-            return true;
-        }
-        catch (error) {
-            this.logger.debug(`Ping failed: ${error instanceof Error ? error.message : String(error)}`);
-            return false;
-        }
-    }
-    /**
      * Send a request to the Unity server
      */
     async sendRequest(request) {
         // Ensure we're connected first
         if (!this.isConnected) {
-            this.logger.debug('Not connected, connecting first...');
+            this.logger.info('Not connected to Unity, connecting first...');
             await this.connect();
         }
         // Use given id or generate a new one
@@ -161,7 +208,8 @@ export class McpUnity {
             id: requestId
         };
         return new Promise((resolve, reject) => {
-            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+            // Double check isConnected again after await
+            if (!this.ws || !this.isConnected) {
                 reject(new McpUnityError(ErrorType.CONNECTION, 'Not connected to Unity'));
                 return;
             }
@@ -194,8 +242,21 @@ export class McpUnity {
     }
     /**
      * Check if connected to Unity
+     * Only returns true if the connection is guaranteed to be active
      */
     get isConnected() {
-        return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+        // Basic WebSocket connection check
+        const isSocketConnected = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+        if (!isSocketConnected) {
+            return false;
+        }
+        // Check if we've received a pong recently
+        const timeSinceLastPong = Date.now() - this.lastPongTime;
+        const isPongRecent = timeSinceLastPong < this.PING_INTERVAL + this.PONG_TIMEOUT;
+        if (!isPongRecent && this.lastPongTime > 0) {
+            this.logger.debug(`Connection may be stale: ${timeSinceLastPong}ms since last pong`);
+            return false;
+        }
+        return true;
     }
 }

@@ -64,11 +64,6 @@ namespace McpUnity.Unity
                 {
                     responseJson = CreateErrorResponse("Missing method in request", "invalid_request");
                 }
-                else if (method == "ping")
-                {
-                    // Handle MCP Protocol ping request - respond with an empty result object
-                    responseJson = new JObject();
-                }
                 else if (_server.TryGetTool(method, out var tool))
                 {
                     // Execute the tool

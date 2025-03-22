@@ -11,10 +11,6 @@ export function createGetMenuItemsResource(mcpUnity, logger) {
             mimeType: resourceMimeType
         },
         handler: async (params) => {
-            logger.info(`Fetching menu items list`, params);
-            if (!mcpUnity.isConnected) {
-                throw new McpUnityError(ErrorType.CONNECTION, 'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.');
-            }
             const response = await mcpUnity.sendRequest({
                 method: resourceName,
                 params: {}
@@ -22,6 +18,7 @@ export function createGetMenuItemsResource(mcpUnity, logger) {
             if (!response.success) {
                 throw new McpUnityError(ErrorType.RESOURCE_FETCH, response.message || 'Failed to fetch menu items from Unity');
             }
+            logger.info(`Fetching resource:`, response.menuItems);
             return {
                 contents: [{
                         uri: resourceUri,

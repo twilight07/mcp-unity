@@ -16,16 +16,7 @@ export function createGetConsoleLogsResource(mcpUnity: McpUnity, logger: Logger)
       description: 'Retrieve all logs from the Unity console',
       mimeType: resourceMimeType
     },
-    handler: async (params: any): Promise<ReadResourceResult> => {
-      logger.info(`Fetching Unity console logs`, params);
-      
-      if (!mcpUnity.isConnected) {
-        throw new McpUnityError(
-          ErrorType.CONNECTION, 
-          'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.'
-        );
-      }
-      
+    handler: async (params: any): Promise<ReadResourceResult> => {      
       const response = await mcpUnity.sendRequest({
         method: resourceName,
         params: {}

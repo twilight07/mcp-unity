@@ -111,7 +111,7 @@ namespace McpUnity.Unity
             GUI.enabled = !mcpUnityServer.IsListening;
             if (GUILayout.Button("Start Server", GUILayout.Height(30)))
             {
-                mcpUnityServer.StopServer();
+                mcpUnityServer.StartServer();
             }
             
             // Disconnect button - enabled only when connected

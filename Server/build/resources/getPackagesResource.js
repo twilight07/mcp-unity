@@ -11,10 +11,6 @@ export function createGetPackagesResource(mcpUnity, logger) {
             mimeType: resourceMimeType
         },
         handler: async (params) => {
-            logger.info('Fetching package list from Unity Package Manager');
-            if (!mcpUnity.isConnected) {
-                throw new McpUnityError(ErrorType.CONNECTION, 'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.');
-            }
             const response = await mcpUnity.sendRequest({
                 method: resourceName,
                 params: {}

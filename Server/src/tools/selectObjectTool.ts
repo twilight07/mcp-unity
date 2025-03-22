@@ -14,15 +14,6 @@ export function createSelectObjectTool(mcpUnity: McpUnity, logger: Logger): Tool
       objectPath: z.string().describe('The path or ID of the object to select (e.g. "Main Camera" or a Unity object ID)')
     }),
     handler: async ({ objectPath }): Promise<CallToolResult> => {
-      logger.info(`Selecting object: ${objectPath}`);
-      
-      if (!mcpUnity.isConnected) {
-        throw new McpUnityError(
-          ErrorType.CONNECTION, 
-          'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.'
-        );
-      }
-      
       const response = await mcpUnity.sendRequest({
         method: toolName,
         params: { objectPath }

@@ -13,10 +13,6 @@ export function createGetAssetsResource(mcpUnity, logger) {
         handler: async (params) => {
             const assetType = params?.assetType;
             const searchPattern = params?.searchPattern;
-            logger.info(`Fetching assets from Asset Database${assetType ? ` of type ${assetType}` : ''}${searchPattern ? ` matching ${searchPattern}` : ''}`);
-            if (!mcpUnity.isConnected) {
-                throw new McpUnityError(ErrorType.CONNECTION, 'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.');
-            }
             const response = await mcpUnity.sendRequest({
                 method: resourceName,
                 params: {

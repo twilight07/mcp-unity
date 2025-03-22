@@ -14,15 +14,6 @@ export function createMenuItemTool(mcpUnity: McpUnity, logger: Logger): ToolDefi
       menuPath: z.string().describe('The path to the menu item to execute (e.g. "GameObject/Create Empty")')
     }),
     handler: async ({ menuPath }): Promise<CallToolResult> => {
-      logger.info(`Executing menu item: ${menuPath}`);
-      
-      if (!mcpUnity.isConnected) {
-        throw new McpUnityError(
-          ErrorType.CONNECTION, 
-          'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.'
-        );
-      }
-      
       const response = await mcpUnity.sendRequest({
         method: toolName,
         params: { menuPath }

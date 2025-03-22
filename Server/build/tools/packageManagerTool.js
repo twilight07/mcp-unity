@@ -15,10 +15,6 @@ export function createPackageManagerTool(mcpUnity, logger) {
         }),
         handler: async (params) => {
             const { methodSource, packageName, version, repositoryUrl, branch, path } = params;
-            logger.info(`Package Manager operation: source=${methodSource}`);
-            if (!mcpUnity.isConnected) {
-                throw new McpUnityError(ErrorType.CONNECTION, 'Not connected to Unity. Please ensure Unity is running with the MCP Unity plugin enabled.');
-            }
             // Validate required parameters based on method
             if (methodSource === 'registry' && !packageName) {
                 throw new McpUnityError(ErrorType.VALIDATION, 'Required parameter "packageName" not provided for registry method');
