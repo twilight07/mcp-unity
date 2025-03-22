@@ -41,7 +41,7 @@ export class McpUnity {
         // Close any existing connection
         this.disconnect();
         return new Promise((resolve, reject) => {
-            const wsUrl = `ws://localhost:${this.port}`;
+            const wsUrl = `ws://localhost:${this.port}/McpUnity`;
             this.logger.debug(`Connecting to ${wsUrl}...`);
             try {
                 this.ws = new WebSocket(wsUrl);

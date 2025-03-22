@@ -73,7 +73,7 @@ export class McpUnity {
     this.disconnect();
     
     return new Promise<void>((resolve, reject) => {
-      const wsUrl = `ws://localhost:${this.port}`;
+      const wsUrl = `ws://localhost:${this.port}/McpUnity`;
       this.logger.debug(`Connecting to ${wsUrl}...`);
       
       try {
