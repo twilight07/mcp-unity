@@ -26,7 +26,7 @@ namespace McpUnity.Tools
             string message = parameters["message"]?.ToObject<string>();
             if (string.IsNullOrEmpty(message))
             {
-                return Task.FromResult(McpUnityBridge.CreateErrorResponse(
+                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'message' not provided", 
                     "validation_error"
                 ));

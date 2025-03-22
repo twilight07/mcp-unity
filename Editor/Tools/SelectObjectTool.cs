@@ -28,7 +28,7 @@ namespace McpUnity.Tools
             string objectPath = parameters["objectPath"]?.ToObject<string>();
             if (string.IsNullOrEmpty(objectPath))
             {
-                return Task.FromResult(McpUnityBridge.CreateErrorResponse(
+                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'objectPath' not provided", 
                     "validation_error"
                 ));

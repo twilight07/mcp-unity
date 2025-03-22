@@ -75,7 +75,7 @@ async function startServer() {
     // Start Unity Bridge connection
     await mcpUnity.start();
     
-    serverLogger.info('MCP Server started and ready');
+    serverLogger.info('MCP Server started');
   } catch (error) {
     serverLogger.error('Failed to start server', error);
     process.exit(1);

@@ -28,7 +28,7 @@ namespace McpUnity.Tools
             string menuPath = parameters["menuPath"]?.ToObject<string>();
             if (string.IsNullOrEmpty(menuPath))
             {
-                return Task.FromResult(McpUnityBridge.CreateErrorResponse(
+                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'menuPath' not provided", 
                     "validation_error"
                 ));

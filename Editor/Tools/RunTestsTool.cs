@@ -51,7 +51,7 @@ namespace McpUnity.Tools
             // Check if tests are already running
             if (_isRunning)
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Tests are already running. Please wait for them to complete.",
                     "test_runner_busy"
                 );

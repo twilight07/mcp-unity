@@ -73,9 +73,9 @@ namespace McpUnity.Unity
             EditorGUILayout.LabelField("Status:", GUILayout.Width(120));
             
             McpUnitySettings settings = McpUnitySettings.Instance;
-            McpUnityBridge mcpUnityBridge = McpUnityBridge.Instance;
-            string statusText = mcpUnityBridge.IsListening ? "Server Online" : "Server Offline";
-            Color statusColor = mcpUnityBridge.IsListening  ? Color.green : Color.red;
+            McpUnityServer mcpUnityServer = McpUnityServer.Instance;
+            string statusText = mcpUnityServer.IsListening ? "Server Online" : "Server Offline";
+            Color statusColor = mcpUnityServer.IsListening  ? Color.green : Color.red;
             
             GUIStyle statusStyle = new GUIStyle(EditorStyles.boldLabel);
             statusStyle.normal.textColor = statusColor;
@@ -98,7 +98,7 @@ namespace McpUnity.Unity
             {
                 settings.Port = newPort;
                 settings.SaveSettings();
-                _ = mcpUnityBridge.StopListener();
+                mcpUnityServer.StopServer();
             }
             EditorGUILayout.EndHorizontal();
             
@@ -108,17 +108,17 @@ namespace McpUnity.Unity
             EditorGUILayout.BeginHorizontal();
             
             // Connect button - enabled only when disconnected
-            GUI.enabled = !mcpUnityBridge.IsListening;
-            if (GUILayout.Button("Connect", GUILayout.Height(30)))
+            GUI.enabled = !mcpUnityServer.IsListening;
+            if (GUILayout.Button("Start Server", GUILayout.Height(30)))
             {
-                mcpUnityBridge.StartListener();
+                mcpUnityServer.StopServer();
             }
             
             // Disconnect button - enabled only when connected
-            GUI.enabled = mcpUnityBridge.IsListening;
-            if (GUILayout.Button("Disconnect", GUILayout.Height(30)))
+            GUI.enabled = mcpUnityServer.IsListening;
+            if (GUILayout.Button("Stop Server", GUILayout.Height(30)))
             {
-                _ = mcpUnityBridge.StopListener();
+                mcpUnityServer.StopServer();
             }
             
             GUI.enabled = true;

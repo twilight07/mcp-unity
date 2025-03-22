@@ -224,8 +224,13 @@ To build the server, open a terminal and:
 ### Debugging
    
 1. Debug the server with [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector):
-   ```bash
-   npx @modelcontextprotocol/inspector node build/index.js
+   - Powershell
+   ```powershell
+   $env:UNITY_PORT=8090; npx @modelcontextprotocol/inspector node Server/build/index.js
+   ```
+   - Command Prompt/Terminal
+   ```cmd
+   set UNITY_PORT=8090 && npx @modelcontextprotocol/inspector node Server/build/index.js
    ```
 
 2. Enable logging on your terminal or into a log.txt file:

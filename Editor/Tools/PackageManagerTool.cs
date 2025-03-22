@@ -32,7 +32,7 @@ namespace McpUnity.Tools
             string method = parameters["methodSource"]?.ToObject<string>();
             if (string.IsNullOrEmpty(method))
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'methodSource' not provided", 
                     "validation_error"
                 );
@@ -48,7 +48,7 @@ namespace McpUnity.Tools
                 case "disk":
                     return await AddFromDiskAsync(parameters);
                 default:
-                    return McpUnityBridge.CreateErrorResponse(
+                    return McpUnitySocketHandler.CreateErrorResponse(
                         $"Unknown method '{method}'. Valid methods are: registry, github, disk",
                         "validation_error"
                     );
@@ -64,7 +64,7 @@ namespace McpUnity.Tools
             string packageName = parameters["packageName"]?.ToObject<string>();
             if (string.IsNullOrEmpty(packageName))
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'packageName' not provided for registry method", 
                     "validation_error"
                 );
@@ -96,7 +96,7 @@ namespace McpUnity.Tools
             }
             catch (Exception ex)
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     $"Exception adding package: {ex.Message}",
                     "package_manager_error"
                 );
@@ -112,7 +112,7 @@ namespace McpUnity.Tools
             string repositoryUrl = parameters["repositoryUrl"]?.ToObject<string>();
             if (string.IsNullOrEmpty(repositoryUrl))
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'repositoryUrl' not provided for github method", 
                     "validation_error"
                 );
@@ -168,7 +168,7 @@ namespace McpUnity.Tools
             }
             catch (Exception ex)
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     $"Exception adding package: {ex.Message}",
                     "package_manager_error"
                 );
@@ -184,7 +184,7 @@ namespace McpUnity.Tools
             string path = parameters["path"]?.ToObject<string>();
             if (string.IsNullOrEmpty(path))
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'path' not provided for disk method", 
                     "validation_error"
                 );
@@ -210,7 +210,7 @@ namespace McpUnity.Tools
             }
             catch (Exception ex)
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     $"Exception adding package: {ex.Message}",
                     "package_manager_error"
                 );
@@ -240,14 +240,14 @@ namespace McpUnity.Tools
             }
             else if (_addRequest.Status == StatusCode.Failure)
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     $"Failed to add package: {_addRequest.Error.message}",
                     "package_manager_error"
                 );
             }
             else
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     $"Unknown package manager status: {_addRequest.Status}",
                     "package_manager_error"
                 );

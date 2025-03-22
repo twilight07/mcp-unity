@@ -109,7 +109,7 @@ namespace McpUnity.Services
 
             if (completedTask != completionSource.Task)
             {
-                return McpUnityBridge.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     $"Test run timed out after {timeoutMinutes} minutes",
                     "test_runner_timeout"
                 );

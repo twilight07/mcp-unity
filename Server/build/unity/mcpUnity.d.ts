@@ -7,35 +7,24 @@ interface UnityRequest {
 export declare class McpUnity {
     private logger;
     private port;
-    private socket;
+    private ws;
     private pendingRequests;
-    private receivedData;
-    private readonly PING_TIMEOUT;
-    private readonly CONNECTION_TIMEOUT;
-    private connecting;
+    private readonly REQUEST_TIMEOUT;
     constructor(logger: Logger);
     /**
      * Start the Unity connection
      */
     start(): Promise<void>;
     /**
-     * Connect to the Unity server
+     * Connect to the Unity WebSocket
      */
     private connect;
     /**
-     * Handle data received from Unity
+     * Handle messages received from Unity
      */
-    private handleData;
+    private handleMessage;
     /**
-     * Handle socket errors
-     */
-    private handleError;
-    /**
-     * Handle socket close
-     */
-    private handleClose;
-    /**
-     * Disconnect from Unity and clean up
+     * Disconnect from Unity
      */
     private disconnect;
     /**
@@ -43,7 +32,7 @@ export declare class McpUnity {
      */
     stop(): Promise<void>;
     /**
-     * Sends a ping to Unity server to check connectivity
+     * Send a ping to validate the connection
      */
     ping(): Promise<boolean>;
     /**
