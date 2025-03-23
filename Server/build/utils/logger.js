@@ -33,7 +33,7 @@ export class Logger {
         return isLoggingEnabled;
     }
     isLoggingFileEnabled() {
-        return true;
+        return isLoggingFileEnabled;
     }
     log(level, message, data) {
         if (level < this.level)

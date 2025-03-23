@@ -7,10 +7,6 @@ export class McpUnity {
     ws = null;
     pendingRequests = new Map();
     REQUEST_TIMEOUT = 10000;
-    lastPongTime = 0;
-    pingInterval = null;
-    PING_INTERVAL = 30000; // 30 seconds
-    PONG_TIMEOUT = 10000; // 10 seconds
     constructor(logger) {
         this.logger = logger;
         // Initialize port from environment variable or use default
@@ -30,6 +26,8 @@ export class McpUnity {
         catch (error) {
             this.logger.warn(`Could not connect to Unity WebSocket: ${error instanceof Error ? error.message : String(error)}`);
             this.logger.warn('Will retry connection on next request');
+            // Disconnect to clean up for the next request attempt
+            this.disconnect();
         }
         return Promise.resolve();
     }
@@ -51,18 +49,13 @@ export class McpUnity {
             const connectionTimeout = setTimeout(() => {
                 if (this.ws && (this.ws.readyState === WebSocket.CONNECTING)) {
                     this.logger.warn('Connection timeout, terminating WebSocket');
-                    // If connection is taking too long, terminate it
-                    // Use terminate() not close() for CONNECTING state
-                    this.ws.terminate();
-                    this.ws = null;
+                    this.disconnect();
                     reject(new McpUnityError(ErrorType.CONNECTION, 'Connection timeout'));
                 }
             }, this.REQUEST_TIMEOUT);
             this.ws.onopen = () => {
                 clearTimeout(connectionTimeout);
                 this.logger.debug('WebSocket connected');
-                this.lastPongTime = Date.now(); // Initialize pong time on connection
-                this.startPingInterval();
                 resolve();
             };
             this.ws.onerror = (err) => {
@@ -78,52 +71,7 @@ export class McpUnity {
                 this.logger.debug('WebSocket closed');
                 this.disconnect();
             };
-            this.ws.on('pong', () => {
-                this.lastPongTime = Date.now();
-            });
         });
-    }
-    /**
-     * Start ping interval to keep connection alive and detect disconnections
-     */
-    startPingInterval() {
-        // Clear any existing interval
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-        }
-        // Set up new ping interval
-        this.pingInterval = setInterval(() => {
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                // Check if we've received a pong recently
-                const timeSinceLastPong = Date.now() - this.lastPongTime;
-                if (timeSinceLastPong > this.PING_INTERVAL + this.PONG_TIMEOUT) {
-                    this.logger.warn(`No pong received for ${timeSinceLastPong}ms, considering connection dead`);
-                    this.disconnect();
-                    return;
-                }
-                // Send ping
-                try {
-                    this.ws.ping();
-                }
-                catch (err) {
-                    this.logger.error(`Error sending ping: ${err instanceof Error ? err.message : String(err)}`);
-                    this.disconnect();
-                }
-            }
-            else {
-                // WebSocket is not open, clear interval
-                this.stopPingInterval();
-            }
-        }, this.PING_INTERVAL);
-    }
-    /**
-     * Stop ping interval
-     */
-    stopPingInterval() {
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-            this.pingInterval = null;
-        }
     }
     /**
      * Handle messages received from Unity
@@ -151,8 +99,6 @@ export class McpUnity {
      * Disconnect from Unity
      */
     disconnect() {
-        // Stop ping interval
-        this.stopPingInterval();
         if (this.ws) {
             this.logger.debug(`Disconnecting WebSocket in state: ${this.ws.readyState}`);
             // First remove all event handlers to prevent callbacks during close
@@ -183,6 +129,13 @@ export class McpUnity {
                 this.pendingRequests.delete(id);
             }
         }
+    }
+    /**
+     * Tries to reconnect to Unity
+     */
+    reconnect() {
+        this.disconnect();
+        this.connect();
     }
     /**
      * Stop the Unity connection
@@ -219,8 +172,8 @@ export class McpUnity {
                     this.logger.error(`Request ${requestId} timed out after ${this.REQUEST_TIMEOUT}ms`);
                     this.pendingRequests.delete(requestId);
                     reject(new McpUnityError(ErrorType.TIMEOUT, 'Request timed out'));
-                    this.disconnect();
                 }
+                this.reconnect();
             }, this.REQUEST_TIMEOUT);
             // Store pending request
             this.pendingRequests.set(requestId, {
@@ -236,7 +189,6 @@ export class McpUnity {
                 clearTimeout(timeout);
                 this.pendingRequests.delete(requestId);
                 reject(new McpUnityError(ErrorType.CONNECTION, `Send failed: ${err instanceof Error ? err.message : String(err)}`));
-                this.disconnect();
             }
         });
     }
@@ -246,17 +198,6 @@ export class McpUnity {
      */
     get isConnected() {
         // Basic WebSocket connection check
-        const isSocketConnected = this.ws !== null && this.ws.readyState === WebSocket.OPEN;
-        if (!isSocketConnected) {
-            return false;
-        }
-        // Check if we've received a pong recently
-        const timeSinceLastPong = Date.now() - this.lastPongTime;
-        const isPongRecent = timeSinceLastPong < this.PING_INTERVAL + this.PONG_TIMEOUT;
-        if (!isPongRecent && this.lastPongTime > 0) {
-            this.logger.debug(`Connection may be stale: ${timeSinceLastPong}ms since last pong`);
-            return false;
-        }
-        return true;
+        return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
     }
 }

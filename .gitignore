@@ -111,9 +111,5 @@ GvhProjectSettings.xml
 **/StreamingAssets.meta
 
 #Project Specific
-**/Server/node_modules/
-**/Server/node_modules.meta
 **/package-lock.json
 **/package-lock.json.meta
-log.txt
-log.txt.meta

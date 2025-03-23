@@ -23,10 +23,10 @@ namespace McpUnity.Unity
     {
         private static McpUnityServer _instance;
         
-        private readonly WebSocketServer _webSocketServer;
         private readonly Dictionary<string, McpToolBase> _tools = new Dictionary<string, McpToolBase>();
         private readonly Dictionary<string, McpResourceBase> _resources = new Dictionary<string, McpResourceBase>();
         
+        private WebSocketServer _webSocketServer;
         private CancellationTokenSource _cts;
         private TestRunnerService _testRunnerService;
         
@@ -69,11 +69,6 @@ namespace McpUnity.Unity
             RegisterResources();
             RegisterTools();
             
-            // Create a new WebSocket server
-            _webSocketServer = new WebSocketServer(McpUnitySettings.Instance.Port);
-            // Add the MCP service endpoint with a handler that references this server
-            _webSocketServer.AddWebSocketService("/McpUnity", () => new McpUnitySocketHandler(this));
-                
             Debug.Log($"[MCP Unity] Created WebSocket server on port {McpUnitySettings.Instance.Port}");
             
             StartServer();
@@ -88,6 +83,11 @@ namespace McpUnity.Unity
             
             try
             {
+                // Create a new WebSocket server
+                _webSocketServer = new WebSocketServer($"ws://localhost:{McpUnitySettings.Instance.Port}");
+                // Add the MCP service endpoint with a handler that references this server
+                _webSocketServer.AddWebSocketService("/McpUnity", () => new McpUnitySocketHandler(this));
+                
                 // Start the server
                 _webSocketServer.Start();
                 

@@ -10,10 +10,6 @@ export declare class McpUnity {
     private ws;
     private pendingRequests;
     private readonly REQUEST_TIMEOUT;
-    private lastPongTime;
-    private pingInterval;
-    private readonly PING_INTERVAL;
-    private readonly PONG_TIMEOUT;
     constructor(logger: Logger);
     /**
      * Start the Unity connection
@@ -24,14 +20,6 @@ export declare class McpUnity {
      */
     private connect;
     /**
-     * Start ping interval to keep connection alive and detect disconnections
-     */
-    private startPingInterval;
-    /**
-     * Stop ping interval
-     */
-    private stopPingInterval;
-    /**
      * Handle messages received from Unity
      */
     private handleMessage;
@@ -39,6 +27,10 @@ export declare class McpUnity {
      * Disconnect from Unity
      */
     private disconnect;
+    /**
+     * Tries to reconnect to Unity
+     */
+    private reconnect;
     /**
      * Stop the Unity connection
      */

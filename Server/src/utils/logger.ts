@@ -43,7 +43,7 @@ export class Logger {
   }
   
   isLoggingFileEnabled(): boolean {
-    return true;
+    return isLoggingFileEnabled;
   }
   
   private log(level: LogLevel, message: string, data?: any) {
