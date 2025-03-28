@@ -29,6 +29,7 @@ namespace McpUnity.Unity
         private WebSocketServer _webSocketServer;
         private CancellationTokenSource _cts;
         private TestRunnerService _testRunnerService;
+        private List<ClientInfo> _clients = new List<ClientInfo>();
         
         /// <summary>
         /// Static constructor that gets called when Unity loads due to InitializeOnLoad attribute
@@ -198,5 +199,44 @@ namespace McpUnity.Unity
             // Create TestRunnerService
             _testRunnerService = new TestRunnerService();
         }
+        
+        /// <summary>
+        /// Gets the list of clients currently connected to the WebSocket server
+        /// </summary>
+        /// <returns>List of client information</returns>
+        public List<ClientInfo> GetConnectedClients()
+        {
+            _clients.Clear();
+            
+            if (!IsListening)
+                return _clients;
+            
+            // Get all services
+            var services = _webSocketServer.WebSocketServices.Hosts;
+            
+            foreach (var servicePath in services)
+            {
+                // Get sessions from the service
+                foreach (var session in servicePath.Sessions.Sessions)
+                {
+                    _clients.Add(new ClientInfo
+                    {
+                        ID = session.ID,
+                        Name = session.Context.Origin ?? "Unknown"
+                    });
+                }
+            }
+            
+            return _clients;
+        }
+    }
+    
+    /// <summary>
+    /// Simple class to hold client connection information
+    /// </summary>
+    public struct ClientInfo
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
     }
 }

@@ -1,0 +1,12 @@
+This project is split in 2 parts:
+- The C# Unity Editor package in the Editor/ folder
+- The Node.js server in the Server/ folder.
+
+Use WebSockets to communicate between the Editor and the Node.js server.
+For more documentation for the WebSocket library being used in Unity see https://github.com/sta/websocket-sharp/tree/master/websocket-sharp/Server
+
+Minimum supported versions:
+- Unity 2022.3
+- Node.js 18.0.0
+
+The MCP Node.js server implements the typescript SDK from https://github.com/modelcontextprotocol/typescript-sdk

@@ -1,9 +1,5 @@
-using System;
 using UnityEngine;
 using UnityEditor;
-using System.IO;
-using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace McpUnity.Unity
 {
@@ -121,9 +117,44 @@ namespace McpUnity.Unity
                 mcpUnityServer.StopServer();
             }
             
+            Repaint();
+            
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
             
+            EditorGUILayout.Space();
+            
+            EditorGUILayout.LabelField("Connected Clients", EditorStyles.boldLabel);
+            EditorGUILayout.BeginVertical("box");
+            
+            var clients = mcpUnityServer.GetConnectedClients();
+            
+            if (clients.Count > 0)
+            {
+                foreach (var client in clients)
+                {
+                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("ID:", GUILayout.Width(50));
+                    EditorGUILayout.LabelField(client.ID, EditorStyles.boldLabel);
+                    EditorGUILayout.EndHorizontal();
+                    
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField("Name:", GUILayout.Width(50));
+                    EditorGUILayout.LabelField(client.Name);
+                    EditorGUILayout.EndHorizontal();
+                    
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.Space();
+                }
+            }
+            else
+            {
+                EditorGUILayout.LabelField("No clients connected", EditorStyles.label);
+            }
+                
+            EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
             // MCP Config generation section
@@ -134,15 +165,35 @@ namespace McpUnity.Unity
             
             if (string.IsNullOrEmpty(_mcpConfigJson) || before != _tabsIndentationJson)
             {
-                GenerateMcpConfigJson();
+                _mcpConfigJson = McpConfigUtils.GenerateMcpConfigJson(_tabsIndentationJson);
             }
-            
-            EditorGUILayout.Space();
-            EditorGUILayout.TextArea(_mcpConfigJson, GUILayout.Height(200));
                 
             if (GUILayout.Button("Copy to Clipboard", GUILayout.Height(30)))
             {
                 EditorGUIUtility.systemCopyBuffer = _mcpConfigJson;
+            }
+            
+            EditorGUILayout.TextArea(_mcpConfigJson, GUILayout.Height(200));
+
+            EditorGUILayout.Space();
+            
+            if (GUILayout.Button("Configure Windsurf IDE", GUILayout.Height(30)))
+            {
+                McpConfigUtils.AddToWindsurfIdeConfig(_tabsIndentationJson);
+            }
+            
+            EditorGUILayout.Space();
+            
+            if (GUILayout.Button("Configure Cursor IDE", GUILayout.Height(30)))
+            {
+                McpConfigUtils.AddToCursorIdeConfig();
+            }
+            
+            EditorGUILayout.Space();
+            
+            if (GUILayout.Button("Configure Claude Desktop", GUILayout.Height(30)))
+            {
+                McpConfigUtils.AddToClaudeDesktopConfig(_tabsIndentationJson);
             }
             
             EditorGUILayout.EndVertical();
@@ -200,97 +251,6 @@ namespace McpUnity.Unity
             EditorGUILayout.EndHorizontal();
             
             EditorGUILayout.EndVertical();
-        }
-
-        private void GenerateMcpConfigJson()
-        {
-            var config = new Dictionary<string, object>
-            {
-                { "mcpServers", new Dictionary<string, object>
-                    {
-                        { "mcp-unity", new Dictionary<string, object>
-                            {
-                                { "command", "node" },
-                                { "args", new[] { Path.Combine(GetServerPath(), "build", "index.js") } },
-                                { "env", new Dictionary<string, string>
-                                    {
-                                        { "UNITY_PORT", McpUnitySettings.Instance.Port.ToString() }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-            
-            // Initialize string writer with proper indentation
-            var stringWriter = new StringWriter();
-            using (var jsonWriter = new JsonTextWriter(stringWriter))
-            {
-                jsonWriter.Formatting = Formatting.Indented;
-                
-                // Set indentation character and count
-                if (_tabsIndentationJson)
-                {
-                    jsonWriter.IndentChar = '\t';
-                    jsonWriter.Indentation = 1;
-                }
-                else
-                {
-                    jsonWriter.IndentChar = ' ';
-                    jsonWriter.Indentation = 2;
-                }
-                
-                // Serialize directly to the JsonTextWriter
-                var serializer = new JsonSerializer();
-                serializer.Serialize(jsonWriter, config);
-            }
-            
-            _mcpConfigJson = stringWriter.ToString().Replace("\\", "/").Replace("//", "/");
-        }
-
-        /// <summary>
-        /// Gets the absolute path to the Server directory containing package.json
-        /// Works whether MCP Unity is installed via Package Manager or directly in the Assets folder
-        /// </summary>
-        private string GetServerPath()
-        {
-            // First, try to find the package info via Package Manager
-            var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath($"Packages/{McpUnitySettings.PackageName}");
-                
-            if (packageInfo != null && !string.IsNullOrEmpty(packageInfo.resolvedPath))
-            {
-                return Path.Combine(packageInfo.resolvedPath, "Server");
-            }
-            
-            var assets = AssetDatabase.FindAssets("tsconfig");
-
-            if(assets.Length == 1)
-            {
-                // Convert relative path to absolute path
-                var relativePath = AssetDatabase.GUIDToAssetPath(assets[0]);
-                return Path.GetFullPath(Path.Combine(Application.dataPath, "..", relativePath));
-            }
-            if (assets.Length > 0)
-            {
-                foreach (var assetJson in assets)
-                {
-                    string relativePath = AssetDatabase.GUIDToAssetPath(assetJson);
-                    string fullPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", relativePath));
-                    
-                    if(Path.GetFileName(Path.GetDirectoryName(fullPath)) == "Server")
-                    {
-                        return Path.GetDirectoryName(fullPath);
-                    }
-                }
-            }
-            
-            // If we get here, we couldn't find the server path
-            var errorString = "[MCP Unity] Could not locate Server directory. Please check the installation of the MCP Unity package.";
-
-            Debug.LogError(errorString);
-
-            return errorString;
         }
 
         #endregion

@@ -1,10 +1,10 @@
 # MCP Unity
 
 [![](https://badge.mcpx.dev?type=server 'MCP Server')](https://modelcontextprotocol.io/introduction)
-[![smithery badge](https://smithery.ai/badge/@CoderGamester/mcp-unity)](https://smithery.ai/server/@CoderGamester/mcp-unity)
 [![](https://img.shields.io/badge/Unity-000000?style=flat&logo=unity&logoColor=white 'Unity')](https://unity.com/releases/editor/archive)
 [![](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white 'Node.js')](https://nodejs.org/en/download/)
 
+[![smithery badge](https://smithery.ai/badge/@CoderGamester/mcp-unity)](https://smithery.ai/server/@CoderGamester/mcp-unity)
 [![](https://img.shields.io/github/stars/CoderGamester/mcp-unity 'Stars')](https://github.com/CoderGamester/mcp-unity/stargazers)
 [![](https://img.shields.io/github/forks/CoderGamester/mcp-unity 'Forks')](https://github.com/CoderGamester/mcp-unity/network/members)
 [![](https://img.shields.io/github/last-commit/CoderGamester/mcp-unity 'Last Commit')](https://github.com/CoderGamester/mcp-unity/commits/main)
@@ -143,14 +143,9 @@ Currently not available
 <details open>
 <summary><span style="font-size: 1.1em; font-weight: bold;">Option 3: Configure Manually</span></summary>
 
-<div style="padding-left: 20px;">
+Open the MCP configuration file of your AI client (e.g. claude_desktop_config.json in Claude Desktop) and copy the following text:
 
-<details>
-<summary><span style="font-size: 1em">Option 3.1: Configure Claude Desktop</span></summary>
-
-<div style="padding-left: 10px;">
-
-Open the MCP configuration file (claude_desktop_config.json) in Claude Desktop Developer in (File > Settings > Developer > Edit Config)
+> Replace `ABSOLUTE/PATH/TO` with the absolute path to your MCP Unity installation.
 
 ```json
 {
@@ -167,52 +162,6 @@ Open the MCP configuration file (claude_desktop_config.json) in Claude Desktop D
    }
 }
 ```
-</div>
-
-</details>
-
-<details>
-<summary><span style="font-size: 1em">Option 3.2: Configure Windsurf IDE</span></summary>
-
-<div style="padding-left: 10px;">
-
-Open the MCP configuration file (mcp_config.json) in Windsurf IDE in (Windsurf Settings > Advanced Settings > General > Add Server)
-
-```json
-{
-   "mcpServers": {
-   "mcp-unity": {
-      "command": "node",
-      "args": [
-         "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
-      ],
-      "env": {
-         "UNITY_PORT": "8090"
-      }
-   }
-   }
-}
-```
-</div>
-
-</details>
-
-<details>
-<summary><span style="font-size: 1em">Option 3.3: Configure Cursor IDE</span></summary>
-
-<div style="padding-left: 10px;">
-
-Add the following configuration to your Cursor MCP Configure settings:
-
-```
-Name: MCP Unity
-Type: commmand
-Command: env UNITY_PORT=8090 node ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js
-```
-</div>
-
-</details>
-</div>
 
 </details>
 

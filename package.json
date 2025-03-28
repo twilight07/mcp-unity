@@ -6,6 +6,9 @@
   "unity": "2022.3",
   "license": "MIT",
   "description": "The purpose of this package is to provide a MCP Unity Server for executing Unity operations and request Editor information from AI MCP enabled hosts",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
   "type": "library",
   "hideInEditor": false
 }
