@@ -125,9 +125,12 @@ Installing this MCP Unity Server is a multi-step process:
 1. Open the Unity Editor
 2. Navigate to Tools > MCP Unity > Server Window
 3. Click on the "Configure" button for your AI LLM client as shown in the image below
+
+![image](https://github.com/user-attachments/assets/8d286e83-da60-40fa-bd6c-5de9a77c1820)
+
 4. Confirm the configuration installation with the given popup
 
-![MCP configuration](https://github.com/user-attachments/assets/ea9bb912-94a7-4409-81c1-3af39158dac0)
+![image](https://github.com/user-attachments/assets/b1f05d33-3694-4256-a57b-8556005021ba)
 
 </details>
 
@@ -174,8 +177,8 @@ Open the MCP configuration file of your AI client (e.g. claude_desktop_config.js
    
 ![connect](https://github.com/user-attachments/assets/2e266a8b-8ba3-4902-b585-b220b11ab9a2)
 
-## Configure the WebSocket Port
-By default, the WebSocket server runs on port 8080. You can change this port in two ways:
+## Optional: Set WebSocket Port
+By default, the WebSocket server runs on port 8090. You can change this port in two ways:
 
 <details>
 <summary><span style="font-size: 1.1em; font-weight: bold;">Option 1: Using the Unity Editor</span></summary>
