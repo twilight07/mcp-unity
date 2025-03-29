@@ -50,22 +50,22 @@ MCP Unity is an implementation of the Model Context Protocol for Unity Editor, a
 ## Features
 MCP Unity currently provides the following tools:
 
-- **execute_menu_item**: Executes Unity menu items (functions tagged with the MenuItem attribute)
-- **select_gameobject**: Selects game objects in the Unity hierarchy by path or instance ID
-- **update_component**: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
-- **package_manager**: Installs, removes, and updates packages in the Unity Package Manager
-- **run_tests**: Runs tests using the Unity Test Runner
-- **notify_message**: Displays messages in the Unity Editor
+- __**execute_menu_item**__: Executes Unity menu items (functions tagged with the MenuItem attribute)
+- __**select_gameobject**__: Selects game objects in the Unity hierarchy by path or instance ID
+- __**update_component**__: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
+- __**package_manager**__: Installs, removes, and updates packages in the Unity Package Manager
+- __**run_tests**__: Runs tests using the Unity Test Runner
+- __**notify_message**__: Displays messages in the Unity Editor
 
 MCP Unity currently provides the following resources:
 
-- **get_menu_items**: Retrieves a list of all available menu items in the Unity Editor to facilitate **execute_menu_item** tool
-- **get_hierarchy**: Retrieves a list of all game objects in the Unity hierarchy
-- **get_gameobject**: Retrieves detailed information about a specific GameObject by instance ID, including all GameObject components with it's serialized properties and fields
-- **get_console_logs**: Retrieves a list of all logs from the Unity console
-- **get_packages**: Retrieves information about installed and available packages from the Unity Package Manager
-- **get_assets**: Retrieves information about assets in the Unity Asset Database
-- **get_tests**: Retrieves information about tests in the Unity Test Runner
+- __**get_menu_items**__: Retrieves a list of all available menu items in the Unity Editor to facilitate __**execute_menu_item**__ tool
+- __**get_hierarchy**__: Retrieves a list of all game objects in the Unity hierarchy
+- __**get_gameobject**__: Retrieves detailed information about a specific GameObject by instance ID, including all GameObject components with it's serialized properties and fields
+- __**get_console_logs**__: Retrieves a list of all logs from the Unity console
+- __**get_packages**__: Retrieves information about installed and available packages from the Unity Package Manager
+- __**get_assets**__: Retrieves information about assets in the Unity Asset Database
+- __**get_tests**__: Retrieves information about tests in the Unity Test Runner
 
 ## Requirements
 - Unity 2022.3 or later - to [install the server](#install-server)
@@ -122,9 +122,10 @@ Installing this MCP Unity Server is a multi-step process:
 <details open>
 <summary><span style="font-size: 1.1em; font-weight: bold;">Option 1: Configure using Unity Editor</span></summary>
 
-> Replace `ABSOLUTE/PATH/TO` with the absolute path to your MCP Unity installation.
-
-The right configuration can be accessed in the Unity Editor MCP Server window (Tools > MCP Unity > Server Window)
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Click on the "Configure" button for your AI LLM client as shown in the image below
+4. Confirm the configuration installation with the given popup
 
 ![MCP configuration](https://github.com/user-attachments/assets/ea9bb912-94a7-4409-81c1-3af39158dac0)
 
