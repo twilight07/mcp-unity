@@ -51,7 +51,8 @@ MCP Unity is an implementation of the Model Context Protocol for Unity Editor, a
 MCP Unity currently provides the following tools:
 
 - **execute_menu_item**: Executes Unity menu items (functions tagged with the MenuItem attribute)
-- **select_object**: Selects game objects in the Unity hierarchy
+- **select_gameobject**: Selects game objects in the Unity hierarchy by path or instance ID
+- **update_component**: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
 - **package_manager**: Installs, removes, and updates packages in the Unity Package Manager
 - **run_tests**: Runs tests using the Unity Test Runner
 - **notify_message**: Displays messages in the Unity Editor
@@ -60,6 +61,7 @@ MCP Unity currently provides the following resources:
 
 - **get_menu_items**: Retrieves a list of all available menu items in the Unity Editor to facilitate **execute_menu_item** tool
 - **get_hierarchy**: Retrieves a list of all game objects in the Unity hierarchy
+- **get_gameobject**: Retrieves detailed information about a specific GameObject by instance ID, including all GameObject components with it's serialized properties and fields
 - **get_console_logs**: Retrieves a list of all logs from the Unity console
 - **get_packages**: Retrieves information about installed and available packages from the Unity Package Manager
 - **get_assets**: Retrieves information about assets in the Unity Asset Database
@@ -96,7 +98,6 @@ Installing this MCP Unity Server is a multi-step process:
 4. Verify the installation by opening PowerShell and running:
    ```bash
    node --version
-   npm --version
    ```
 </details>
 
@@ -113,7 +114,6 @@ Installing this MCP Unity Server is a multi-step process:
 5. Verify the installation by opening Terminal and running:
    ```bash
    node --version
-   npm --version
    ```
 </details>
 
@@ -140,12 +140,12 @@ Currently not available
 ```
 </details>
 
-<details open>
+<details>
 <summary><span style="font-size: 1.1em; font-weight: bold;">Option 3: Configure Manually</span></summary>
 
 Open the MCP configuration file of your AI client (e.g. claude_desktop_config.json in Claude Desktop) and copy the following text:
 
-> Replace `ABSOLUTE/PATH/TO` with the absolute path to your MCP Unity installation.
+> Replace `ABSOLUTE/PATH/TO` with the absolute path to your MCP Unity installation or just copy the text from the Unity Editor MCP Server window (Tools > MCP Unity > Server Window).
 
 ```json
 {

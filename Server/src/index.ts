@@ -6,16 +6,18 @@ import { Logger, LogLevel } from './utils/logger.js';
 import { ToolRegistry } from './tools/toolRegistry.js';
 import { ResourceRegistry } from './resources/resourceRegistry.js';
 import { createMenuItemTool } from './tools/menuItemTool.js';
-import { createSelectObjectTool } from './tools/selectObjectTool.js';
+import { createSelectGameObjectTool } from './tools/selectGameObjectTool.js';
 import { createPackageManagerTool } from './tools/packageManagerTool.js';
 import { createRunTestsTool } from './tools/runTestsTool.js';
 import { createNotifyMessageTool } from './tools/notifyMessageTool.js';
+import { createUpdateComponentTool } from './tools/updateComponentTool.js';
 import { createGetMenuItemsResource } from './resources/getMenuItemResource.js';
 import { createGetConsoleLogsResource } from './resources/getConsoleLogResource.js';
 import { createGetHierarchyResource } from './resources/getHierarchyResource.js';
 import { createGetPackagesResource } from './resources/getPackagesResource.js';
 import { createGetAssetsResource } from './resources/getAssetsResource.js';
 import { createGetTestsResource } from './resources/getTestsResource.js';
+import { createGetGameObjectResource } from './resources/getGameObjectResource.js';
 
 // Initialize loggers
 const serverLogger = new Logger('Server', LogLevel.INFO);
@@ -46,10 +48,11 @@ const resourceRegistry = new ResourceRegistry(resourceLogger);
 
 // Add all tools to the registry
 toolRegistry.add(createMenuItemTool(mcpUnity, toolLogger));
-toolRegistry.add(createSelectObjectTool(mcpUnity, toolLogger));
+toolRegistry.add(createSelectGameObjectTool(mcpUnity, toolLogger));
 toolRegistry.add(createPackageManagerTool(mcpUnity, toolLogger));
 toolRegistry.add(createRunTestsTool(mcpUnity, toolLogger));
 toolRegistry.add(createNotifyMessageTool(mcpUnity, toolLogger));
+toolRegistry.add(createUpdateComponentTool(mcpUnity, toolLogger));
 
 // Add all resources to the registry
 resourceRegistry.add(createGetMenuItemsResource(mcpUnity, resourceLogger));
@@ -58,6 +61,7 @@ resourceRegistry.add(createGetHierarchyResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetPackagesResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetAssetsResource(mcpUnity, resourceLogger));
 resourceRegistry.add(createGetTestsResource(mcpUnity, resourceLogger));
+resourceRegistry.add(createGetGameObjectResource(mcpUnity, resourceLogger));
 
 // Register all tools and resources with the MCP server
 toolRegistry.registerWithServer(server);

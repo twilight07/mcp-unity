@@ -144,9 +144,9 @@ namespace McpUnity.Unity
             MenuItemTool menuItemTool = new MenuItemTool();
             _tools.Add(menuItemTool.Name, menuItemTool);
             
-            // Register SelectObjectTool
-            SelectObjectTool selectObjectTool = new SelectObjectTool();
-            _tools.Add(selectObjectTool.Name, selectObjectTool);
+            // Register SelectGameObjectTool
+            SelectGameObjectTool selectGameObjectTool = new SelectGameObjectTool();
+            _tools.Add(selectGameObjectTool.Name, selectGameObjectTool);
             
             // Register PackageManagerTool
             PackageManagerTool packageManagerTool = new PackageManagerTool();
@@ -159,6 +159,10 @@ namespace McpUnity.Unity
             // Register NotifyMessageTool
             NotifyMessageTool notifyMessageTool = new NotifyMessageTool();
             _tools.Add(notifyMessageTool.Name, notifyMessageTool);
+            
+            // Register UpdateComponentTool
+            UpdateComponentTool updateComponentTool = new UpdateComponentTool();
+            _tools.Add(updateComponentTool.Name, updateComponentTool);
         }
         
         /// <summary>
@@ -189,6 +193,10 @@ namespace McpUnity.Unity
             // Register GetTestsResource
             GetTestsResource getTestsResource = new GetTestsResource(_testRunnerService);
             _resources.Add(getTestsResource.Name, getTestsResource);
+            
+            // Register GetGameObjectResource
+            GetGameObjectResource getGameObjectResource = new GetGameObjectResource();
+            _resources.Add(getGameObjectResource.Name, getGameObjectResource);
         }
         
         /// <summary>
