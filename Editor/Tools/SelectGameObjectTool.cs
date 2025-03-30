@@ -19,10 +19,10 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Execute the SelectGameObject tool with the provided parameters asynchronously
+        /// Execute the SelectGameObject tool with the provided parameters synchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override Task<JObject> ExecuteAsync(JObject parameters)
+        public override JObject Execute(JObject parameters)
         {
             // Extract parameters
             string objectPath = parameters["objectPath"]?.ToObject<string>();
@@ -31,38 +31,38 @@ namespace McpUnity.Tools
             // Validate parameters - require either objectPath or instanceId
             if (string.IsNullOrEmpty(objectPath) && !instanceId.HasValue)
             {
-                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'objectPath' or 'instanceId' not provided", 
                     "validation_error"
-                ));
+                );
             }
             
             // First try to find by instance ID if provided
             if (instanceId.HasValue)
             {
-                Debug.Log($"[MCP Unity] Selecting GameObject by instance ID: {instanceId.Value}");
-
                 Selection.activeGameObject = EditorUtility.InstanceIDToObject(instanceId.Value) as GameObject;
             }
             // Otherwise, try to find by object path/name if provided
             else
             {
-                Debug.Log($"[MCP Unity] Selecting GameObject by path: {objectPath}");
-                
                 // Try to find the object by path in the hierarchy
                 Selection.activeGameObject = GameObject.Find(objectPath);
             }
 
             // Ping the selected object
             EditorGUIUtility.PingObject(Selection.activeGameObject);
-                
+            
+            // Log the selection
+            Debug.Log($"[MCP Unity] Selected GameObject: " +
+                (instanceId.HasValue ? $"Instance ID {instanceId.Value}" : $"Path '{objectPath}'"));
+            
             // Create the response
-            return Task.FromResult(new JObject
+            return new JObject
             {
                 ["success"] = true,
                 ["message"] = $"Successfully selected GameObject" + 
                     (instanceId.HasValue ? $" with instance ID: {instanceId.Value}" : $": {objectPath}")
-            });
+            };
         }
     }
 }

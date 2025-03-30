@@ -1,11 +1,14 @@
 using System;
-using McpUnity.Unity;
+using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using McpUnity.Tools;
+using McpUnity.Unity;
 
 namespace McpUnity.Tools
 {
@@ -14,60 +17,114 @@ namespace McpUnity.Tools
     /// </summary>
     public class PackageManagerTool : McpToolBase
     {
-        private AddRequest _addRequest;
+        // Class to track each package operation
+        private class PackageOperation
+        {
+            public AddRequest Request { get; set; }
+            public TaskCompletionSource<JObject> CompletionSource { get; set; }
+        }
+        
+        // Queue of active package operations
+        private readonly List<PackageOperation> _activeOperations = new List<PackageOperation>();
+        
+        // Flag to track if the update callback is registered
+        private bool _updateCallbackRegistered = false;
         
         public PackageManagerTool()
         {
             Name = "package_manager";
             Description = "Manages packages in the Unity Package Manager";
+            IsAsync = true; // Package Manager operations are asynchronous
         }
         
         /// <summary>
-        /// Execute the PackageManager tool with the provided parameters asynchronously
+        /// Execute the PackageManager tool asynchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override async Task<JObject> ExecuteAsync(JObject parameters)
+        /// <param name="tcs">TaskCompletionSource to set the result or exception</param>
+        public override void ExecuteAsync(JObject parameters, TaskCompletionSource<JObject> tcs)
         {
-            // Extract method parameter
-            string method = parameters["methodSource"]?.ToObject<string>();
-            if (string.IsNullOrEmpty(method))
+            try
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
-                    "Required parameter 'methodSource' not provided", 
-                    "validation_error"
-                );
-            }
-            
-            // Process based on method
-            switch (method.ToLowerInvariant())
-            {
-                case "registry":
-                    return await AddFromRegistryAsync(parameters);
-                case "github":
-                    return await AddFromGitHubAsync(parameters);
-                case "disk":
-                    return await AddFromDiskAsync(parameters);
-                default:
-                    return McpUnitySocketHandler.CreateErrorResponse(
-                        $"Unknown method '{method}'. Valid methods are: registry, github, disk",
+                // Extract method parameter
+                string method = parameters["methodSource"]?.ToObject<string>();
+                if (string.IsNullOrEmpty(method))
+                {
+                    tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
+                        "Required parameter 'methodSource' not provided", 
                         "validation_error"
-                    );
+                    ));
+                    return;
+                }
+                
+                // Create and register the operation
+                var operation = new PackageOperation
+                {
+                    CompletionSource = tcs
+                };
+                
+                switch (method.ToLowerInvariant())
+                {
+                    case "registry":
+                        operation.Request = AddFromRegistry(parameters, tcs);
+                        break;
+                    case "github":
+                        operation.Request = AddFromGitHub(parameters, tcs);
+                        break;
+                    case "disk":
+                        operation.Request = AddFromDisk(parameters, tcs);
+                        break;
+                    default:
+                        tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
+                            $"Unknown method '{method}'. Valid methods are: registry, github, disk",
+                            "validation_error"
+                        ));
+                        return;
+                }
+                
+                // If request creation failed, the error has already been set on the tcs
+                if (operation.Request == null)
+                {
+                    return;
+                }
+                
+                lock (_activeOperations)
+                {
+                    _activeOperations.Add(operation);
+                    
+                    // Register update callback if not already registered
+                    if (!_updateCallbackRegistered)
+                    {
+                        EditorApplication.update += CheckOperationsCompletion;
+                        _updateCallbackRegistered = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any uncaught exceptions
+                Debug.LogError($"[MCP Unity] Exception in PackageManagerTool.ExecuteAsync: {ex}");
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
+                    $"Internal error: {ex.Message}",
+                    "internal_error"
+                ));
             }
         }
         
         /// <summary>
-        /// Add a package from the Unity registry asynchronously
+        /// Add a package from the Unity registry
         /// </summary>
-        private async Task<JObject> AddFromRegistryAsync(JObject parameters)
+        private AddRequest AddFromRegistry(JObject parameters, TaskCompletionSource<JObject> tcs)
         {
             // Extract parameters
             string packageName = parameters["packageName"]?.ToObject<string>();
             if (string.IsNullOrEmpty(packageName))
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'packageName' not provided for registry method", 
                     "validation_error"
-                );
+                ));
+                return null;
             }
             
             string version = parameters["version"]?.ToObject<string>();
@@ -84,45 +141,37 @@ namespace McpUnity.Tools
             try
             {
                 // Add the package
-                _addRequest = Client.Add(packageIdentifier);
-                
-                // Wait for the request to complete asynchronously
-                while (!_addRequest.IsCompleted)
-                {
-                    await Task.Delay(100);
-                }
-                
-                return ProcessAddRequestResult();
+                return Client.Add(packageIdentifier);
             }
             catch (Exception ex)
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     $"Exception adding package: {ex.Message}",
                     "package_manager_error"
-                );
+                ));
+                return null;
             }
         }
         
         /// <summary>
-        /// Add a package from GitHub asynchronously
+        /// Add a package from GitHub
         /// </summary>
-        private async Task<JObject> AddFromGitHubAsync(JObject parameters)
+        private AddRequest AddFromGitHub(JObject parameters, TaskCompletionSource<JObject> tcs)
         {
             // Extract parameters
-            string repositoryUrl = parameters["repositoryUrl"]?.ToObject<string>();
-            if (string.IsNullOrEmpty(repositoryUrl))
+            string packageUrl = parameters["repositoryUrl"]?.ToObject<string>();
+            
+            if (string.IsNullOrEmpty(packageUrl))
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'repositoryUrl' not provided for github method", 
                     "validation_error"
-                );
+                ));
+                return null;
             }
             
             string branch = parameters["branch"]?.ToObject<string>();
             string path = parameters["path"]?.ToObject<string>();
-            
-            // Format the package URL
-            string packageUrl = repositoryUrl;
             
             // Remove any .git suffix if present
             if (packageUrl.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
@@ -156,38 +205,33 @@ namespace McpUnity.Tools
             try
             {
                 // Add the package
-                _addRequest = Client.Add(packageUrl);
-                
-                // Wait for the request to complete asynchronously
-                while (!_addRequest.IsCompleted)
-                {
-                    await Task.Delay(100);
-                }
-                
-                return ProcessAddRequestResult();
+                return Client.Add(packageUrl);
             }
             catch (Exception ex)
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     $"Exception adding package: {ex.Message}",
                     "package_manager_error"
-                );
+                ));
+                return null;
             }
         }
         
         /// <summary>
-        /// Add a package from disk asynchronously
+        /// Add a package from disk
         /// </summary>
-        private async Task<JObject> AddFromDiskAsync(JObject parameters)
+        private AddRequest AddFromDisk(JObject parameters, TaskCompletionSource<JObject> tcs)
         {
             // Extract parameters
             string path = parameters["path"]?.ToObject<string>();
+            
             if (string.IsNullOrEmpty(path))
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'path' not provided for disk method", 
                     "validation_error"
-                );
+                ));
+                return null;
             }
             
             // Format as file URL
@@ -198,59 +242,110 @@ namespace McpUnity.Tools
             try
             {
                 // Add the package
-                _addRequest = Client.Add(packageUrl);
-                
-                // Wait for the request to complete asynchronously
-                while (!_addRequest.IsCompleted)
-                {
-                    await Task.Delay(100);
-                }
-                
-                return ProcessAddRequestResult();
+                return Client.Add(packageUrl);
             }
             catch (Exception ex)
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     $"Exception adding package: {ex.Message}",
                     "package_manager_error"
-                );
+                ));
+                return null;
             }
         }
         
         /// <summary>
-        /// Process the result of a package add request
+        /// Check all active operations for completion
         /// </summary>
-        private JObject ProcessAddRequestResult()
+        private void CheckOperationsCompletion()
         {
-            // Check request status
-            if (_addRequest.Status == StatusCode.Success)
+            // Store initial count
+            int initialCount = _activeOperations.Count;
+            
+            lock (_activeOperations)
             {
-                return new JObject
+                // Process operations in reverse order to safely remove completed ones
+                for (int i = _activeOperations.Count - 1; i >= 0; i--)
                 {
-                    ["success"] = true,
-                    ["message"] = $"Successfully added package: {_addRequest.Result.displayName} ({_addRequest.Result.name}) version {_addRequest.Result.version}",
-                    ["type"] = "text",
-                    ["packageInfo"] = JObject.FromObject(new
+                    var operation = _activeOperations[i];
+                    
+                    if (operation.Request != null && operation.Request.IsCompleted)
                     {
-                        name = _addRequest.Result.name,
-                        displayName = _addRequest.Result.displayName,
-                        version = _addRequest.Result.version
-                    })
-                };
+                        // Process the completed operation
+                        ProcessCompletedOperation(operation);
+                        
+                        // Remove it from the active operations list
+                        _activeOperations.RemoveAt(i);
+                    }
+                }
+                
+                // If all operations are completed, unregister the update callback
+                if (_activeOperations.Count == 0 && _updateCallbackRegistered)
+                {
+                    EditorApplication.update -= CheckOperationsCompletion;
+                    _updateCallbackRegistered = false;
+                }
             }
-            else if (_addRequest.Status == StatusCode.Failure)
+            
+            // If any operations completed, force a GC collection to clean up UPM request objects
+            if (initialCount != _activeOperations.Count)
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
-                    $"Failed to add package: {_addRequest.Error.message}",
+                GC.Collect();
+            }
+        }
+        
+        /// <summary>
+        /// Process a completed package operation
+        /// </summary>
+        private void ProcessCompletedOperation(PackageOperation operation)
+        {
+            if (operation.CompletionSource == null)
+            {
+                Debug.LogError("[MCP Unity] TaskCompletionSource is null when processing completed operation");
+                return;
+            }
+            
+            // Check request status
+            if (operation.Request.Status == StatusCode.Success)
+            {
+                var result = operation.Request.Result;
+                if (result != null)
+                {
+                    operation.CompletionSource.SetResult(new JObject
+                    {
+                        ["success"] = true,
+                        ["message"] = $"Successfully added package: {result.displayName} ({result.name}) version {result.version}",
+                        ["type"] = "text",
+                        ["packageInfo"] = JObject.FromObject(new
+                        {
+                            name = result.name,
+                            displayName = result.displayName,
+                            version = result.version
+                        })
+                    });
+                }
+                else
+                {
+                    operation.CompletionSource.SetResult(new JObject
+                    {
+                        ["success"] = true,
+                        ["message"] = $"Package operation completed successfully, but no package information was returned."
+                    });
+                }
+            }
+            else if (operation.Request.Status == StatusCode.Failure)
+            {
+                operation.CompletionSource.SetResult(McpUnitySocketHandler.CreateErrorResponse(
+                    $"Failed to add package: {operation.Request.Error.message}",
                     "package_manager_error"
-                );
+                ));
             }
             else
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
-                    $"Unknown package manager status: {_addRequest.Status}",
+                operation.CompletionSource.SetResult(McpUnitySocketHandler.CreateErrorResponse(
+                    $"Unknown package manager status: {operation.Request.Status}",
                     "package_manager_error"
-                );
+                ));
             }
         }
     }

@@ -21,10 +21,10 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Execute the UpdateComponent tool with the provided parameters asynchronously
+        /// Execute the UpdateComponent tool with the provided parameters synchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override Task<JObject> ExecuteAsync(JObject parameters)
+        public override JObject Execute(JObject parameters)
         {
             // Extract parameters
             int? instanceId = parameters["instanceId"]?.ToObject<int?>();
@@ -34,28 +34,28 @@ namespace McpUnity.Tools
             // Validate parameters
             if (!instanceId.HasValue)
             {
-                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'instanceId' not provided", 
                     "validation_error"
-                ));
+                );
             }
             
             if (string.IsNullOrEmpty(componentName))
             {
-                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'componentName' not provided", 
                     "validation_error"
-                ));
+                );
             }
             
             // Find the GameObject by instance ID
             GameObject gameObject = EditorUtility.InstanceIDToObject(instanceId.Value) as GameObject;
             if (gameObject == null)
             {
-                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     $"GameObject with instance ID {instanceId.Value} not found", 
                     "not_found_error"
-                ));
+                );
             }
             
             Debug.Log($"[MCP Unity] Updating component '{componentName}' on GameObject '{gameObject.name}'");
@@ -70,10 +70,10 @@ namespace McpUnity.Tools
                 Type componentType = FindComponentType(componentName);
                 if (componentType == null)
                 {
-                    return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
+                    return McpUnitySocketHandler.CreateErrorResponse(
                         $"Component type '{componentName}' not found in Unity", 
                         "component_error"
-                    ));
+                    );
                 }
                 
                 component = Undo.AddComponent(gameObject, componentType);
@@ -95,14 +95,14 @@ namespace McpUnity.Tools
             }
             
             // Create the response
-            return Task.FromResult(new JObject
+            return new JObject
             {
                 ["success"] = true,
                 ["message"] = wasAdded
                     ? $"Successfully added component '{componentName}' to GameObject '{gameObject.name}' and updated its data"
                     : $"Successfully updated component '{componentName}' on GameObject '{gameObject.name}'",
                 ["type"] = "text"
-            });
+            };
         }
         
         /// <summary>

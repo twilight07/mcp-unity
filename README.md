@@ -48,24 +48,24 @@
 MCP Unity is an implementation of the Model Context Protocol for Unity Editor, allowing AI assistants to interact with your Unity projects. This package provides a bridge between Unity and a Node.js server that implements the MCP protocol, enabling AI agents like Claude, Windsurf, and Cursor to execute operations within the Unity Editor.
 
 ## Features
-MCP Unity currently provides the following tools:
+This MCP currently provides the following <ins>tools</ins>:
 
-- __**execute_menu_item**__: Executes Unity menu items (functions tagged with the MenuItem attribute)
-- __**select_gameobject**__: Selects game objects in the Unity hierarchy by path or instance ID
-- __**update_component**__: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
-- __**package_manager**__: Installs, removes, and updates packages in the Unity Package Manager
-- __**run_tests**__: Runs tests using the Unity Test Runner
-- __**notify_message**__: Displays messages in the Unity Editor
+- <ins>**execute_menu_item**</ins>: Executes Unity menu items (functions tagged with the MenuItem attribute)
+- <ins>**select_gameobject**</ins>: Selects game objects in the Unity hierarchy by path or instance ID
+- <ins>**update_component**</ins>: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
+- <ins>**package_manager**</ins>: Installs, removes, and updates packages in the Unity Package Manager
+- <ins>**run_tests**</ins>: Runs tests using the Unity Test Runner
+- <ins>**notify_message**</ins>: Displays messages in the Unity Editor
 
-MCP Unity currently provides the following resources:
+This MCP currently provides the following <ins>resources</ins>:
 
-- __**get_menu_items**__: Retrieves a list of all available menu items in the Unity Editor to facilitate __**execute_menu_item**__ tool
-- __**get_hierarchy**__: Retrieves a list of all game objects in the Unity hierarchy
-- __**get_gameobject**__: Retrieves detailed information about a specific GameObject by instance ID, including all GameObject components with it's serialized properties and fields
-- __**get_console_logs**__: Retrieves a list of all logs from the Unity console
-- __**get_packages**__: Retrieves information about installed and available packages from the Unity Package Manager
-- __**get_assets**__: Retrieves information about assets in the Unity Asset Database
-- __**get_tests**__: Retrieves information about tests in the Unity Test Runner
+- <ins>**get_menu_items**</ins>: Retrieves a list of all available menu items in the Unity Editor to facilitate <ins>**execute_menu_item**</ins> tool
+- <ins>**get_hierarchy**</ins>: Retrieves a list of all game objects in the Unity hierarchy
+- <ins>**get_gameobject**</ins>: Retrieves detailed information about a specific GameObject by instance ID, including all GameObject components with it's serialized properties and fields
+- <ins>**get_console_logs**</ins>: Retrieves a list of all logs from the Unity console
+- <ins>**get_packages**</ins>: Retrieves information about installed and available packages from the Unity Package Manager
+- <ins>**get_assets**</ins>: Retrieves information about assets in the Unity Asset Database
+- <ins>**get_tests**</ins>: Retrieves information about tests in the Unity Test Runner
 
 ## Requirements
 - Unity 2022.3 or later - to [install the server](#install-server)

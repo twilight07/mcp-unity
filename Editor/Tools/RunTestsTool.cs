@@ -43,18 +43,20 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Execute the RunTests tool with the provided parameters asynchronously
+        /// Executes the RunTests tool asynchronously on the main thread.
         /// </summary>
-        /// <param name="parameters">Tool parameters as a JObject</param>
-        public override async Task<JObject> ExecuteAsync(JObject parameters)
+        /// <param name="parameters">Tool parameters, including optional 'testMode' and 'testFilter'.</param>
+        /// <param name="tcs">TaskCompletionSource to set the result or exception.</param>
+        public override void ExecuteAsync(JObject parameters, TaskCompletionSource<JObject> tcs)
         {
             // Check if tests are already running
             if (_isRunning)
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     "Tests are already running. Please wait for them to complete.",
                     "test_runner_busy"
-                );
+                ));
+                return;
             }
             
             // Extract parameters
@@ -82,13 +84,13 @@ namespace McpUnity.Tools
             // Reset state
             _isRunning = true;
             _testResults.Clear();
-            _testRunCompletionSource = new TaskCompletionSource<JObject>();
+            _testRunCompletionSource = tcs;
             
             // Execute tests using the TestRunnerService
-            return await _testRunnerService.ExecuteTests(
+            _testRunnerService.ExecuteTests(
                 testMode, 
                 testFilter, 
-                _testRunCompletionSource
+                tcs
             );
         }
         
@@ -163,6 +165,10 @@ namespace McpUnity.Tools
             {
                 Debug.LogError($"[MCP Unity] Failed to set test results: {ex.Message}");
                 _testRunCompletionSource.TrySetException(ex);
+            }
+            finally
+            {
+                _testRunCompletionSource = null;
             }
         }
         

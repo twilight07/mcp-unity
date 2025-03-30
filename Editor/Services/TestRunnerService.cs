@@ -80,7 +80,7 @@ namespace McpUnity.Services
         /// <param name="completionSource">TaskCompletionSource to resolve when tests are complete</param>
         /// <param name="timeoutMinutes">Timeout in minutes, defaults to 10</param>
         /// <returns>Task that resolves with test results when tests are complete</returns>
-        public async Task<JObject> ExecuteTests(
+        public async void ExecuteTests(
             TestMode testMode, 
             string testFilter, 
             TaskCompletionSource<JObject> completionSource, 
@@ -109,13 +109,11 @@ namespace McpUnity.Services
 
             if (completedTask != completionSource.Task)
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
+                completionSource.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     $"Test run timed out after {timeoutMinutes} minutes",
                     "test_runner_timeout"
-                );
+                ));
             }
-                
-            return completionSource.Task.Result;
         }
     }
     

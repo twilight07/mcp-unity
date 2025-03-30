@@ -17,44 +17,44 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Execute the NotifyMessage tool with the provided parameters asynchronously
+        /// Execute the NotifyMessage tool with the provided parameters synchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override Task<JObject> ExecuteAsync(JObject parameters)
+        public override JObject Execute(JObject parameters)
         {
             // Extract parameters
             string message = parameters["message"]?.ToObject<string>();
+            string type = parameters["type"]?.ToObject<string>()?.ToLower() ?? "info";
+ 
             if (string.IsNullOrEmpty(message))
             {
-                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'message' not provided", 
                     "validation_error"
-                ));
+                );
             }
-            
-            string messageType = parameters["type"]?.ToObject<string>()?.ToLowerInvariant() ?? "info";
-            
-            // Display the message in the Unity console based on the type
-            switch (messageType)
+ 
+            // Log the message based on type
+            switch (type)
             {
-                case "warning":
-                    Debug.LogWarning($"[MCP Unity Notification] {message}");
-                    break;
                 case "error":
-                    Debug.LogError($"[MCP Unity Notification] {message}");
+                    Debug.LogError($"[MCP]: {message}");
                     break;
-                case "info":
+                case "warning":
+                    Debug.LogWarning($"[MCP]: {message}");
+                    break;
                 default:
-                    Debug.Log($"[MCP Unity Notification] {message}");
+                    Debug.Log($"[MCP]: {message}");
                     break;
             }
-            
-            return Task.FromResult(new JObject
+ 
+            // Create the response
+            return new JObject
             {
                 ["success"] = true,
                 ["message"] = $"Message displayed: {message}",
                 ["type"] = "text"
-            });
+            };
         }
     }
 }

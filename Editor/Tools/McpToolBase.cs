@@ -20,23 +20,43 @@ namespace McpUnity.Tools
         /// Description of the tool's functionality
         /// </summary>
         public string Description { get; protected set; }
+
+        /// <summary>
+        /// Flag indicating if the tool executes asynchronously on the main thread.
+        /// If true, ExecuteAsync should be overridden.
+        /// If false, Execute should be overridden.
+        /// </summary>
+        public bool IsAsync { get; protected set; } = false;
         
         /// <summary>
-        /// Execute the tool with the provided parameters
+        /// Execute the tool asynchronously with the provided parameters.
+        /// This should be overridden by tools that need to run on the Unity main thread 
+        /// or perform long-running operations without blocking the WebSocket handler.
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        /// <returns>The result of the tool execution as a JObject</returns>
-        public abstract Task<JObject> ExecuteAsync(JObject parameters);
+        /// <param name="tcs">TaskCompletionSource to set the result or exception of the execution</param>
+        public virtual void ExecuteAsync(JObject parameters, TaskCompletionSource<JObject> tcs)
+        {
+            // Default implementation for tools that don't override this.
+            // Indicate that this method should have been overridden if IsAsync is true.
+            tcs.TrySetException(new NotImplementedException("ExecuteAsync must be overridden if IsAsync is true."));
+        }
         
         /// <summary>
-        /// Synchronous execution method for backward compatibility
+        /// Execute the tool synchronously with the provided parameters.
+        /// This should be overridden by tools that can execute quickly and directly 
+        /// within the WebSocket message handler thread.
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        /// <returns>The result of the tool execution as a JObject</returns>
+        /// <returns>The result of the tool execution as a JObject, or an error JObject</returns>
         public virtual JObject Execute(JObject parameters)
         {
-            // Call the async method and wait for it to complete
-            return ExecuteAsync(parameters).GetAwaiter().GetResult();
+            // Default implementation for tools that don't override this.
+            // Indicate that this method should have been overridden if IsAsync is false.
+            return McpUnity.Unity.McpUnitySocketHandler.CreateErrorResponse(
+                "Execute must be overridden if IsAsync is false.", 
+                "implementation_error"
+            );
         }
     }
 }

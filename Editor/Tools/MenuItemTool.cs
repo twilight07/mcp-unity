@@ -19,19 +19,19 @@ namespace McpUnity.Tools
         }
         
         /// <summary>
-        /// Execute the MenuItem tool with the provided parameters asynchronously
+        /// Execute the MenuItem tool with the provided parameters synchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
-        public override Task<JObject> ExecuteAsync(JObject parameters)
+        public override JObject Execute(JObject parameters)
         {
             // Extract parameters with defaults
             string menuPath = parameters["menuPath"]?.ToObject<string>();
             if (string.IsNullOrEmpty(menuPath))
             {
-                return Task.FromResult(McpUnitySocketHandler.CreateErrorResponse(
+                return McpUnitySocketHandler.CreateErrorResponse(
                     "Required parameter 'menuPath' not provided", 
                     "validation_error"
-                ));
+                );
             }
                 
             // Log the execution
@@ -41,13 +41,13 @@ namespace McpUnity.Tools
             bool success = EditorApplication.ExecuteMenuItem(menuPath);
                 
             // Create the response
-            return Task.FromResult(new JObject
+            return new JObject
             {
                 ["success"] = success,
                 ["message"] = success 
                     ? $"Successfully executed menu item: {menuPath}" 
                     : $"Failed to execute menu item: {menuPath}"
-            });
+            };
         }
     }
 }

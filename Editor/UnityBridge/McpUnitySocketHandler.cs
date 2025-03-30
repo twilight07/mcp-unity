@@ -66,8 +66,15 @@ namespace McpUnity.Unity
                 }
                 else if (_server.TryGetTool(method, out var tool))
                 {
-                    // Execute the tool
-                    responseJson = await ExecuteToolAsync(tool, parameters);
+                    // Execute the tool based on its IsAsync flag
+                    if (tool.IsAsync)
+                    {
+                        responseJson = await ExecuteToolAsync(tool, parameters);
+                    }
+                    else
+                    {
+                        responseJson = tool.Execute(parameters);
+                    }
                 }
                 else if (_server.TryGetResource(method, out var resource))
                 {
@@ -80,20 +87,7 @@ namespace McpUnity.Unity
                 }
                 
                 // Format as JSON-RPC 2.0 response
-                JObject jsonRpcResponse = new JObject
-                {
-                    ["id"] = requestId
-                };
-                
-                // Add result or error
-                if (responseJson.TryGetValue("error", out var errorObj))
-                {
-                    jsonRpcResponse["error"] = errorObj;
-                }
-                else
-                {
-                    jsonRpcResponse["result"] = responseJson;
-                }
+                JObject jsonRpcResponse = CreateResponse(requestId, responseJson);
                 
                 // Send the response back to the client
                 Send(jsonRpcResponse.ToString(Formatting.None));
@@ -142,7 +136,7 @@ namespace McpUnity.Unity
             {
                 try
                 {
-                    _ = DelayTaskCall(tool, parameters, tcs);
+                    tool.ExecuteAsync(parameters, tcs);
                 }
                 catch (Exception ex)
                 {
@@ -156,13 +150,6 @@ namespace McpUnity.Unity
             
             // Wait for the task to complete
             return await tcs.Task;
-        }
-        
-        // Helper method to delegate tool execution to the main thread
-        private async Task DelayTaskCall(McpToolBase tool, JObject parameters, TaskCompletionSource<JObject> tcs)
-        {
-            var result = await tool.ExecuteAsync(parameters);
-            tcs.SetResult(result);
         }
         
         /// <summary>
@@ -192,6 +179,33 @@ namespace McpUnity.Unity
             
             // Wait for the task to complete
             return tcs.Task.GetAwaiter().GetResult();
+        }
+        
+        /// <summary>
+        /// Create a JSON-RPC 2.0 response
+        /// </summary>
+        /// <param name="requestId">Request ID</param>
+        /// <param name="result">Result object</param>
+        /// <returns>JSON-RPC 2.0 response</returns>
+        private JObject CreateResponse(string requestId, JObject result)
+        {
+            // Format as JSON-RPC 2.0 response
+            JObject jsonRpcResponse = new JObject
+            {
+                ["id"] = requestId
+            };
+            
+            // Add result or error
+            if (result.TryGetValue("error", out var errorObj))
+            {
+                jsonRpcResponse["error"] = errorObj;
+            }
+            else
+            {
+                jsonRpcResponse["result"] = result;
+            }
+            
+            return jsonRpcResponse;
         }
     }
 }
