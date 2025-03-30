@@ -304,7 +304,9 @@ Don't forget to shutdown the server with `Ctrl + C` before closing the terminal 
 
 If you have any questions or need support, please open an [issue](https://github.com/CoderGamester/mcp-unity/issues) on this repository.
 
-Alternative you can reach out on [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
+Alternative you can reach out on:
+- [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
+- Discord: gamester7178
 
 ## Contributing
 

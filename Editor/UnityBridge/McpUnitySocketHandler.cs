@@ -66,20 +66,11 @@ namespace McpUnity.Unity
                 }
                 else if (_server.TryGetTool(method, out var tool))
                 {
-                    // Execute the tool based on its IsAsync flag
-                    if (tool.IsAsync)
-                    {
-                        responseJson = await ExecuteToolAsync(tool, parameters);
-                    }
-                    else
-                    {
-                        responseJson = tool.Execute(parameters);
-                    }
+                    responseJson = await ExecuteTool(tool, parameters);
                 }
                 else if (_server.TryGetResource(method, out var resource))
                 {
-                    // Fetch the resource
-                    responseJson = FetchResource(resource, parameters);
+                    responseJson = await FetchResource(resource, parameters);
                 }
                 else
                 {
@@ -127,7 +118,7 @@ namespace McpUnity.Unity
         /// <summary>
         /// Execute a tool with the provided parameters
         /// </summary>
-        private async Task<JObject> ExecuteToolAsync(McpToolBase tool, JObject parameters)
+        private async Task<JObject> ExecuteTool(McpToolBase tool, JObject parameters)
         {
             // We need to dispatch to Unity's main thread
             var tcs = new TaskCompletionSource<JObject>();
@@ -136,7 +127,15 @@ namespace McpUnity.Unity
             {
                 try
                 {
-                    tool.ExecuteAsync(parameters, tcs);
+                    if (tool.IsAsync)
+                    {
+                        tool.ExecuteAsync(parameters, tcs);
+                    }
+                    else
+                    {
+                        var result = tool.Execute(parameters);
+                        tcs.SetResult(result);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -155,7 +154,7 @@ namespace McpUnity.Unity
         /// <summary>
         /// Fetch a resource with the provided parameters
         /// </summary>
-        private JObject FetchResource(McpResourceBase resource, JObject parameters)
+        private async Task<JObject> FetchResource(McpResourceBase resource, JObject parameters)
         {
             // We need to dispatch to Unity's main thread and wait for completion
             var tcs = new TaskCompletionSource<JObject>();
@@ -178,7 +177,7 @@ namespace McpUnity.Unity
             };
             
             // Wait for the task to complete
-            return tcs.Task.GetAwaiter().GetResult();
+            return await tcs.Task;
         }
         
         /// <summary>
