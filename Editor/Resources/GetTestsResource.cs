@@ -67,15 +67,17 @@ namespace McpUnity.Resources
                     ["name"] = test.Name,
                     ["fullName"] = test.FullName,
                     ["path"] = test.Path,
-                    ["testMode"] = test.TestMode
+                    ["testMode"] = test.TestMode,
+                    ["runState"] = test.RunState
                 });
             }
             
             // Return the results
             return new JObject
             {
+                ["success"] = true,
+                ["message"] = $"Retrieved {allTests.Count} tests",
                 ["tests"] = results,
-                ["count"] = allTests.Count,
                 ["editModeCount"] = allTests.Count(t => t.TestMode.Equals("EditMode", StringComparison.OrdinalIgnoreCase)),
                 ["playModeCount"] = allTests.Count(t => t.TestMode.Equals("PlayMode", StringComparison.OrdinalIgnoreCase))
             };

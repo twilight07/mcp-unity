@@ -14,10 +14,10 @@ export function createRunTestsTool(mcpUnity: McpUnity, logger: Logger): ToolDefi
     name: toolName,
     description: 'Runs Unity\'s Test Runner tests',
     paramsSchema: z.object({
-      testMode: z.string().optional().describe('The test mode to run (EditMode, PlayMode, or All)'),
-      testFilter: z.string().optional().describe('Optional test filter (e.g. specific test name or namespace)')
+      testMode: z.string().optional().describe('The test mode to run (EditMode or PlayMode) - defaults to EditMode (optional)'),
+      testFilter: z.string().optional().describe('The specific test filter to run (e.g. specific test name or namespace) (optional)')
     }),
-    handler: async ({ testMode = 'All', testFilter }): Promise<CallToolResult> => {
+    handler: async ({ testMode = 'EditMode', testFilter }): Promise<CallToolResult> => {
       try {
         // Create and wait for the test run
         const response = await mcpUnity.sendRequest({

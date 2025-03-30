@@ -1,7 +1,7 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 export function createGetMenuItemsResource(mcpUnity, logger) {
     const resourceName = 'get_menu_items';
-    const resourceUri = `unity://${resourceName}`;
+    const resourceUri = `unity://menu-items`;
     const resourceMimeType = 'application/json';
     return {
         name: resourceName,
@@ -18,12 +18,11 @@ export function createGetMenuItemsResource(mcpUnity, logger) {
             if (!response.success) {
                 throw new McpUnityError(ErrorType.RESOURCE_FETCH, response.message || 'Failed to fetch menu items from Unity');
             }
-            logger.info(`Fetching resource:`, response.menuItems);
             return {
                 contents: [{
                         uri: resourceUri,
                         mimeType: resourceMimeType,
-                        text: response.menuItems
+                        text: JSON.stringify(response.menuItems, null, 2)
                     }]
             };
         }

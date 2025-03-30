@@ -1,7 +1,7 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 export function createGetPackagesResource(mcpUnity, logger) {
     const resourceName = 'get_packages';
-    const resourceUri = `unity://${resourceName}`;
+    const resourceUri = `unity://package-manager`;
     const resourceMimeType = 'application/json';
     return {
         name: resourceName,

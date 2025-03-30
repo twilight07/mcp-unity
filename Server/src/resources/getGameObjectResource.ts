@@ -6,7 +6,7 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 export function createGetGameObjectResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_gameobject';
-  const resourceUri = `unity://${resourceName}`;
+  const resourceUri = `unity://gameobject`;
   const resourceMimeType = 'application/json';
   
   return {

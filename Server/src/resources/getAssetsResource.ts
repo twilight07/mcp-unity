@@ -6,7 +6,7 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 export function createGetAssetsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_assets';
-  const resourceUri = `unity://${resourceName}`;
+  const resourceUri = `unity://assets`;
   const resourceMimeType = 'application/json';
   
   return {
@@ -54,8 +54,8 @@ export function createGetAssetsResource(mcpUnity: McpUnity, logger: Logger): Res
         contents: [
           {
             uri: resourceUri,
-            text: JSON.stringify(assetsData, null, 2),
-            mimeType: resourceMimeType
+            mimeType: resourceMimeType,
+            text: JSON.stringify(assetsData, null, 2)
           }
         ]
       };

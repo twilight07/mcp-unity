@@ -13,8 +13,10 @@ namespace McpUnity.Unity
         private GUIStyle _subHeaderStyle;
         private GUIStyle _boxStyle;
         private GUIStyle _wrappedLabelStyle;
+        private GUIStyle _connectedClientBoxStyle; // Style for individual connected clients
+        private GUIStyle _connectedClientLabelStyle; // Style for labels in connected client boxes
         private int _selectedTab = 0;
-        private string[] _tabNames = new string[] { "Server", "Help" };
+        private readonly string[] _tabNames = { "Server", "Help" };
         private bool _isInitialized = false;
         private string _mcpConfigJson = "";
         private bool _tabsIndentationJson = false;
@@ -125,7 +127,7 @@ namespace McpUnity.Unity
             EditorGUILayout.Space();
             
             EditorGUILayout.LabelField("Connected Clients", EditorStyles.boldLabel);
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical("box"); // Keep the default gray box for the container
             
             var clients = mcpUnityServer.GetConnectedClients();
             
@@ -133,16 +135,16 @@ namespace McpUnity.Unity
             {
                 foreach (var client in clients)
                 {
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                    EditorGUILayout.BeginVertical(_connectedClientBoxStyle); // Use green background for each client
                     
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField("ID:", GUILayout.Width(50));
+                    EditorGUILayout.LabelField("ID:", _connectedClientLabelStyle, GUILayout.Width(50));                    
                     EditorGUILayout.LabelField(client.ID, EditorStyles.boldLabel);
                     EditorGUILayout.EndHorizontal();
                     
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField("Name:", GUILayout.Width(50));
-                    EditorGUILayout.LabelField(client.Name);
+                    EditorGUILayout.LabelField("Name:", _connectedClientLabelStyle, GUILayout.Width(50));
+                    EditorGUILayout.LabelField(client.Name, _connectedClientLabelStyle);
                     EditorGUILayout.EndHorizontal();
                     
                     EditorGUILayout.EndVertical();
@@ -151,7 +153,7 @@ namespace McpUnity.Unity
             }
             else
             {
-                EditorGUILayout.LabelField("No clients connected", EditorStyles.label);
+                EditorGUILayout.LabelField("No clients connected", EditorStyles.centeredGreyMiniLabel);
             }
                 
             EditorGUILayout.EndVertical();
@@ -285,6 +287,26 @@ namespace McpUnity.Unity
             {
                 padding = new RectOffset(10, 10, 10, 10),
                 margin = new RectOffset(0, 0, 10, 10)
+            };
+            
+            // Connected client box style with green background
+            _connectedClientBoxStyle = new GUIStyle(EditorStyles.helpBox)
+            {
+                padding = new RectOffset(10, 10, 10, 10),
+                margin = new RectOffset(0, 0, 5, 5)
+            };
+            
+            // Create a light green texture for the background
+            Texture2D greenTexture = new Texture2D(1, 1);
+            greenTexture.SetPixel(0, 0, new Color(0.8f, 1.0f, 0.8f, 1.0f)); // Light green color
+            greenTexture.Apply();
+            
+            _connectedClientBoxStyle.normal.background = greenTexture;
+            
+            // Label style for text in connected client boxes (black text for contrast)
+            _connectedClientLabelStyle = new GUIStyle(EditorStyles.label)
+            {
+                normal = { textColor = Color.black }
             };
             
             // Wrapped label style for text that needs to wrap

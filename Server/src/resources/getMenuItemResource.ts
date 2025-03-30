@@ -6,7 +6,7 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 export function createGetMenuItemsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_menu_items';
-  const resourceUri = `unity://${resourceName}`;
+  const resourceUri = `unity://menu-items`;
   const resourceMimeType = 'application/json';
   
   return {
@@ -28,13 +28,12 @@ export function createGetMenuItemsResource(mcpUnity: McpUnity, logger: Logger): 
           response.message || 'Failed to fetch menu items from Unity'
         );
       }
-      logger.info(`Fetching resource:`, response.menuItems);
       
       return {
         contents: [{ 
           uri: resourceUri,
           mimeType: resourceMimeType,
-          text: response.menuItems
+          text: JSON.stringify(response.menuItems, null, 2)
         }]
       };
     }

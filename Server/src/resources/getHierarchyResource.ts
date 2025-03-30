@@ -6,14 +6,14 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 export function createGetHierarchyResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_hierarchy';
-  const resourceUri = `unity://${resourceName}`;
+  const resourceUri = `unity://hierarchy`;
   const resourceMimeType = 'application/json';
   
   return {
     name: resourceName,
     uri: resourceUri,
     metadata: {
-      description: 'Retrieve all game objects in the Unity loaded scenes with their active state',
+      description: 'Retrieve all GameObjects in the Unity loaded scenes with their active state',
       mimeType: resourceMimeType
     },
     handler: async (params: any): Promise<ReadResourceResult> => {
@@ -33,7 +33,7 @@ export function createGetHierarchyResource(mcpUnity: McpUnity, logger: Logger): 
         contents: [{ 
           uri: resourceUri,
           mimeType: resourceMimeType,
-          text: response.hierarchy
+          text: JSON.stringify(response.hierarchy, null, 2)
         }]
       };
     }

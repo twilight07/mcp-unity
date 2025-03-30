@@ -1,10 +1,15 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 export function createGetTestsResource(mcpUnity, logger) {
     const resourceName = 'get_tests';
+    const resourceUri = `unity://tests`;
+    const resourceMimeType = 'application/json';
     return {
         name: resourceName,
-        description: "Gets the list of available tests from Unity's Test Runner",
-        uri: `unity://${resourceName}`,
+        uri: resourceUri,
+        metadata: {
+            description: "Gets the list of available tests from Unity's Test Runner",
+            mimeType: resourceMimeType
+        },
         handler: async (params) => {
             const { testMode, nameFilter } = params;
             const response = await mcpUnity.sendRequest({
@@ -25,8 +30,6 @@ export function createGetTestsResource(mcpUnity, logger) {
             };
             // Format the test data as JSON
             const testDataJson = JSON.stringify(testsResponse, null, 2);
-            // Create a summary message
-            const summaryMessage = `Found ${testsResponse.count} tests (${testsResponse.editModeCount} EditMode, ${testsResponse.playModeCount} PlayMode)`;
             return {
                 _meta: {
                     test_count: testsResponse.count,
@@ -35,13 +38,9 @@ export function createGetTestsResource(mcpUnity, logger) {
                 },
                 contents: [
                     {
-                        uri: 'data:text/plain',
-                        text: summaryMessage
-                    },
-                    {
-                        uri: 'data:application/json',
+                        uri: resourceUri,
                         text: testDataJson,
-                        mimeType: 'application/json'
+                        mimeType: resourceMimeType
                     }
                 ]
             };

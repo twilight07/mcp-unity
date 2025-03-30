@@ -12,7 +12,7 @@ export function createNotifyMessageTool(mcpUnity: McpUnity, logger: Logger): Too
     description: 'Sends a message to the Unity console',
     paramsSchema: z.object({
       message: z.string().describe('The message to display in the Unity console'),
-      type: z.string().optional().describe('The type of message (info, warning, error)')
+      type: z.string().optional().describe('The type of message (info, warning, error) - defaults to info (optional)')
     }),
     handler: async (params): Promise<CallToolResult> => {
       const { message, type = 'info' } = params;

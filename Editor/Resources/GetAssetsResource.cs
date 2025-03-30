@@ -37,6 +37,7 @@ namespace McpUnity.Resources
             return new JObject
             {
                 ["success"] = true,
+                ["message"] = $"Retrieved {assets.Count} assets",
                 ["assets"] = assets
             };
         }

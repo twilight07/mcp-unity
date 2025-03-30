@@ -28,14 +28,15 @@ namespace McpUnity.Tools
         {
             // Extract parameters
             int? instanceId = parameters["instanceId"]?.ToObject<int?>();
+            string objectPath = parameters["objectPath"]?.ToObject<string>();
             string componentName = parameters["componentName"]?.ToObject<string>();
             JObject componentData = parameters["componentData"] as JObject;
             
-            // Validate parameters
-            if (!instanceId.HasValue)
+            // Validate parameters - require either instanceId or objectPath
+            if (!instanceId.HasValue && string.IsNullOrEmpty(objectPath))
             {
                 return McpUnitySocketHandler.CreateErrorResponse(
-                    "Required parameter 'instanceId' not provided", 
+                    "Either 'instanceId' or 'objectPath' must be provided", 
                     "validation_error"
                 );
             }
@@ -48,17 +49,45 @@ namespace McpUnity.Tools
                 );
             }
             
-            // Find the GameObject by instance ID
-            GameObject gameObject = EditorUtility.InstanceIDToObject(instanceId.Value) as GameObject;
-            if (gameObject == null)
+            // Find the GameObject by instance ID or path
+            GameObject gameObject = null;
+            string identifier = "unknown";
+            
+            if (instanceId.HasValue)
             {
-                return McpUnitySocketHandler.CreateErrorResponse(
-                    $"GameObject with instance ID {instanceId.Value} not found", 
-                    "not_found_error"
-                );
+                gameObject = EditorUtility.InstanceIDToObject(instanceId.Value) as GameObject;
+                identifier = $"ID {instanceId.Value}";
+                
+                if (gameObject == null)
+                {
+                    return McpUnitySocketHandler.CreateErrorResponse(
+                        $"GameObject with instance ID {instanceId.Value} not found", 
+                        "not_found_error"
+                    );
+                }
+            }
+            else
+            {
+                // Find by path
+                gameObject = GameObject.Find(objectPath);
+                identifier = $"path '{objectPath}'";
+                
+                if (gameObject == null)
+                {
+                    // Try to find using the Unity Scene hierarchy path
+                    gameObject = FindGameObjectByPath(objectPath);
+                    
+                    if (gameObject == null)
+                    {
+                        return McpUnitySocketHandler.CreateErrorResponse(
+                            $"GameObject with path '{objectPath}' not found", 
+                            "not_found_error"
+                        );
+                    }
+                }
             }
             
-            Debug.Log($"[MCP Unity] Updating component '{componentName}' on GameObject '{gameObject.name}'");
+            Debug.Log($"[MCP Unity] Updating component '{componentName}' on GameObject '{gameObject.name}' (found by {identifier})");
             
             // Try to find the component by name
             Component component = gameObject.GetComponent(componentName);
@@ -103,6 +132,53 @@ namespace McpUnity.Tools
                     : $"Successfully updated component '{componentName}' on GameObject '{gameObject.name}'",
                 ["type"] = "text"
             };
+        }
+        
+        /// <summary>
+        /// Find a GameObject by its hierarchy path
+        /// </summary>
+        /// <param name="path">The path to the GameObject (e.g. "Canvas/Panel/Button")</param>
+        /// <returns>The GameObject if found, null otherwise</returns>
+        private GameObject FindGameObjectByPath(string path)
+        {
+            // Split the path by '/'
+            string[] pathParts = path.Split('/');
+            
+            // If the path is empty, return null
+            if (pathParts.Length == 0)
+            {
+                return null;
+            }
+            
+            // Search through all root GameObjects in all scenes
+            foreach (GameObject rootObj in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                if (rootObj.name == pathParts[0])
+                {
+                    // Found the root object, now traverse down the path
+                    GameObject current = rootObj;
+                    
+                    // Start from index 1 since we've already matched the root
+                    for (int i = 1; i < pathParts.Length; i++)
+                    {
+                        Transform child = current.transform.Find(pathParts[i]);
+                        if (child == null)
+                        {
+                            // Path segment not found
+                            return null;
+                        }
+                        
+                        // Move to the next level
+                        current = child.gameObject;
+                    }
+                    
+                    // If we got here, we found the full path
+                    return current;
+                }
+            }
+            
+            // Not found
+            return null;
         }
         
         /// <summary>

@@ -35,6 +35,7 @@ namespace McpUnity.Tools
         {
             Name = "run_tests";
             Description = "Runs tests using Unity's Test Runner";
+            IsAsync = true;
             
             _testRunnerService = testRunnerService;
             

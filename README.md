@@ -1,6 +1,6 @@
 # MCP Unity
 
-[![](https://badge.mcpx.dev?type=server 'MCP Server')](https://modelcontextprotocol.io/introduction)
+[![](https://badge.mcpx.dev?status=on 'MCP Enabled')](https://modelcontextprotocol.io/introduction)
 [![](https://img.shields.io/badge/Unity-000000?style=flat&logo=unity&logoColor=white 'Unity')](https://unity.com/releases/editor/archive)
 [![](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white 'Node.js')](https://nodejs.org/en/download/)
 
@@ -53,7 +53,7 @@ This MCP currently provides the following <ins>tools</ins>:
 - <ins>**execute_menu_item**</ins>: Executes Unity menu items (functions tagged with the MenuItem attribute)
 - <ins>**select_gameobject**</ins>: Selects game objects in the Unity hierarchy by path or instance ID
 - <ins>**update_component**</ins>: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
-- <ins>**package_manager**</ins>: Installs, removes, and updates packages in the Unity Package Manager
+- <ins>**add_package**</ins>: Installs new packages in the Unity Package Manager
 - <ins>**run_tests**</ins>: Runs tests using the Unity Test Runner
 - <ins>**notify_message**</ins>: Displays messages in the Unity Editor
 
@@ -176,6 +176,8 @@ Open the MCP configuration file of your AI client (e.g. claude_desktop_config.js
 4. Open Claude Desktop or your AI Coding IDE (e.g. Cursor IDE, Windsurf IDE, etc.) and start executing Unity tools
    
 ![connect](https://github.com/user-attachments/assets/2e266a8b-8ba3-4902-b585-b220b11ab9a2)
+
+> When the AI client connects to the WebSocket server, it will automatically show in the green box in the window
 
 ## Optional: Set WebSocket Port
 By default, the WebSocket server runs on port 8090. You can change this port in two ways:

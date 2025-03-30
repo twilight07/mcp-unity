@@ -1,7 +1,7 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 export function createGetGameObjectResource(mcpUnity, logger) {
     const resourceName = 'get_gameobject';
-    const resourceUri = `unity://${resourceName}`;
+    const resourceUri = `unity://gameobject`;
     const resourceMimeType = 'application/json';
     return {
         name: resourceName,

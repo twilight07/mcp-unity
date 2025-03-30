@@ -13,9 +13,9 @@ using McpUnity.Unity;
 namespace McpUnity.Tools
 {
     /// <summary>
-    /// Tool for managing packages in the Unity Package Manager
+    /// Tool for adding packages into the Unity Package Manager
     /// </summary>
-    public class PackageManagerTool : McpToolBase
+    public class AddPackageTool : McpToolBase
     {
         // Class to track each package operation
         private class PackageOperation
@@ -30,15 +30,15 @@ namespace McpUnity.Tools
         // Flag to track if the update callback is registered
         private bool _updateCallbackRegistered = false;
         
-        public PackageManagerTool()
+        public AddPackageTool()
         {
-            Name = "package_manager";
-            Description = "Manages packages in the Unity Package Manager";
+            Name = "add_package";
+            Description = "Adds packages into the Unity Package Manager";
             IsAsync = true; // Package Manager operations are asynchronous
         }
         
         /// <summary>
-        /// Execute the PackageManager tool asynchronously
+        /// Execute the AddPackage tool asynchronously
         /// </summary>
         /// <param name="parameters">Tool parameters as a JObject</param>
         /// <param name="tcs">TaskCompletionSource to set the result or exception</param>
@@ -46,12 +46,12 @@ namespace McpUnity.Tools
         {
             try
             {
-                // Extract method parameter
-                string method = parameters["methodSource"]?.ToObject<string>();
-                if (string.IsNullOrEmpty(method))
+                // Extract source parameter
+                string source = parameters["source"]?.ToObject<string>();
+                if (string.IsNullOrEmpty(source))
                 {
                     tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
-                        "Required parameter 'methodSource' not provided", 
+                        "Required parameter 'source' not provided", 
                         "validation_error"
                     ));
                     return;
@@ -63,7 +63,7 @@ namespace McpUnity.Tools
                     CompletionSource = tcs
                 };
                 
-                switch (method.ToLowerInvariant())
+                switch (source.ToLowerInvariant())
                 {
                     case "registry":
                         operation.Request = AddFromRegistry(parameters, tcs);
@@ -76,7 +76,7 @@ namespace McpUnity.Tools
                         break;
                     default:
                         tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
-                            $"Unknown method '{method}'. Valid methods are: registry, github, disk",
+                            $"Unknown method '{source}'. Valid methods are: registry, github, disk",
                             "validation_error"
                         ));
                         return;
@@ -103,7 +103,7 @@ namespace McpUnity.Tools
             catch (Exception ex)
             {
                 // Handle any uncaught exceptions
-                Debug.LogError($"[MCP Unity] Exception in PackageManagerTool.ExecuteAsync: {ex}");
+                Debug.LogError($"[MCP Unity] Exception in AddPackageTool.ExecuteAsync: {ex}");
                 tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
                     $"Internal error: {ex.Message}",
                     "internal_error"

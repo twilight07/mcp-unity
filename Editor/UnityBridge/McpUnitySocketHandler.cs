@@ -79,9 +79,12 @@ namespace McpUnity.Unity
                 
                 // Format as JSON-RPC 2.0 response
                 JObject jsonRpcResponse = CreateResponse(requestId, responseJson);
+                string responseStr = jsonRpcResponse.ToString(Formatting.None);
+                
+                Debug.Log($"[MCP Unity] WebSocket message response: {responseStr}");
                 
                 // Send the response back to the client
-                Send(jsonRpcResponse.ToString(Formatting.None));
+                Send(responseStr);
             }
             catch (Exception ex)
             {

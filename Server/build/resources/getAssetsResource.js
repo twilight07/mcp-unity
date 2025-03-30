@@ -1,7 +1,7 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 export function createGetAssetsResource(mcpUnity, logger) {
     const resourceName = 'get_assets';
-    const resourceUri = `unity://${resourceName}`;
+    const resourceUri = `unity://assets`;
     const resourceMimeType = 'application/json';
     return {
         name: resourceName,
@@ -40,8 +40,8 @@ export function createGetAssetsResource(mcpUnity, logger) {
                 contents: [
                     {
                         uri: resourceUri,
-                        text: JSON.stringify(assetsData, null, 2),
-                        mimeType: resourceMimeType
+                        mimeType: resourceMimeType,
+                        text: JSON.stringify(assetsData, null, 2)
                     }
                 ]
             };

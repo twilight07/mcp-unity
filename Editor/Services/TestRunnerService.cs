@@ -67,7 +67,8 @@ namespace McpUnity.Services
                     Name = testAdaptor.Name,
                     FullName = testAdaptor.FullName,
                     Path = fullPath,
-                    TestMode = testAdaptor.TestMode.ToString()
+                    TestMode = testAdaptor.TestMode.ToString(),
+                    RunState = testAdaptor.RunState.ToString()
                 });
             }
         }
@@ -126,5 +127,6 @@ namespace McpUnity.Services
         public string FullName { get; set; }
         public string Path { get; set; }
         public string TestMode { get; set; }
+        public string RunState { get; set; }
     }
 }

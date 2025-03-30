@@ -19,7 +19,7 @@ export class ResourceRegistry {
                 try {
                     this.logger.info(`Fetching resource: ${resource.name}`, params);
                     const result = await resource.handler(params);
-                    this.logger.info(`Resource fetch successful: ${resource.name}`);
+                    this.logger.info(`Resource fetch successful: ${resource.name}`, result);
                     return result;
                 }
                 catch (error) {

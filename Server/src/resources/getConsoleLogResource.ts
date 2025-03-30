@@ -33,7 +33,7 @@ export function createGetConsoleLogsResource(mcpUnity: McpUnity, logger: Logger)
         contents: [{ 
           uri: resourceUri,
           mimeType: resourceMimeType,
-          text: response.logs
+          text: JSON.stringify(response.logs, null, 2)
         }]
       };
     }

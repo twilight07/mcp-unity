@@ -7,7 +7,7 @@ import { ToolRegistry } from './tools/toolRegistry.js';
 import { ResourceRegistry } from './resources/resourceRegistry.js';
 import { createMenuItemTool } from './tools/menuItemTool.js';
 import { createSelectGameObjectTool } from './tools/selectGameObjectTool.js';
-import { createPackageManagerTool } from './tools/packageManagerTool.js';
+import { createAddPackageTool } from './tools/addPackageTool.js';
 import { createRunTestsTool } from './tools/runTestsTool.js';
 import { createNotifyMessageTool } from './tools/notifyMessageTool.js';
 import { createUpdateComponentTool } from './tools/updateComponentTool.js';
@@ -41,7 +41,7 @@ const resourceRegistry = new ResourceRegistry(resourceLogger);
 // Add all tools to the registry
 toolRegistry.add(createMenuItemTool(mcpUnity, toolLogger));
 toolRegistry.add(createSelectGameObjectTool(mcpUnity, toolLogger));
-toolRegistry.add(createPackageManagerTool(mcpUnity, toolLogger));
+toolRegistry.add(createAddPackageTool(mcpUnity, toolLogger));
 toolRegistry.add(createRunTestsTool(mcpUnity, toolLogger));
 toolRegistry.add(createNotifyMessageTool(mcpUnity, toolLogger));
 toolRegistry.add(createUpdateComponentTool(mcpUnity, toolLogger));

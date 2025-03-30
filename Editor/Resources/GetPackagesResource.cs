@@ -39,6 +39,7 @@ namespace McpUnity.Resources
             return new JObject
             {
                 ["success"] = true,
+                ["message"] = $"Retrieved {projectPackages.Count} project packages and {registryPackages.Count} registry packages",
                 ["projectPackages"] = projectPackages,
                 ["registryPackages"] = registryPackages
             };
