@@ -18,7 +18,8 @@ namespace McpUnity.Resources
         public GetMenuItemsResource()
         {
             Name = "get_menu_items";
-            Description = "Retrieves a list of all available Unity menu items";
+            Description = "List of available menu items in Unity to execute";
+            Uri = "unity://menu-items";
         }
 
         /// <summary>

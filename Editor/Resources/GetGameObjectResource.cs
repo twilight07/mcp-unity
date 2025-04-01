@@ -16,6 +16,7 @@ namespace McpUnity.Resources
         {
             Name = "get_gameobject";
             Description = "Retrieves detailed information about a specific GameObject by instance ID";
+            Uri = "unity://gameobject/{id}";
         }
         
         /// <summary>

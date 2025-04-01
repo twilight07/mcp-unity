@@ -454,3 +454,57 @@
   "message": "fafadad"
 }
 [2025-03-30T22:31:46.458Z] [INFO] [Tools] Tool execution successful: notify_message
+[2025-03-31T15:07:34.261Z] [INFO] [Unity] Using port: 8090 for Unity WebSocket connection
+[2025-03-31T15:07:34.262Z] [INFO] [Tools] Registering tool with MCP server: execute_menu_item
+[2025-03-31T15:07:34.262Z] [INFO] [Tools] Registering tool with MCP server: select_gameobject
+[2025-03-31T15:07:34.263Z] [INFO] [Tools] Registering tool with MCP server: add_package
+[2025-03-31T15:07:34.263Z] [INFO] [Tools] Registering tool with MCP server: run_tests
+[2025-03-31T15:07:34.263Z] [INFO] [Tools] Registering tool with MCP server: notify_message
+[2025-03-31T15:07:34.263Z] [INFO] [Tools] Registering tool with MCP server: update_component
+[2025-03-31T15:07:34.264Z] [INFO] [Resources] Registering resource with MCP server: get_menu_items
+[2025-03-31T15:07:34.264Z] [INFO] [Resources] Registering resource with MCP server: get_console_logs
+[2025-03-31T15:07:34.264Z] [INFO] [Resources] Registering resource with MCP server: get_hierarchy
+[2025-03-31T15:07:34.264Z] [INFO] [Resources] Registering resource with MCP server: get_packages
+[2025-03-31T15:07:34.264Z] [INFO] [Resources] Registering resource with MCP server: get_assets
+[2025-03-31T15:07:34.264Z] [INFO] [Resources] Registering resource with MCP server: get_tests
+[2025-03-31T15:07:34.264Z] [INFO] [Resources] Registering resource with MCP server: get_gameobject
+[2025-03-31T15:07:34.265Z] [INFO] [Server] MCP Server started
+[2025-03-31T15:07:34.265Z] [INFO] [Unity] Attempting to connect to Unity WebSocket...
+[2025-03-31T15:07:34.277Z] [ERROR] [Unity] WebSocket error: Unknown error
+[2025-03-31T15:07:34.277Z] [WARN] [Unity] Could not connect to Unity WebSocket: Connection failed: Unknown error
+[2025-03-31T15:07:34.277Z] [WARN] [Unity] Will retry connection on next request
+[2025-03-31T15:07:38.672Z] [INFO] [Resources] Fetching resource: get_packages
+"unity://package-manager"
+[2025-03-31T15:07:38.673Z] [INFO] [Unity] Not connected to Unity, connecting first...
+[2025-03-31T15:07:38.674Z] [ERROR] [Unity] WebSocket error: Unknown error
+[2025-03-31T15:07:38.674Z] [ERROR] [Resources] Resource fetch failed: get_packages
+{
+  "type": "connection_error",
+  "message": "Connection failed: Unknown error"
+}
+[2025-03-31T15:07:48.323Z] [INFO] [Resources] Fetching resource: get_gameobject
+"unity://gameobject"
+[2025-03-31T15:07:48.324Z] [ERROR] [Resources] Resource fetch failed: get_gameobject
+{
+  "type": "validation_error",
+  "message": "Missing required parameter: instanceId"
+}
+[2025-04-01T14:25:59.584Z] [INFO] [Unity] Using port: 8090 for Unity WebSocket connection
+[2025-04-01T14:25:59.585Z] [INFO] [Tools] Registering tool with MCP server: execute_menu_item
+[2025-04-01T14:25:59.586Z] [INFO] [Tools] Registering tool with MCP server: select_gameobject
+[2025-04-01T14:25:59.586Z] [INFO] [Tools] Registering tool with MCP server: add_package
+[2025-04-01T14:25:59.586Z] [INFO] [Tools] Registering tool with MCP server: run_tests
+[2025-04-01T14:25:59.587Z] [INFO] [Tools] Registering tool with MCP server: notify_message
+[2025-04-01T14:25:59.587Z] [INFO] [Tools] Registering tool with MCP server: update_component
+[2025-04-01T14:25:59.587Z] [INFO] [Resources] Registering resource with MCP server: get_menu_items
+[2025-04-01T14:25:59.587Z] [INFO] [Resources] Registering resource with MCP server: get_console_logs
+[2025-04-01T14:25:59.588Z] [INFO] [Resources] Registering resource with MCP server: get_hierarchy
+[2025-04-01T14:25:59.588Z] [INFO] [Resources] Registering resource with MCP server: get_packages
+[2025-04-01T14:25:59.588Z] [INFO] [Resources] Registering resource with MCP server: get_assets
+[2025-04-01T14:25:59.588Z] [INFO] [Resources] Registering resource with MCP server: get_tests
+[2025-04-01T14:25:59.588Z] [INFO] [Resources] Registering resource with MCP server: get_gameobject
+[2025-04-01T14:25:59.589Z] [INFO] [Server] MCP Server started
+[2025-04-01T14:25:59.589Z] [INFO] [Unity] Attempting to connect to Unity WebSocket...
+[2025-04-01T14:25:59.617Z] [INFO] [Unity] Successfully connected to Unity WebSocket
+[2025-04-01T14:26:21.276Z] [INFO] [Server] Shutting down...
+[2025-04-01T14:26:21.277Z] [INFO] [Unity] Unity WebSocket client stopped

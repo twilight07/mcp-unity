@@ -15,6 +15,7 @@ namespace McpUnity.Resources
         {
             Name = "get_hierarchy";
             Description = "Retrieves all game objects in the Unity loaded scenes with their active state";
+            Uri = "unity://hierarchy";
         }
         
         /// <summary>

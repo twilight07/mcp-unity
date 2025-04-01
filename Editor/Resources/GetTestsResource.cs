@@ -23,6 +23,7 @@ namespace McpUnity.Resources
         {
             Name = "get_tests";
             Description = "Gets available tests from Unity Test Runner";
+            Uri = "tests://{testMode}/{nameFilter}";
             
             _testRunnerService = testRunnerService;
         }

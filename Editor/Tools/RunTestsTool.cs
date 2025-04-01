@@ -15,7 +15,8 @@ namespace McpUnity.Tools
     /// </summary>
     public class RunTestsTool : McpToolBase, ICallbacks
     {
-        private readonly TestRunnerService _testRunnerService;
+        private readonly ITestRunnerService _testRunnerService;
+        
         private bool _isRunning = false;
         private TaskCompletionSource<JObject> _testRunCompletionSource;
         private List<TestResult> _testResults = new List<TestResult>();
@@ -31,7 +32,7 @@ namespace McpUnity.Tools
             public bool Passed => ResultState == "Passed";
         }
         
-        public RunTestsTool(TestRunnerService testRunnerService)
+        public RunTestsTool(ITestRunnerService testRunnerService)
         {
             Name = "run_tests";
             Description = "Runs tests using Unity's Test Runner";

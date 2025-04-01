@@ -21,6 +21,11 @@ namespace McpUnity.Resources
         public string Description { get; protected set; }
         
         /// <summary>
+        /// The URI pattern of the resource
+        /// </summary>
+        public string Uri { get; protected set; }
+        
+        /// <summary>
         /// Whether this resource is enabled and available for use
         /// </summary>
         public bool IsEnabled { get; protected set; } = true;

@@ -16,7 +16,8 @@ namespace McpUnity.Resources
         public GetAssetsResource()
         {
             Name = "get_assets";
-            Description = "Gets a list of all assets from the Unity Asset Database";
+            Description = "Retrieves assets from the Unity Asset Database";
+            Uri = "unity://assets";
         }
         
         /// <summary>

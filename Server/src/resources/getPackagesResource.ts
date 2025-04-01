@@ -6,7 +6,7 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 export function createGetPackagesResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_packages';
-  const resourceUri = `unity://package-manager`;
+  const resourceUri = `unity://packages`;
   const resourceMimeType = 'application/json';
   
   return {

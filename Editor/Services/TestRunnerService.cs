@@ -12,7 +12,7 @@ namespace McpUnity.Services
     /// <summary>
     /// Service for accessing Unity Test Runner functionality
     /// </summary>
-    public class TestRunnerService
+    public class TestRunnerService : ITestRunnerService
     {
         private readonly TestRunnerApi _testRunnerApi;
         
@@ -41,36 +41,6 @@ namespace McpUnity.Services
             _testRunnerApi.RetrieveTestList(TestMode.PlayMode, adaptor => CollectTestItems(adaptor, tests));
             
             return tests;
-        }
-        
-        /// <summary>
-        /// Recursively collect test items from test adaptors
-        /// </summary>
-        private void CollectTestItems(ITestAdaptor testAdaptor, List<TestItemInfo> tests, string parentPath = "")
-        {
-            if (testAdaptor.IsSuite)
-            {
-                // For suites (namespaces, classes), collect all children
-                foreach (var child in testAdaptor.Children)
-                {
-                    string currentPath = string.IsNullOrEmpty(parentPath) ? testAdaptor.Name : $"{parentPath}.{testAdaptor.Name}";
-                    CollectTestItems(child, tests, currentPath);
-                }
-            }
-            else
-            {
-                // For individual tests, add to the list
-                string fullPath = string.IsNullOrEmpty(parentPath) ? testAdaptor.Name : $"{parentPath}.{testAdaptor.Name}";
-                
-                tests.Add(new TestItemInfo
-                {
-                    Name = testAdaptor.Name,
-                    FullName = testAdaptor.FullName,
-                    Path = fullPath,
-                    TestMode = testAdaptor.TestMode.ToString(),
-                    RunState = testAdaptor.RunState.ToString()
-                });
-            }
         }
 
         /// <summary>
@@ -114,6 +84,36 @@ namespace McpUnity.Services
                     $"Test run timed out after {timeoutMinutes} minutes",
                     "test_runner_timeout"
                 ));
+            }
+        }
+        
+        /// <summary>
+        /// Recursively collect test items from test adaptors
+        /// </summary>
+        private void CollectTestItems(ITestAdaptor testAdaptor, List<TestItemInfo> tests, string parentPath = "")
+        {
+            if (testAdaptor.IsSuite)
+            {
+                // For suites (namespaces, classes), collect all children
+                foreach (var child in testAdaptor.Children)
+                {
+                    string currentPath = string.IsNullOrEmpty(parentPath) ? testAdaptor.Name : $"{parentPath}.{testAdaptor.Name}";
+                    CollectTestItems(child, tests, currentPath);
+                }
+            }
+            else
+            {
+                // For individual tests, add to the list
+                string fullPath = string.IsNullOrEmpty(parentPath) ? testAdaptor.Name : $"{parentPath}.{testAdaptor.Name}";
+                
+                tests.Add(new TestItemInfo
+                {
+                    Name = testAdaptor.Name,
+                    FullName = testAdaptor.FullName,
+                    Path = fullPath,
+                    TestMode = testAdaptor.TestMode.ToString(),
+                    RunState = testAdaptor.RunState.ToString()
+                });
             }
         }
     }

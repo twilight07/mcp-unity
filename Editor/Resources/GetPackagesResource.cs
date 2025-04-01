@@ -19,7 +19,8 @@ namespace McpUnity.Resources
         public GetPackagesResource()
         {
             Name = "get_packages";
-            Description = "Gets a list of all packages from the Unity Package Manager";
+            Description = "Retrieve all packages from the Unity Package Manager";
+            Uri = "unity://packages";
         }
         
         /// <summary>

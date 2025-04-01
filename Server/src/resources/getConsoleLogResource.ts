@@ -6,7 +6,7 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 export function createGetConsoleLogsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_console_logs';
-  const resourceUri = `unity://${resourceName}`;
+  const resourceUri = `logs://console`;
   const resourceMimeType = 'application/json';
   
   return {
