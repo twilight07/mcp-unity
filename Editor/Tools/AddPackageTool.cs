@@ -13,7 +13,7 @@ using McpUnity.Unity;
 namespace McpUnity.Tools
 {
     /// <summary>
-    /// Tool for adding packages into the Unity Package Manager
+    /// Tool for adding new packages into the Unity Package Manager
     /// </summary>
     public class AddPackageTool : McpToolBase
     {
@@ -33,7 +33,7 @@ namespace McpUnity.Tools
         public AddPackageTool()
         {
             Name = "add_package";
-            Description = "Adds packages into the Unity Package Manager";
+            Description = "Adds a new packages into the Unity Package Manager";
             IsAsync = true; // Package Manager operations are asynchronous
         }
         
@@ -44,70 +44,58 @@ namespace McpUnity.Tools
         /// <param name="tcs">TaskCompletionSource to set the result or exception</param>
         public override void ExecuteAsync(JObject parameters, TaskCompletionSource<JObject> tcs)
         {
-            try
+            // Extract source parameter
+            string source = parameters["source"]?.ToObject<string>();
+            if (string.IsNullOrEmpty(source))
             {
-                // Extract source parameter
-                string source = parameters["source"]?.ToObject<string>();
-                if (string.IsNullOrEmpty(source))
-                {
+                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
+                    "Required parameter 'source' not provided", 
+                    "validation_error"
+                ));
+                return;
+            }
+            
+            // Create and register the operation
+            var operation = new PackageOperation
+            {
+                CompletionSource = tcs
+            };
+            
+            switch (source.ToLowerInvariant())
+            {
+                case "registry":
+                    operation.Request = AddFromRegistry(parameters, tcs);
+                    break;
+                case "github":
+                    operation.Request = AddFromGitHub(parameters, tcs);
+                    break;
+                case "disk":
+                    operation.Request = AddFromDisk(parameters, tcs);
+                    break;
+                default:
                     tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
-                        "Required parameter 'source' not provided", 
+                        $"Unknown method '{source}'. Valid methods are: registry, github, disk",
                         "validation_error"
                     ));
                     return;
-                }
-                
-                // Create and register the operation
-                var operation = new PackageOperation
-                {
-                    CompletionSource = tcs
-                };
-                
-                switch (source.ToLowerInvariant())
-                {
-                    case "registry":
-                        operation.Request = AddFromRegistry(parameters, tcs);
-                        break;
-                    case "github":
-                        operation.Request = AddFromGitHub(parameters, tcs);
-                        break;
-                    case "disk":
-                        operation.Request = AddFromDisk(parameters, tcs);
-                        break;
-                    default:
-                        tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
-                            $"Unknown method '{source}'. Valid methods are: registry, github, disk",
-                            "validation_error"
-                        ));
-                        return;
-                }
-                
-                // If request creation failed, the error has already been set on the tcs
-                if (operation.Request == null)
-                {
-                    return;
-                }
-                
-                lock (_activeOperations)
-                {
-                    _activeOperations.Add(operation);
-                    
-                    // Register update callback if not already registered
-                    if (!_updateCallbackRegistered)
-                    {
-                        EditorApplication.update += CheckOperationsCompletion;
-                        _updateCallbackRegistered = true;
-                    }
-                }
             }
-            catch (Exception ex)
+            
+            // If request creation failed, the error has already been set on the tcs
+            if (operation.Request == null)
             {
-                // Handle any uncaught exceptions
-                Debug.LogError($"[MCP Unity] Exception in AddPackageTool.ExecuteAsync: {ex}");
-                tcs.SetResult(McpUnitySocketHandler.CreateErrorResponse(
-                    $"Internal error: {ex.Message}",
-                    "internal_error"
-                ));
+                return;
+            }
+            
+            lock (_activeOperations)
+            {
+                _activeOperations.Add(operation);
+                
+                // Register update callback if not already registered
+                if (!_updateCallbackRegistered)
+                {
+                    EditorApplication.update += CheckOperationsCompletion;
+                    _updateCallbackRegistered = true;
+                }
             }
         }
         

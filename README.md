@@ -10,10 +10,6 @@
 [![](https://img.shields.io/github/last-commit/CoderGamester/mcp-unity 'Last Commit')](https://github.com/CoderGamester/mcp-unity/commits/main)
 [![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
 
-<a href="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity/badge" alt="Unity MCP server" />
-</a>
-
 ```                                                                        
                               ,/(/.   *(/,                                  
                           */(((((/.   *((((((*.                             
@@ -71,6 +67,10 @@ This MCP currently provides the following <ins>resources</ins>:
 - Unity 2022.3 or later - to [install the server](#install-server)
 - Node.js 18 or later - to [start the server](#start-server)
 - npm 9 or later - to [debug the server](#debug-server)
+
+<a href="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity">
+  <img width="400" height="200" src="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity/badge" alt="Unity MCP server" />
+</a>
 
 ## <a name="install-server"></a>Installation
 

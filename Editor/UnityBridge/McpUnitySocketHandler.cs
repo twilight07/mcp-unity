@@ -8,6 +8,8 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 using McpUnity.Tools;
 using McpUnity.Resources;
+using Unity.EditorCoroutines.Editor;
+using System.Collections;
 
 namespace McpUnity.Unity
 {
@@ -57,25 +59,28 @@ namespace McpUnity.Unity
                 var method = requestJson["method"]?.ToString();
                 var parameters = requestJson["params"] as JObject ?? new JObject();
                 var requestId = requestJson["id"]?.ToString();
-                
-                JObject responseJson;
+                // We need to dispatch to Unity's main thread and wait for completion
+                var tcs = new TaskCompletionSource<JObject>();
                 
                 if (string.IsNullOrEmpty(method))
                 {
-                    responseJson = CreateErrorResponse("Missing method in request", "invalid_request");
+                    tcs.SetResult(CreateErrorResponse("Missing method in request", "invalid_request"));
                 }
                 else if (_server.TryGetTool(method, out var tool))
                 {
-                    responseJson = await ExecuteTool(tool, parameters);
+                    EditorCoroutineUtility.StartCoroutineOwnerless(ExecuteTool(tool, parameters, tcs));
                 }
                 else if (_server.TryGetResource(method, out var resource))
                 {
-                    responseJson = await FetchResource(resource, parameters);
+                    EditorCoroutineUtility.StartCoroutineOwnerless(FetchResourceCoroutine(resource, parameters, tcs));
                 }
                 else
                 {
-                    responseJson = CreateErrorResponse($"Unknown method: {method}", "unknown_method");
+                    tcs.SetResult(CreateErrorResponse($"Unknown method: {method}", "unknown_method"));
                 }
+                
+                // Wait for the task to complete
+                JObject responseJson = await tcs.Task;
                 
                 // Format as JSON-RPC 2.0 response
                 JObject jsonRpcResponse = CreateResponse(requestId, responseJson);
@@ -121,66 +126,52 @@ namespace McpUnity.Unity
         /// <summary>
         /// Execute a tool with the provided parameters
         /// </summary>
-        private async Task<JObject> ExecuteTool(McpToolBase tool, JObject parameters)
+        private IEnumerator ExecuteTool(McpToolBase tool, JObject parameters, TaskCompletionSource<JObject> tcs)
         {
-            // We need to dispatch to Unity's main thread
-            var tcs = new TaskCompletionSource<JObject>();
-            
-            UnityEditor.EditorApplication.delayCall += () =>
+            try
             {
-                try
+                if (tool.IsAsync)
                 {
-                    if (tool.IsAsync)
-                    {
-                        tool.ExecuteAsync(parameters, tcs);
-                    }
-                    else
-                    {
-                        var result = tool.Execute(parameters);
-                        tcs.SetResult(result);
-                    }
+                    tool.ExecuteAsync(parameters, tcs);
                 }
-                catch (Exception ex)
+                else
                 {
-                    Debug.LogError($"[MCP Unity] Error executing tool {tool.Name}: {ex.Message}");
-                    tcs.SetResult(CreateErrorResponse(
-                        $"Failed to execute tool {tool.Name}: {ex.Message}",
-                        "tool_execution_error"
-                    ));
+                    var result = tool.Execute(parameters);
+                    tcs.SetResult(result);
                 }
-            };
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[MCP Unity] Error executing tool {tool.Name}: {ex.Message}");
+                tcs.SetResult(CreateErrorResponse(
+                    $"Failed to execute tool {tool.Name}: {ex.Message}",
+                    "tool_execution_error"
+                ));
+            }
             
-            // Wait for the task to complete
-            return await tcs.Task;
+            yield return null;
         }
         
         /// <summary>
         /// Fetch a resource with the provided parameters
         /// </summary>
-        private async Task<JObject> FetchResource(McpResourceBase resource, JObject parameters)
+        private IEnumerator FetchResourceCoroutine(McpResourceBase resource, JObject parameters, TaskCompletionSource<JObject> tcs)
         {
-            // We need to dispatch to Unity's main thread and wait for completion
-            var tcs = new TaskCompletionSource<JObject>();
-            
-            UnityEditor.EditorApplication.delayCall += () =>
+            try
             {
-                try
-                {
-                    var result = resource.Fetch(parameters);
-                    tcs.SetResult(result);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"[MCP Unity] Error fetching resource {resource.Name}: {ex.Message}");
-                    tcs.SetResult(CreateErrorResponse(
-                        $"Failed to fetch resource {resource.Name}: {ex.Message}",
-                        "resource_fetch_error"
-                    ));
-                }
-            };
+                var result = resource.Fetch(parameters);
+                tcs.SetResult(result);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[MCP Unity] Error fetching resource {resource.Name}: {ex.Message}");
+                tcs.SetResult(CreateErrorResponse(
+                    $"Failed to fetch resource {resource.Name}: {ex.Message}",
+                    "resource_fetch_error"
+                ));
+            }
             
-            // Wait for the task to complete
-            return await tcs.Task;
+            yield return null;
         }
         
         /// <summary>
