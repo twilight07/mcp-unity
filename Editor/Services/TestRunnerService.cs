@@ -67,7 +67,6 @@ namespace McpUnity.Services
             if (!string.IsNullOrEmpty(testFilter))
             {
                 filter.testNames = new[] { testFilter };
-                filter.categoryNames = new[] { testFilter };
             }
                 
             // Execute tests

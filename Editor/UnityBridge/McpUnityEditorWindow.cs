@@ -159,28 +159,6 @@ namespace McpUnity.Unity
                 
             EditorGUILayout.EndVertical();
             
-            // IDE Integration settings
-            string ideIntegrationTooltip = "Add the Library/PackedCache folder to VSCode-like IDE workspaces so code can be indexed for the AI to access it. This improves code intelligence for Unity packages in VSCode, Cursor, and similar IDEs.";
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField(new GUIContent("Improve VSCode-like IDEs code intelligence", ideIntegrationTooltip), EditorStyles.boldLabel);
-            
-            // Add button to manually update workspace
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button(new GUIContent("Update Workspace Cache Now", ideIntegrationTooltip), GUILayout.Height(24)))
-            {
-                bool updated = VsCodeWorkspaceUtils.AddPackageCacheToWorkspace();
-                if (updated)
-                {
-                    EditorUtility.DisplayDialog("Workspace Updated", "Successfully added Library/PackedCache to workspace files. Please restart your IDE and open the workspace.", "OK");
-                }
-                else
-                {
-                    EditorUtility.DisplayDialog("Workspace Update Failed", "No workspace files were found or needed updating.", "OK");
-                }
-            }
-            
-            EditorGUILayout.EndHorizontal();
-            
             // MCP Config generation section
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("MCP Configuration", EditorStyles.boldLabel);
@@ -238,13 +216,159 @@ namespace McpUnity.Unity
             
             EditorGUILayout.EndVertical();
             
+            // IDE Integration settings
+            EditorGUILayout.Space();
+            WrappedLabel("IDE Integration Settings", _subHeaderStyle);
+            
+            EditorGUILayout.BeginVertical(_boxStyle);
+            string ideIntegrationTooltip = "Add the Library/PackedCache folder to VSCode-like IDE workspaces so code can be indexed for the AI to access it. This improves code intelligence for Unity packages in VSCode, Cursor, and similar IDEs.";
+            
+            WrappedLabel("These settings help improve code intelligence in VSCode-like IDEs by adding the Unity Package Cache to your workspace. This is automatically configured when the MCP Unity tool is opened in Unity.");
+            EditorGUILayout.Space();
+            
+            // Add button to manually update workspace
+            if (GUILayout.Button(new GUIContent("Update Workspace Cache Now", ideIntegrationTooltip), GUILayout.Height(24)))
+            {
+                bool updated = VsCodeWorkspaceUtils.AddPackageCacheToWorkspace();
+                if (updated)
+                {
+                    EditorUtility.DisplayDialog("Workspace Updated", "Successfully added Library/PackedCache to workspace files. Please restart your IDE and open the workspace.", "OK");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Workspace Update Failed", "No workspace files were found or needed updating.", "OK");
+                }
+            }
+            
+            EditorGUILayout.EndVertical();
+            
             EditorGUILayout.Space();
             WrappedLabel("Available Tools", _subHeaderStyle);
             
             EditorGUILayout.BeginVertical(_boxStyle);
             
+            // execute_menu_item
             WrappedLabel("execute_menu_item", EditorStyles.boldLabel);
             WrappedLabel("Executes a function that is currently tagged with MenuItem attribute in the project or in the Unity Editor's menu path");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Execute the menu item 'GameObject/Create Empty' to create a new empty GameObject", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // select_gameobject
+            WrappedLabel("select_gameobject", EditorStyles.boldLabel);
+            WrappedLabel("Selects game objects in the Unity hierarchy by path or instance ID");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Select the Main Camera object in my scene", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // update_component
+            WrappedLabel("update_component", EditorStyles.boldLabel);
+            WrappedLabel("Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Add a Rigidbody component to the Player object and set its mass to 5", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // add_package
+            WrappedLabel("add_package", EditorStyles.boldLabel);
+            WrappedLabel("Installs new packages in the Unity Package Manager");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Add the TextMeshPro package to my project", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // run_tests
+            WrappedLabel("run_tests", EditorStyles.boldLabel);
+            WrappedLabel("Runs tests using the Unity Test Runner");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Run all the EditMode tests in my project", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // notify_message
+            WrappedLabel("notify_message", EditorStyles.boldLabel);
+            WrappedLabel("Displays messages in the Unity Editor console");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Send a notification to Unity that the task has been completed", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            
+            EditorGUILayout.EndVertical();
+            
+            // Available Resources section
+            EditorGUILayout.Space();
+            WrappedLabel("Available Resources", _subHeaderStyle);
+            
+            EditorGUILayout.BeginVertical(_boxStyle);
+            
+            // get_menu_items
+            WrappedLabel("get_menu_items", EditorStyles.boldLabel);
+            WrappedLabel("Retrieves a list of all available menu items in the Unity Editor");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Show me all available menu items related to GameObject creation", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // get_hierarchy
+            WrappedLabel("get_hierarchy", EditorStyles.boldLabel);
+            WrappedLabel("Retrieves a list of all game objects in the Unity hierarchy");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Show me the current scene hierarchy structure", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // get_gameobject
+            WrappedLabel("get_gameobject", EditorStyles.boldLabel);
+            WrappedLabel("Retrieves detailed information about a specific GameObject, including all components with serialized properties and fields");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Get me detailed information about the Player GameObject", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // get_console_logs
+            WrappedLabel("get_console_logs", EditorStyles.boldLabel);
+            WrappedLabel("Retrieves a list of all logs from the Unity console");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Show me the recent error messages from the Unity console", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // get_packages
+            WrappedLabel("get_packages", EditorStyles.boldLabel);
+            WrappedLabel("Retrieves information about installed and available packages from the Unity Package Manager");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("List all the packages currently installed in my Unity project", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // get_assets
+            WrappedLabel("get_assets", EditorStyles.boldLabel);
+            WrappedLabel("Retrieves information about assets in the Unity Asset Database");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Find all texture assets in my project", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // get_tests
+            WrappedLabel("get_tests", EditorStyles.boldLabel);
+            WrappedLabel("Retrieves information about tests in the Unity Test Runner");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("List all available tests in my Unity project", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
             
             EditorGUILayout.EndVertical();
             

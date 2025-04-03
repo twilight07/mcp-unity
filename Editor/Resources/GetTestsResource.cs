@@ -23,7 +23,7 @@ namespace McpUnity.Resources
         {
             Name = "get_tests";
             Description = "Gets available tests from Unity Test Runner";
-            Uri = "tests://{testMode}/{nameFilter}";
+            Uri = "unity://tests/{testMode}";
             
             _testRunnerService = testRunnerService;
         }
@@ -36,7 +36,6 @@ namespace McpUnity.Resources
         {
             // Get filter parameters
             string testModeFilter = parameters["testMode"]?.ToObject<string>();
-            string nameFilter = parameters["nameFilter"]?.ToObject<string>();
             
             // Get all tests from the service
             var allTests = _testRunnerService.GetAllTests();
@@ -46,16 +45,6 @@ namespace McpUnity.Resources
             {
                 allTests = allTests.Where(t => 
                     t.TestMode.Equals(testModeFilter, StringComparison.OrdinalIgnoreCase)
-                ).ToList();
-            }
-            
-            // Apply name filter if provided
-            if (!string.IsNullOrEmpty(nameFilter))
-            {
-                allTests = allTests.Where(t => 
-                    t.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase) || 
-                    t.FullName.Contains(nameFilter, StringComparison.OrdinalIgnoreCase) ||
-                    t.Path.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)
                 ).ToList();
             }
             

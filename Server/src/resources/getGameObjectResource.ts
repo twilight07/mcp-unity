@@ -18,10 +18,16 @@ export type GameObjectParams = z.infer<typeof GameObjectParamsSchema>;
 
 export function createGetGameObjectResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_gameobject';
+  const resourceUri = 'unity://gameobject/{id}';
   const resourceMimeType = 'application/json';
   
   // Create a resource template with the MCP SDK
-  const template = new ResourceTemplate('unity://gameobject/{id}', { list: undefined });
+  const template = new ResourceTemplate(
+    resourceUri, 
+    { 
+      list: () => listGameObjects(mcpUnity, logger, resourceMimeType)
+    }
+  );
   
   return {
     name: resourceName,
@@ -69,4 +75,99 @@ export function createGetGameObjectResource(mcpUnity: McpUnity, logger: Logger):
       };
     }
   };
+}
+
+/**
+ * Get a list of all GameObjects in the scene
+ * @param mcpUnity The McpUnity instance to communicate with Unity
+ * @param logger The logger instance
+ * @param resourceMimeType The MIME type for the resource
+ * @returns A promise that resolves to a list of GameObject resources
+ */
+async function listGameObjects(mcpUnity: McpUnity, logger: Logger, resourceMimeType: string) {
+  const hierarchyResponse = await mcpUnity.sendRequest({
+    method: 'get_hierarchy',
+    params: {}
+  });
+  
+  if (!hierarchyResponse.success) {
+    logger.error(`Failed to fetch hierarchy: ${hierarchyResponse.message}`);
+    throw new Error(hierarchyResponse.message || 'Failed to fetch hierarchy');
+  }
+  
+  // Process the hierarchy to create a list of GameObject references
+  const gameObjects = processHierarchyToGameObjectList(hierarchyResponse.hierarchy || []);
+  
+  // Create resources array with both instance ID and path URIs
+  const resources: Array<{
+    uri: string;
+    name: string;
+    description: string;
+    mimeType: string;
+  }> = [];
+  
+  // Add resources for each GameObject
+  gameObjects.forEach(obj => {
+    // Add resource with instance ID URI
+    resources.push({
+      uri: `unity://gameobject/${obj.instanceId}`,
+      name: obj.name,
+      description: `GameObject with instance ID ${obj.instanceId} at path: ${obj.path}`,
+      mimeType: resourceMimeType
+    });
+    
+    // Add resource with path URI if path exists
+    if (obj.path) {
+      resources.push({
+        uri: `unity://gameobject/${encodeURIComponent(obj.path)}`,
+        name: obj.name,
+        description: `GameObject with instance ID ${obj.instanceId} at path: ${obj.path}`,
+        mimeType: resourceMimeType
+      });
+    }
+  });
+  
+  return { resources };
+}
+
+/**
+ * Process the hierarchy data to create a list of GameObject references
+ * @param hierarchyData The hierarchy data from Unity
+ * @returns An array of GameObject references with their instance IDs and paths
+ */
+function processHierarchyToGameObjectList(hierarchyData: any): any[] {
+  const gameObjects: any[] = [];
+  
+  // Helper function to traverse the hierarchy recursively
+  function traverseHierarchy(node: any, path: string = ''): void {
+    if (!node) return;
+    
+    // Current path is parent path + node name
+    const currentPath = path ? `${path}/${node.name}` : node.name;
+    
+    // Add this GameObject to the list
+    gameObjects.push({
+      instanceId: node.instanceId,
+      name: node.name,
+      path: currentPath,
+      active: node.active,
+      uri: `unity://gameobject/${node.instanceId}`
+    });
+    
+    // Process children recursively
+    if (node.children && Array.isArray(node.children)) {
+      for (const child of node.children) {
+        traverseHierarchy(child, currentPath);
+      }
+    }
+  }
+  
+  // Start traversal with each root GameObject
+  if (Array.isArray(hierarchyData)) {
+    for (const rootNode of hierarchyData) {
+      traverseHierarchy(rootNode);
+    }
+  }
+  
+  return gameObjects;
 }

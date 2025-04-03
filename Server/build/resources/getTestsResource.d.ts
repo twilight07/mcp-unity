@@ -6,11 +6,6 @@ export interface TestItem {
     fullName: string;
     path: string;
     testMode: string;
-}
-export interface TestsResponse {
-    tests: TestItem[];
-    count: number;
-    editModeCount: number;
-    playModeCount: number;
+    runState: string;
 }
 export declare function createGetTestsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition;

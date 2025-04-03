@@ -53,37 +53,59 @@ MCP Unity provides automatic integration with VSCode-like IDEs (Visual Studio Co
 - Enables better autocompletion and type information for Unity packages
 - Helps AI coding assistants understand your project's dependencies
 
-You can manually update your workspace using the "Update Workspace Now" button in the Unity Editor MCP Server window (Tools > MCP Unity > Server Window) under the IDE Integration section.
-
 ### MCP Server Tools
 
 This MCP currently provides the following <ins>tools</ins>:
 
 - <ins>**execute_menu_item**</ins>: Executes Unity menu items (functions tagged with the MenuItem attribute)
+  > **Example prompt:** "Execute the menu item 'GameObject/Create Empty' to create a new empty GameObject"
+
 - <ins>**select_gameobject**</ins>: Selects game objects in the Unity hierarchy by path or instance ID
+  > **Example prompt:** "Select the Main Camera object in my scene"
+
 - <ins>**update_component**</ins>: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
+  > **Example prompt:** "Add a Rigidbody component to the Player object and set its mass to 5"
+
 - <ins>**add_package**</ins>: Installs new packages in the Unity Package Manager
+  > **Example prompt:** "Add the TextMeshPro package to my project"
+
 - <ins>**run_tests**</ins>: Runs tests using the Unity Test Runner
+  > **Example prompt:** "Run all the EditMode tests in my project"
+
 - <ins>**notify_message**</ins>: Displays messages in the Unity Editor
+  > **Example prompt:** "Send a notification to Unity that the task has been completed"
 
 ### MCP Server Resources
 
 - <ins>**get_menu_items**</ins>: Retrieves a list of all available menu items in the Unity Editor to facilitate <ins>**execute_menu_item**</ins> tool
+  > **Example prompt:** "Show me all available menu items related to GameObject creation"
+
 - <ins>**get_hierarchy**</ins>: Retrieves a list of all game objects in the Unity hierarchy
+  > **Example prompt:** "Show me the current scene hierarchy structure"
+
 - <ins>**get_gameobject**</ins>: Retrieves detailed information about a specific GameObject by instance ID, including all GameObject components with it's serialized properties and fields
+  > **Example prompt:** "Get me detailed information about the Player GameObject"
+
 - <ins>**get_console_logs**</ins>: Retrieves a list of all logs from the Unity console
+  > **Example prompt:** "Show me the recent error messages from the Unity console"
+
 - <ins>**get_packages**</ins>: Retrieves information about installed and available packages from the Unity Package Manager
+  > **Example prompt:** "List all the packages currently installed in my Unity project"
+
 - <ins>**get_assets**</ins>: Retrieves information about assets in the Unity Asset Database
+  > **Example prompt:** "Find all texture assets in my project"
+
 - <ins>**get_tests**</ins>: Retrieves information about tests in the Unity Test Runner
+  > **Example prompt:** "List all available tests in my Unity project"
+
+<a href="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity">
+  <img width="400" height="200" src="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity/badge" alt="Unity MCP server" />
+</a>
 
 ## Requirements
 - Unity 2022.3 or later - to [install the server](#install-server)
 - Node.js 18 or later - to [start the server](#start-server)
 - npm 9 or later - to [debug the server](#debug-server)
-
-<a href="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity">
-  <img width="400" height="200" src="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity/badge" alt="Unity MCP server" />
-</a>
 
 ## <a name="install-server"></a>Installation
 

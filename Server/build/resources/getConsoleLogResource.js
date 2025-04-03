@@ -1,7 +1,7 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 export function createGetConsoleLogsResource(mcpUnity, logger) {
     const resourceName = 'get_console_logs';
-    const resourceUri = `unity://${resourceName}`;
+    const resourceUri = `logs://console`;
     const resourceMimeType = 'application/json';
     return {
         name: resourceName,

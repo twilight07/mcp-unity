@@ -1,48 +1,56 @@
-import { McpUnityError, ErrorType } from '../utils/errors.js';
+import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
+/**
+ * Lists available test modes (EditMode and PlayMode)
+ * @param resourceMimeType The MIME type for the resources
+ * @returns A list of test mode resources
+ */
+function listTestModes(resourceMimeType) {
+    return {
+        resources: [
+            {
+                uri: `unity://tests/EditMode`,
+                name: "EditMode tests",
+                description: "List of all EditMode tests in Unity's test runner",
+                mimeType: resourceMimeType
+            },
+            {
+                uri: `unity://tests/PlayMode`,
+                name: "PlayMode tests",
+                description: "List of all PlayMode tests in Unity's test runner",
+                mimeType: resourceMimeType
+            }
+        ]
+    };
+}
 export function createGetTestsResource(mcpUnity, logger) {
     const resourceName = 'get_tests';
-    const resourceUri = `unity://tests`;
     const resourceMimeType = 'application/json';
+    // Create the resource definition
     return {
         name: resourceName,
-        uri: resourceUri,
+        uri: new ResourceTemplate('unity://tests/{testMode}', {
+            list: () => listTestModes(resourceMimeType)
+        }),
         metadata: {
             description: "Gets the list of available tests from Unity's Test Runner",
             mimeType: resourceMimeType
         },
+        // Handler for the resource
         handler: async (params) => {
-            const { testMode, nameFilter } = params;
+            // Extract query parameters from the URL if available
+            const testMode = params?.testMode || params?.mode || 'EditMode';
             const response = await mcpUnity.sendRequest({
                 method: resourceName,
                 params: {
-                    testMode,
-                    nameFilter
+                    testMode
                 }
             });
-            if (!response.success && response.error) {
-                throw new McpUnityError(ErrorType.RESOURCE_FETCH, response.error.message || 'Failed to fetch tests from Unity');
-            }
-            const testsResponse = {
-                tests: response.tests || [],
-                count: response.count || 0,
-                editModeCount: response.editModeCount || 0,
-                playModeCount: response.playModeCount || 0
-            };
-            // Format the test data as JSON
-            const testDataJson = JSON.stringify(testsResponse, null, 2);
             return {
-                _meta: {
-                    test_count: testsResponse.count,
-                    edit_mode_count: testsResponse.editModeCount,
-                    play_mode_count: testsResponse.playModeCount
-                },
-                contents: [
-                    {
-                        uri: resourceUri,
-                        text: testDataJson,
-                        mimeType: resourceMimeType
-                    }
-                ]
+                contents: [{
+                        uri: `unity://tests/${testMode}`,
+                        mimeType: resourceMimeType,
+                        text: JSON.stringify(response, null, 2)
+                    }]
             };
         }
     };

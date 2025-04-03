@@ -116,8 +116,6 @@ namespace McpUnity.Unity
                 _server.Clients.Add(ID, clientName);
             }
             
-            //Debug.Log(Context);
-            
             Debug.Log($"[MCP Unity] WebSocket client '{clientName}' connected");
         }
         

@@ -64,8 +64,11 @@ async function startServer() {
         // Connect the server to the transport
         await server.connect(stdioTransport);
         serverLogger.info('MCP Server started');
-        // Start Unity Bridge connection
-        await mcpUnity.start();
+        // Get the client name from the MCP server
+        const clientName = server.server.getClientVersion()?.name || 'Unknown MCP Client';
+        serverLogger.info(`Connected MCP client: ${clientName}`);
+        // Start Unity Bridge connection with client name in headers
+        await mcpUnity.start(clientName);
     }
     catch (error) {
         serverLogger.error('Failed to start server', error);

@@ -13,10 +13,12 @@ export declare class McpUnity {
     constructor(logger: Logger);
     /**
      * Start the Unity connection
+     * @param clientName Optional name of the MCP client connecting to Unity
      */
-    start(): Promise<void>;
+    start(clientName?: string): Promise<void>;
     /**
      * Connect to the Unity WebSocket
+     * @param clientName Optional name of the MCP client connecting to Unity
      */
     private connect;
     /**

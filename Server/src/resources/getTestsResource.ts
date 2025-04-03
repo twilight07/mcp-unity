@@ -13,11 +13,29 @@ export interface TestItem {
   runState: string;
 }
 
-// Define the parameter schema using zod
-export const TestsParamsSchema = z.object({
-  testMode: z.string().optional().describe("Test mode to filter (EditMode or PlayMode)").default('EditMode'),
-  nameFilter: z.string().optional().describe("Filter tests by name")
-});
+/**
+ * Lists available test modes (EditMode and PlayMode)
+ * @param resourceMimeType The MIME type for the resources
+ * @returns A list of test mode resources
+ */
+function listTestModes(resourceMimeType: string) {
+  return {
+    resources: [
+      { 
+        uri: `unity://tests/EditMode`, 
+        name: "EditMode tests",
+        description: "List of all EditMode tests in Unity's test runner",
+        mimeType: resourceMimeType
+      },
+      { 
+        uri: `unity://tests/PlayMode`, 
+        name: "PlayMode tests",
+        description: "List of all PlayMode tests in Unity's test runner",
+        mimeType: resourceMimeType
+      }
+    ]
+  };
+}
 
 export function createGetTestsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
   const resourceName = 'get_tests';
@@ -26,7 +44,9 @@ export function createGetTestsResource(mcpUnity: McpUnity, logger: Logger): Reso
   // Create the resource definition
   return {
     name: resourceName,
-    uri: new ResourceTemplate('tests://{testMode}/{nameFilter}', { list: undefined }),
+    uri: new ResourceTemplate('unity://tests/{testMode}', { 
+      list: () => listTestModes(resourceMimeType)
+    }),
     metadata: {
       description: "Gets the list of available tests from Unity's Test Runner",
       mimeType: resourceMimeType
@@ -36,25 +56,17 @@ export function createGetTestsResource(mcpUnity: McpUnity, logger: Logger): Reso
     handler: async (params: any): Promise<ReadResourceResult> => {
       // Extract query parameters from the URL if available
       const testMode = params?.testMode || params?.mode || 'EditMode';
-      const nameFilter = params?.nameFilter || params?.filter || '';
-      
-      // Validate parameters using Zod schema
-      const validatedParams = TestsParamsSchema.parse({
-        testMode,
-        nameFilter
-      });
       
       const response = await mcpUnity.sendRequest({
         method: resourceName,
         params: {
-          testMode: validatedParams.testMode,
-          nameFilter: validatedParams.nameFilter
+          testMode
         }
       });
       
       return {
         contents: [{
-          uri: `tests://${validatedParams.testMode}/${validatedParams.nameFilter}`,
+          uri: `unity://tests/${testMode}`,
           mimeType: resourceMimeType,
           text: JSON.stringify(response, null, 2)
         }]
