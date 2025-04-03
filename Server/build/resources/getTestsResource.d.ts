@@ -1,6 +1,6 @@
 import { Logger } from '../utils/logger.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpUnity } from '../unity/mcpUnity.js';
-import { ResourceDefinition } from './resourceRegistry.js';
 export interface TestItem {
     name: string;
     fullName: string;
@@ -8,4 +8,12 @@ export interface TestItem {
     testMode: string;
     runState: string;
 }
-export declare function createGetTestsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition;
+/**
+ * Creates and registers the Tests resource with the MCP server
+ * This resource provides access to Unity's Test Runner tests
+ *
+ * @param server The MCP server instance to register with
+ * @param mcpUnity The McpUnity instance to communicate with Unity
+ * @param logger The logger instance for diagnostic information
+ */
+export declare function createGetTestsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;

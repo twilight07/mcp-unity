@@ -1,31 +1,56 @@
 import { McpUnity } from '../unity/mcpUnity.js';
 import { Logger } from '../utils/logger.js';
-import { ResourceDefinition } from './resourceRegistry.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
-export function createGetAssetsResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition {
-  const resourceName = 'get_assets';
-  const resourceUri = `unity://assets`;
-  const resourceMimeType = 'application/json';
-  
-  return {
-    name: resourceName,
-    uri: resourceUri,
-    metadata: {
+// Constants for the resource
+const resourceName = 'get_assets';
+const resourceUri = 'unity://assets';
+const resourceMimeType = 'application/json';
+
+/**
+ * Creates and registers the Assets resource with the MCP server
+ * This resource provides access to assets in the Unity project
+ * 
+ * @param server The MCP server instance to register with
+ * @param mcpUnity The McpUnity instance to communicate with Unity
+ * @param logger The logger instance for diagnostic information
+ */
+export function createGetAssetsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
+  logger.info(`Registering resource: ${resourceName}`);
+      
+  // Register this resource with the MCP server
+  server.resource(
+    resourceName,
+    resourceUri,
+    {
       description: 'Retrieve assets from the Unity Asset Database',
       mimeType: resourceMimeType
     },
-    handler: async (params: any): Promise<ReadResourceResult> => {
-      const assetType = params?.assetType;
-      const searchPattern = params?.searchPattern;
-      
+    async () => {
+      try {
+        return await resourceHandler(mcpUnity);
+      } catch (error) {
+        logger.error(`Error handling resource ${resourceName}: ${error}`);
+        throw error;
+      }
+    }
+  );
+}
+
+/**
+ * Handles requests for asset information from Unity's Asset Database
+ * 
+ * @param mcpUnity The McpUnity instance to communicate with Unity
+ * @returns A promise that resolves to the assets data
+ * @throws McpUnityError if the request to Unity fails
+ */
+async function resourceHandler(mcpUnity: McpUnity): Promise<ReadResourceResult> {
+      // Since we're using a non-templated ResourceDefinition, we need to handle all assets without parameters
       const response = await mcpUnity.sendRequest({
         method: resourceName,
-        params: {
-          assetType,
-          searchPattern
-        }
+        params: {}
       });
       
       if (!response.success) {
@@ -59,6 +84,4 @@ export function createGetAssetsResource(mcpUnity: McpUnity, logger: Logger): Res
           }
         ]
       };
-    }
-  };
 }

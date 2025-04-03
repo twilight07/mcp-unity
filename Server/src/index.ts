@@ -4,7 +4,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { McpUnity } from './unity/mcpUnity.js';
 import { Logger, LogLevel } from './utils/logger.js';
 import { ToolRegistry } from './tools/toolRegistry.js';
-import { ResourceRegistry } from './resources/resourceRegistry.js';
+// No longer need to import from resourceRegistry
 import { createMenuItemTool } from './tools/menuItemTool.js';
 import { createSelectGameObjectTool } from './tools/selectGameObjectTool.js';
 import { createAddPackageTool } from './tools/addPackageTool.js';
@@ -42,9 +42,8 @@ const server = new McpServer (
 // Initialize MCP HTTP bridge with Unity editor
 const mcpUnity = new McpUnity(unityLogger);
 
-// Initialize the registries
+// Initialize the tool registry
 const toolRegistry = new ToolRegistry(toolLogger);
-const resourceRegistry = new ResourceRegistry(resourceLogger);
 
 // Add all tools to the registry
 toolRegistry.add(createMenuItemTool(mcpUnity, toolLogger));
@@ -54,18 +53,17 @@ toolRegistry.add(createRunTestsTool(mcpUnity, toolLogger));
 toolRegistry.add(createNotifyMessageTool(mcpUnity, toolLogger));
 toolRegistry.add(createUpdateComponentTool(mcpUnity, toolLogger));
 
-// Add all resources to the registry
-resourceRegistry.add(createGetMenuItemsResource(mcpUnity, resourceLogger));
-resourceRegistry.add(createGetConsoleLogsResource(mcpUnity, resourceLogger));
-resourceRegistry.add(createGetHierarchyResource(mcpUnity, resourceLogger));
-resourceRegistry.add(createGetPackagesResource(mcpUnity, resourceLogger));
-resourceRegistry.add(createGetAssetsResource(mcpUnity, resourceLogger));
-resourceRegistry.add(createGetTestsResource(mcpUnity, resourceLogger));
-resourceRegistry.add(createGetGameObjectResource(mcpUnity, resourceLogger));
+// Create and register all resources with the MCP server
+createGetTestsResource(server, mcpUnity, resourceLogger);
+createGetGameObjectResource(server, mcpUnity, resourceLogger);
+createGetMenuItemsResource(server, mcpUnity, resourceLogger);
+createGetConsoleLogsResource(server, mcpUnity, resourceLogger);
+createGetHierarchyResource(server, mcpUnity, resourceLogger);
+createGetPackagesResource(server, mcpUnity, resourceLogger);
+createGetAssetsResource(server, mcpUnity, resourceLogger);
 
-// Register all tools and resources with the MCP server
+// Register all tools with the MCP server
 toolRegistry.registerWithServer(server);
-resourceRegistry.registerWithServer(server);
 
 // Server startup function
 async function startServer() {

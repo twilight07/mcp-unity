@@ -22,38 +22,42 @@ namespace McpUnity.Resources
         /// <summary>
         /// Fetch information about a specific GameObject
         /// </summary>
-        /// <param name="parameters">Resource parameters as a JObject. Should include 'instanceId' for the GameObject to fetch</param>
+        /// <param name="parameters">Resource parameters as a JObject. Should include 'objectPathId' which can be either an instance ID or a path</param>
         /// <returns>A JObject containing the GameObject data</returns>
         public override JObject Fetch(JObject parameters)
         {
             // Validate parameters
-            if (parameters == null || !parameters.ContainsKey("instanceId"))
+            if (parameters == null || !parameters.ContainsKey("objectPathId"))
             {
                 return new JObject
                 {
                     ["success"] = false,
-                    ["message"] = "Missing required parameter: instanceId"
+                    ["message"] = "Missing required parameter: objectPathId"
                 };
             }
 
-            // Try to parse the instance ID
-            if (!int.TryParse(parameters["instanceId"].ToString(), out int instanceId))
+            string objectPathId = parameters["objectPathId"].ToString();
+            GameObject gameObject = null;
+            
+            // Try to parse as an instance ID first
+            if (int.TryParse(objectPathId, out int instanceId))
             {
-                return new JObject
-                {
-                    ["success"] = false,
-                    ["message"] = "Invalid instanceId format. Must be an integer."
-                };
+                // If it's a valid integer, try to find by instance ID
+                gameObject = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
             }
-
-            // Try to find the GameObject with the given instance ID
-            GameObject gameObject = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
+            else
+            {
+                // Otherwise, treat it as a path
+                gameObject = GameObject.Find(objectPathId);
+            }
+            
+            // Check if the GameObject was found
             if (gameObject == null)
             {
                 return new JObject
                 {
                     ["success"] = false,
-                    ["message"] = $"GameObject with instanceId {instanceId} not found"
+                    ["message"] = $"GameObject with path '{objectPathId}' not found"
                 };
             }
 

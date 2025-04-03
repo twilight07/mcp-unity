@@ -1,22 +1,12 @@
-import { z } from 'zod';
 import { Logger } from '../utils/logger.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpUnity } from '../unity/mcpUnity.js';
-import { ResourceDefinition } from './resourceRegistry.js';
-export declare const GameObjectParamsSchema: z.ZodEffects<z.ZodObject<{
-    instanceId: z.ZodOptional<z.ZodNumber>;
-    objectPath: z.ZodOptional<z.ZodString>;
-}, "strip", z.ZodTypeAny, {
-    objectPath?: string | undefined;
-    instanceId?: number | undefined;
-}, {
-    objectPath?: string | undefined;
-    instanceId?: number | undefined;
-}>, {
-    objectPath?: string | undefined;
-    instanceId?: number | undefined;
-}, {
-    objectPath?: string | undefined;
-    instanceId?: number | undefined;
-}>;
-export type GameObjectParams = z.infer<typeof GameObjectParamsSchema>;
-export declare function createGetGameObjectResource(mcpUnity: McpUnity, logger: Logger): ResourceDefinition;
+/**
+ * Creates and registers the GameObject resource with the MCP server
+ * This resource provides access to GameObjects in Unity scenes
+ *
+ * @param server The MCP server instance to register with
+ * @param mcpUnity The McpUnity instance to communicate with Unity
+ * @param logger The logger instance for diagnostic information
+ */
+export declare function createGetGameObjectResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;

@@ -1,63 +1,66 @@
-import { z } from 'zod';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
-// Define the parameter schema using zod
-export const GameObjectParamsSchema = z.object({
-    instanceId: z.number().optional().describe("The instance ID of the GameObject to retrieve"),
-    objectPath: z.string().optional().describe("The path of the GameObject in the hierarchy (alternative to instanceId)")
-}).refine(data => data.instanceId !== undefined || data.objectPath !== undefined, {
-    message: "Either instanceId or objectPath must be provided"
-});
-export function createGetGameObjectResource(mcpUnity, logger) {
-    const resourceName = 'get_gameobject';
-    const resourceUri = 'unity://gameobject/{id}';
-    const resourceMimeType = 'application/json';
+import { McpUnityError, ErrorType } from '../utils/errors.js';
+// Constants for the resource
+const resourceName = 'get_gameobject';
+const resourceUri = 'unity://gameobject/{id}';
+const resourceMimeType = 'application/json';
+/**
+ * Creates and registers the GameObject resource with the MCP server
+ * This resource provides access to GameObjects in Unity scenes
+ *
+ * @param server The MCP server instance to register with
+ * @param mcpUnity The McpUnity instance to communicate with Unity
+ * @param logger The logger instance for diagnostic information
+ */
+export function createGetGameObjectResource(server, mcpUnity, logger) {
     // Create a resource template with the MCP SDK
-    const template = new ResourceTemplate(resourceUri, {
+    const resourceTemplate = new ResourceTemplate(resourceUri, {
         list: () => listGameObjects(mcpUnity, logger, resourceMimeType)
     });
-    return {
-        name: resourceName,
-        uri: template,
-        metadata: {
-            description: 'Retrieve a GameObject by ID or path',
-            mimeType: resourceMimeType
-        },
-        // Handler with params from the template
-        handler: async (params) => {
-            let validatedParams;
-            // Extract and convert the parameter from path or query params
-            if (params.id) {
-                // Try to parse as number for instanceId, otherwise use as path
-                const id = params.id;
-                if (!isNaN(Number(id))) {
-                    validatedParams = { instanceId: Number(id) };
-                }
-                else {
-                    validatedParams = { objectPath: id };
-                }
-            }
-            else {
-                // Try to use directly provided instanceId or objectPath
-                validatedParams = GameObjectParamsSchema.parse({
-                    instanceId: params.instanceId,
-                    objectPath: params.objectPath
-                });
-            }
-            // Send request to Unity
-            const response = await mcpUnity.sendRequest({
-                method: resourceName,
-                params: {
-                    instanceId: validatedParams.instanceId,
-                    objectPath: validatedParams.objectPath
-                }
-            });
-            return {
-                contents: [{
-                        uri: `unity://gameobject/${validatedParams.instanceId || validatedParams.objectPath}`,
-                        text: JSON.stringify(response, null, 2)
-                    }]
-            };
+    logger.info(`Registering resource: ${resourceName}`);
+    // Register this resource with the MCP server
+    server.resource(resourceName, resourceTemplate, {
+        description: 'Retrieve a GameObject by ID or path',
+        mimeType: resourceMimeType
+    }, async (uri, variables) => {
+        try {
+            return await resourceHandler(mcpUnity, uri, variables, logger);
         }
+        catch (error) {
+            logger.error(`Error handling resource ${resourceName}: ${error}`);
+            throw error;
+        }
+    });
+}
+/**
+ * Handles requests for GameObject information from Unity
+ *
+ * @param mcpUnity The McpUnity instance to communicate with Unity
+ * @param uri The requested resource URI
+ * @param variables Variables extracted from the URI template
+ * @param logger The logger instance for diagnostic information
+ * @returns A promise that resolves to the GameObject data
+ * @throws McpUnityError if the request to Unity fails
+ */
+async function resourceHandler(mcpUnity, uri, variables, logger) {
+    // Extract and convert the parameter from the template variables
+    const id = variables["id"];
+    // Send request to Unity
+    const response = await mcpUnity.sendRequest({
+        method: resourceName,
+        params: {
+            objectPathId: id
+        }
+    });
+    if (!response.success) {
+        throw new McpUnityError(ErrorType.RESOURCE_FETCH, response.message || 'Failed to fetch GameObject from Unity');
+    }
+    return {
+        contents: [{
+                uri: `unity://gameobject/${id}`,
+                mimeType: resourceMimeType,
+                text: JSON.stringify(response, null, 2)
+            }]
     };
 }
 /**
