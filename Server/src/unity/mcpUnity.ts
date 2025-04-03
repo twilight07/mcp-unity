@@ -45,12 +45,17 @@ export class McpUnity {
   
   /**
    * Start the Unity connection
+   * @param clientName Optional name of the MCP client connecting to Unity
    */
-  public async start(): Promise<void> {
+  public async start(clientName?: string): Promise<void> {
     try {
       this.logger.info('Attempting to connect to Unity WebSocket...');
-      await this.connect();
+      await this.connect(clientName); // Pass client name to connect
       this.logger.info('Successfully connected to Unity WebSocket');
+      
+      if (clientName) {
+        this.logger.info(`Client identified to Unity as: ${clientName}`);
+      }
     } catch (error) {
       this.logger.warn(`Could not connect to Unity WebSocket: ${error instanceof Error ? error.message : String(error)}`);
       this.logger.warn('Will retry connection on next request');
@@ -64,8 +69,9 @@ export class McpUnity {
   
   /**
    * Connect to the Unity WebSocket
+   * @param clientName Optional name of the MCP client connecting to Unity
    */
-  private async connect(): Promise<void> {
+  private async connect(clientName?: string): Promise<void> {
     if (this.isConnected) {
       this.logger.debug('Already connected to Unity WebSocket');
       return Promise.resolve();
@@ -78,8 +84,16 @@ export class McpUnity {
       const wsUrl = `ws://localhost:${this.port}/McpUnity`;
       this.logger.debug(`Connecting to ${wsUrl}...`);
       
-      // Create a new WebSocket
-      this.ws = new WebSocket(wsUrl);
+      // Create connection options with headers for client identification
+      const options: WebSocket.ClientOptions = {
+        headers: {
+          'X-Client-Name': clientName || ''
+        },
+        origin: clientName || ''
+      };
+      
+      // Create a new WebSocket with options
+      this.ws = new WebSocket(wsUrl, options);
       
       const connectionTimeout = setTimeout(() => {
         if (this.ws && (this.ws.readyState === WebSocket.CONNECTING)) {
@@ -205,12 +219,12 @@ export class McpUnity {
       await this.connect();
     }
     
-    // Use given id or generate a new one
+      // Use given id or generate a new one
     const requestId = request.id as string || uuidv4();
     const message: UnityRequest = {
       ...request,
-      id: requestId
-    };
+        id: requestId
+      };
     
     return new Promise((resolve, reject) => {
       // Double check isConnected again after await

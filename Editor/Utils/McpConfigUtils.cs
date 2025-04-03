@@ -1,12 +1,13 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using McpUnity.Unity;
 using UnityEngine;
 using UnityEditor;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace McpUnity.Unity
+namespace McpUnity.Utils
 {
     /// <summary>
     /// Utility class for MCP configuration operations

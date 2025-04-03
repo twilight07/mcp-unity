@@ -10,6 +10,7 @@ using McpUnity.Tools;
 using McpUnity.Resources;
 using Unity.EditorCoroutines.Editor;
 using System.Collections;
+using System.Collections.Specialized;
 
 namespace McpUnity.Unity
 {
@@ -104,7 +105,20 @@ namespace McpUnity.Unity
         /// </summary>
         protected override void OnOpen()
         {
-            Debug.Log("[MCP Unity] WebSocket client connected");
+            // Extract client name from the X-Client-Name header
+            string clientName = "";
+            NameValueCollection headers = Context.Headers;
+            if (headers != null && headers.Contains("X-Client-Name"))
+            {
+                clientName = headers["X-Client-Name"];
+                
+                // Add the client name on the server
+                _server.Clients.Add(ID, clientName);
+            }
+            
+            //Debug.Log(Context);
+            
+            Debug.Log($"[MCP Unity] WebSocket client '{clientName}' connected");
         }
         
         /// <summary>
@@ -112,7 +126,12 @@ namespace McpUnity.Unity
         /// </summary>
         protected override void OnClose(CloseEventArgs e)
         {
-            Debug.Log($"[MCP Unity] WebSocket client disconnected: {e.Reason}");
+            _server.Clients.TryGetValue(ID, out string clientName);
+            
+            // Remove the client from the server
+            _server.Clients.Remove(ID);
+            
+            Debug.Log($"[MCP Unity] WebSocket client '{clientName}' disconnected: {e.Reason}");
         }
         
         /// <summary>

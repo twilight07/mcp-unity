@@ -44,6 +44,19 @@
 MCP Unity is an implementation of the Model Context Protocol for Unity Editor, allowing AI assistants to interact with your Unity projects. This package provides a bridge between Unity and a Node.js server that implements the MCP protocol, enabling AI agents like Claude, Windsurf, and Cursor to execute operations within the Unity Editor.
 
 ## Features
+
+### IDE Integration - Package Cache Access
+
+MCP Unity provides automatic integration with VSCode-like IDEs (Visual Studio Code, Cursor, Windsurf) by adding the Unity `Library/PackedCache` folder to your workspace. This feature:
+
+- Improves code intelligence for Unity packages
+- Enables better autocompletion and type information for Unity packages
+- Helps AI coding assistants understand your project's dependencies
+
+You can manually update your workspace using the "Update Workspace Now" button in the Unity Editor MCP Server window (Tools > MCP Unity > Server Window) under the IDE Integration section.
+
+### MCP Server Tools
+
 This MCP currently provides the following <ins>tools</ins>:
 
 - <ins>**execute_menu_item**</ins>: Executes Unity menu items (functions tagged with the MenuItem attribute)
@@ -53,7 +66,7 @@ This MCP currently provides the following <ins>tools</ins>:
 - <ins>**run_tests**</ins>: Runs tests using the Unity Test Runner
 - <ins>**notify_message**</ins>: Displays messages in the Unity Editor
 
-This MCP currently provides the following <ins>resources</ins>:
+### MCP Server Resources
 
 - <ins>**get_menu_items**</ins>: Retrieves a list of all available menu items in the Unity Editor to facilitate <ins>**execute_menu_item**</ins> tool
 - <ins>**get_hierarchy**</ins>: Retrieves a list of all game objects in the Unity hierarchy

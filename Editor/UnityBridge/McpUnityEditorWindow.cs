@@ -1,3 +1,4 @@
+using McpUnity.Utils;
 using UnityEngine;
 using UnityEditor;
 
@@ -128,8 +129,8 @@ namespace McpUnity.Unity
             
             EditorGUILayout.LabelField("Connected Clients", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical("box"); // Keep the default gray box for the container
-            
-            var clients = mcpUnityServer.GetConnectedClients();
+
+            var clients = mcpUnityServer.Clients;
             
             if (clients.Count > 0)
             {
@@ -139,12 +140,12 @@ namespace McpUnity.Unity
                     
                     EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.LabelField("ID:", _connectedClientLabelStyle, GUILayout.Width(50));                    
-                    EditorGUILayout.LabelField(client.ID, EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(client.Key, EditorStyles.boldLabel);
                     EditorGUILayout.EndHorizontal();
                     
                     EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.LabelField("Name:", _connectedClientLabelStyle, GUILayout.Width(50));
-                    EditorGUILayout.LabelField(client.Name, _connectedClientLabelStyle);
+                    EditorGUILayout.LabelField(client.Value, _connectedClientLabelStyle);
                     EditorGUILayout.EndHorizontal();
                     
                     EditorGUILayout.EndVertical();
@@ -157,9 +158,31 @@ namespace McpUnity.Unity
             }
                 
             EditorGUILayout.EndVertical();
+            
+            // IDE Integration settings
+            string ideIntegrationTooltip = "Add the Library/PackedCache folder to VSCode-like IDE workspaces so code can be indexed for the AI to access it. This improves code intelligence for Unity packages in VSCode, Cursor, and similar IDEs.";
             EditorGUILayout.Space();
+            EditorGUILayout.LabelField(new GUIContent("Improve VSCode-like IDEs code intelligence", ideIntegrationTooltip), EditorStyles.boldLabel);
+            
+            // Add button to manually update workspace
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(new GUIContent("Update Workspace Cache Now", ideIntegrationTooltip), GUILayout.Height(24)))
+            {
+                bool updated = VsCodeWorkspaceUtils.AddPackageCacheToWorkspace();
+                if (updated)
+                {
+                    EditorUtility.DisplayDialog("Workspace Updated", "Successfully added Library/PackedCache to workspace files. Please restart your IDE and open the workspace.", "OK");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Workspace Update Failed", "No workspace files were found or needed updating.", "OK");
+                }
+            }
+            
+            EditorGUILayout.EndHorizontal();
             
             // MCP Config generation section
+            EditorGUILayout.Space();
             EditorGUILayout.LabelField("MCP Configuration", EditorStyles.boldLabel);
 
             var before = _tabsIndentationJson;

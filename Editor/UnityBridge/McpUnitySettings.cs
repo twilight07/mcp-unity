@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using McpUnity.Utils;
 using UnityEngine;
 using UnityEditor;
 
@@ -31,7 +32,6 @@ namespace McpUnity.Unity
                 if (_instance == null)
                 {
                     _instance = new McpUnitySettings();
-                    _instance.LoadSettings();
                 }
                 return _instance;
             }
@@ -40,7 +40,11 @@ namespace McpUnity.Unity
         /// <summary>
         /// Private constructor for singleton
         /// </summary>
-        private McpUnitySettings() { }
+        private McpUnitySettings() 
+        { 
+            LoadSettings();
+            VsCodeWorkspaceUtils.AddPackageCacheToWorkspace();
+        }
 
         /// <summary>
         /// Load settings from disk
