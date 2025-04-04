@@ -3,8 +3,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { McpUnity } from './unity/mcpUnity.js';
 import { Logger, LogLevel } from './utils/logger.js';
-import { ToolRegistry } from './tools/toolRegistry.js';
-// No longer need to import from resourceRegistry
 import { createMenuItemTool } from './tools/menuItemTool.js';
 import { createSelectGameObjectTool } from './tools/selectGameObjectTool.js';
 import { createAddPackageTool } from './tools/addPackageTool.js';
@@ -35,15 +33,13 @@ const server = new McpServer({
 });
 // Initialize MCP HTTP bridge with Unity editor
 const mcpUnity = new McpUnity(unityLogger);
-// Initialize the tool registry
-const toolRegistry = new ToolRegistry(toolLogger);
 // Add all tools to the registry
-toolRegistry.add(createMenuItemTool(mcpUnity, toolLogger));
-toolRegistry.add(createSelectGameObjectTool(mcpUnity, toolLogger));
-toolRegistry.add(createAddPackageTool(mcpUnity, toolLogger));
-toolRegistry.add(createRunTestsTool(mcpUnity, toolLogger));
-toolRegistry.add(createNotifyMessageTool(mcpUnity, toolLogger));
-toolRegistry.add(createUpdateComponentTool(mcpUnity, toolLogger));
+createMenuItemTool(server, mcpUnity, toolLogger);
+createSelectGameObjectTool(server, mcpUnity, toolLogger);
+createAddPackageTool(server, mcpUnity, toolLogger);
+createRunTestsTool(server, mcpUnity, toolLogger);
+createNotifyMessageTool(server, mcpUnity, toolLogger);
+createUpdateComponentTool(server, mcpUnity, toolLogger);
 // Create and register all resources with the MCP server
 createGetTestsResource(server, mcpUnity, resourceLogger);
 createGetGameObjectResource(server, mcpUnity, resourceLogger);
@@ -52,8 +48,6 @@ createGetConsoleLogsResource(server, mcpUnity, resourceLogger);
 createGetHierarchyResource(server, mcpUnity, resourceLogger);
 createGetPackagesResource(server, mcpUnity, resourceLogger);
 createGetAssetsResource(server, mcpUnity, resourceLogger);
-// Register all tools with the MCP server
-toolRegistry.registerWithServer(server);
 // Server startup function
 async function startServer() {
     try {

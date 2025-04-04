@@ -1,5 +1,6 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
+import { resourceUri as hierarchyResourceUri } from './getHierarchyResource.js';
 // Constants for the resource
 const resourceName = 'get_gameobject';
 const resourceUri = 'unity://gameobject/{id}';
@@ -15,7 +16,7 @@ const resourceMimeType = 'application/json';
 export function createGetGameObjectResource(server, mcpUnity, logger) {
     // Create a resource template with the MCP SDK
     const resourceTemplate = new ResourceTemplate(resourceUri, {
-        list: () => listGameObjects(mcpUnity, logger, resourceMimeType)
+        list: async () => listGameObjects(mcpUnity, logger, resourceMimeType)
     });
     logger.info(`Registering resource: ${resourceName}`);
     // Register this resource with the MCP server
@@ -44,7 +45,7 @@ export function createGetGameObjectResource(server, mcpUnity, logger) {
  */
 async function resourceHandler(mcpUnity, uri, variables, logger) {
     // Extract and convert the parameter from the template variables
-    const id = variables["id"];
+    const id = decodeURIComponent(variables["id"]);
     // Send request to Unity
     const response = await mcpUnity.sendRequest({
         method: resourceName,
@@ -72,7 +73,7 @@ async function resourceHandler(mcpUnity, uri, variables, logger) {
  */
 async function listGameObjects(mcpUnity, logger, resourceMimeType) {
     const hierarchyResponse = await mcpUnity.sendRequest({
-        method: 'get_hierarchy',
+        method: hierarchyResourceUri,
         params: {}
     });
     if (!hierarchyResponse.success) {
@@ -81,6 +82,7 @@ async function listGameObjects(mcpUnity, logger, resourceMimeType) {
     }
     // Process the hierarchy to create a list of GameObject references
     const gameObjects = processHierarchyToGameObjectList(hierarchyResponse.hierarchy || []);
+    logger.info(`[getGameObjectResource] Fetched hierarchy with ${gameObjects.length} GameObjects ${hierarchyResponse.hierarchy}`);
     // Create resources array with both instance ID and path URIs
     const resources = [];
     // Add resources for each GameObject

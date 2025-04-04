@@ -161,7 +161,12 @@ namespace McpUnity.Tools
             // Set the test run completion result
             try
             {
-                _testRunCompletionSource.SetResult(summary);
+                _testRunCompletionSource.SetResult(new JObject
+                {
+                    ["success"] = true,
+                    ["type"] = "text",
+                    ["message"] = summary["message"].Value<string>()
+                });
             }
             catch (Exception ex)
             {

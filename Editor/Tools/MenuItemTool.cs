@@ -44,6 +44,7 @@ namespace McpUnity.Tools
             return new JObject
             {
                 ["success"] = success,
+                ["type"] = "text",
                 ["message"] = success 
                     ? $"Successfully executed menu item: {menuPath}" 
                     : $"Failed to execute menu item: {menuPath}"

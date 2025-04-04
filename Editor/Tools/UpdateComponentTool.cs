@@ -57,14 +57,6 @@ namespace McpUnity.Tools
             {
                 gameObject = EditorUtility.InstanceIDToObject(instanceId.Value) as GameObject;
                 identifier = $"ID {instanceId.Value}";
-                
-                if (gameObject == null)
-                {
-                    return McpUnitySocketHandler.CreateErrorResponse(
-                        $"GameObject with instance ID {instanceId.Value} not found", 
-                        "not_found_error"
-                    );
-                }
             }
             else
             {
@@ -76,15 +68,15 @@ namespace McpUnity.Tools
                 {
                     // Try to find using the Unity Scene hierarchy path
                     gameObject = FindGameObjectByPath(objectPath);
-                    
-                    if (gameObject == null)
-                    {
-                        return McpUnitySocketHandler.CreateErrorResponse(
-                            $"GameObject with path '{objectPath}' not found", 
-                            "not_found_error"
-                        );
-                    }
                 }
+            }
+                    
+            if (gameObject == null)
+            {
+                return McpUnitySocketHandler.CreateErrorResponse(
+                    $"GameObject with path '{objectPath}' or instance ID {instanceId} not found", 
+                    "not_found_error"
+                );
             }
             
             Debug.Log($"[MCP Unity] Updating component '{componentName}' on GameObject '{gameObject.name}' (found by {identifier})");
@@ -127,10 +119,10 @@ namespace McpUnity.Tools
             return new JObject
             {
                 ["success"] = true,
+                ["type"] = "text",
                 ["message"] = wasAdded
                     ? $"Successfully added component '{componentName}' to GameObject '{gameObject.name}' and updated its data"
-                    : $"Successfully updated component '{componentName}' on GameObject '{gameObject.name}'",
-                ["type"] = "text"
+                    : $"Successfully updated component '{componentName}' on GameObject '{gameObject.name}'"
             };
         }
         

@@ -60,6 +60,7 @@ namespace McpUnity.Tools
             return new JObject
             {
                 ["success"] = true,
+                ["type"] = "text",
                 ["message"] = $"Successfully selected GameObject" + 
                     (instanceId.HasValue ? $" with instance ID: {instanceId.Value}" : $": {objectPath}")
             };

@@ -52,8 +52,8 @@ namespace McpUnity.Tools
             return new JObject
             {
                 ["success"] = true,
-                ["message"] = $"Message displayed: {message}",
-                ["type"] = "text"
+                ["type"] = "text",
+                ["message"] = $"Message displayed: {message}"
             };
         }
     }

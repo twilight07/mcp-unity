@@ -36,7 +36,7 @@ namespace McpUnity.Resources
                 };
             }
 
-            string objectPathId = parameters["objectPathId"].ToString();
+            string objectPathId = parameters["objectPathId"]?.ToObject<string>();
             GameObject gameObject = null;
             
             // Try to parse as an instance ID first

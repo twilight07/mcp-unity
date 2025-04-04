@@ -302,8 +302,8 @@ namespace McpUnity.Tools
                     operation.CompletionSource.SetResult(new JObject
                     {
                         ["success"] = true,
-                        ["message"] = $"Successfully added package: {result.displayName} ({result.name}) version {result.version}",
                         ["type"] = "text",
+                        ["message"] = $"Successfully added package: {result.displayName} ({result.name}) version {result.version}",
                         ["packageInfo"] = JObject.FromObject(new
                         {
                             name = result.name,
@@ -317,6 +317,7 @@ namespace McpUnity.Tools
                     operation.CompletionSource.SetResult(new JObject
                     {
                         ["success"] = true,
+                        ["type"] = "text",
                         ["message"] = $"Package operation completed successfully, but no package information was returned."
                     });
                 }

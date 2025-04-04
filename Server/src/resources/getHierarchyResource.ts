@@ -5,9 +5,9 @@ import { McpUnityError, ErrorType } from '../utils/errors.js';
 import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 // Constants for the resource
-const resourceName = 'get_hierarchy';
-const resourceUri = 'unity://hierarchy';
-const resourceMimeType = 'application/json';
+export const resourceName = 'get_hierarchy';
+export const resourceUri = 'unity://hierarchy';
+export const resourceMimeType = 'application/json';
 
 /**
  * Creates and registers the Hierarchy resource with the MCP server
