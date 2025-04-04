@@ -6,7 +6,7 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 
 // Constants for the resource
 const resourceName = 'get_console_logs';
-const resourceUri = 'logs://console';
+const resourceUri = 'unity://logs';
 const resourceMimeType = 'application/json';
 
 /**

@@ -168,6 +168,10 @@ namespace McpUnity.Unity
             // Register UpdateComponentTool
             UpdateComponentTool updateComponentTool = new UpdateComponentTool();
             _tools.Add(updateComponentTool.Name, updateComponentTool);
+            
+            // Register AddAssetToSceneTool
+            AddAssetToSceneTool addAssetToSceneTool = new AddAssetToSceneTool();
+            _tools.Add(addAssetToSceneTool.Name, addAssetToSceneTool);
         }
         
         /// <summary>

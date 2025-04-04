@@ -45,6 +45,10 @@ MCP Unity is an implementation of the Model Context Protocol for Unity Editor, a
 
 ## Features
 
+<a href="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity">
+  <img width="400" height="200" src="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity/badge" alt="Unity MCP server" />
+</a>
+
 ### IDE Integration - Package Cache Access
 
 MCP Unity provides automatic integration with VSCode-like IDEs (Visual Studio Code, Cursor, Windsurf) by adding the Unity `Library/PackedCache` folder to your workspace. This feature:
@@ -55,52 +59,49 @@ MCP Unity provides automatic integration with VSCode-like IDEs (Visual Studio Co
 
 ### MCP Server Tools
 
-This MCP currently provides the following <ins>tools</ins>:
-
-- <ins>**execute_menu_item**</ins>: Executes Unity menu items (functions tagged with the MenuItem attribute)
+- `execute_menu_item`: Executes Unity menu items (functions tagged with the MenuItem attribute)
   > **Example prompt:** "Execute the menu item 'GameObject/Create Empty' to create a new empty GameObject"
 
-- <ins>**select_gameobject**</ins>: Selects game objects in the Unity hierarchy by path or instance ID
+- `select_gameobject`: Selects game objects in the Unity hierarchy by path or instance ID
   > **Example prompt:** "Select the Main Camera object in my scene"
 
-- <ins>**update_component**</ins>: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
+- `update_component`: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
   > **Example prompt:** "Add a Rigidbody component to the Player object and set its mass to 5"
 
-- <ins>**add_package**</ins>: Installs new packages in the Unity Package Manager
+- `add_package`: Installs new packages in the Unity Package Manager
   > **Example prompt:** "Add the TextMeshPro package to my project"
 
-- <ins>**run_tests**</ins>: Runs tests using the Unity Test Runner
+- `run_tests`: Runs tests using the Unity Test Runner
   > **Example prompt:** "Run all the EditMode tests in my project"
 
-- <ins>**notify_message**</ins>: Displays messages in the Unity Editor
+- `notify_message`: Displays messages in the Unity Editor
   > **Example prompt:** "Send a notification to Unity that the task has been completed"
+
+- `add_asset_to_scene`: Adds an asset from the AssetDatabase to the Unity scene
+  > **Example prompt:** "Add the Player prefab from my project to the current scene"
 
 ### MCP Server Resources
 
-- <ins>**get_menu_items**</ins>: Retrieves a list of all available menu items in the Unity Editor to facilitate <ins>**execute_menu_item**</ins> tool
+- `unity://menu-items`: Retrieves a list of all available menu items in the Unity Editor to facilitate `execute_menu_item` tool
   > **Example prompt:** "Show me all available menu items related to GameObject creation"
 
-- <ins>**get_hierarchy**</ins>: Retrieves a list of all game objects in the Unity hierarchy
+- `unity://hierarchy`: Retrieves a list of all game objects in the Unity hierarchy
   > **Example prompt:** "Show me the current scene hierarchy structure"
 
-- <ins>**get_gameobject**</ins>: Retrieves detailed information about a specific GameObject by instance ID, including all GameObject components with it's serialized properties and fields
+- `unity://gameobject/{id}`: Retrieves detailed information about a specific GameObject by instance ID or object path in the scene hierarchy, including all GameObject components with it's serialized properties and fields
   > **Example prompt:** "Get me detailed information about the Player GameObject"
 
-- <ins>**get_console_logs**</ins>: Retrieves a list of all logs from the Unity console
+- `unity://logs`: Retrieves a list of all logs from the Unity console
   > **Example prompt:** "Show me the recent error messages from the Unity console"
 
-- <ins>**get_packages**</ins>: Retrieves information about installed and available packages from the Unity Package Manager
+- `unity://packages`: Retrieves information about installed and available packages from the Unity Package Manager
   > **Example prompt:** "List all the packages currently installed in my Unity project"
 
-- <ins>**get_assets**</ins>: Retrieves information about assets in the Unity Asset Database
+- `unity://assets`: Retrieves information about assets in the Unity Asset Database
   > **Example prompt:** "Find all texture assets in my project"
 
-- <ins>**get_tests**</ins>: Retrieves information about tests in the Unity Test Runner
+- `unity://tests/{testMode}`: Retrieves information about tests in the Unity Test Runner
   > **Example prompt:** "List all available tests in my Unity project"
-
-<a href="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity">
-  <img width="400" height="200" src="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity/badge" alt="Unity MCP server" />
-</a>
 
 ## Requirements
 - Unity 2022.3 or later - to [install the server](#install-server)
@@ -342,8 +343,9 @@ Don't forget to shutdown the server with `Ctrl + C` before closing the terminal 
 If you have any questions or need support, please open an [issue](https://github.com/CoderGamester/mcp-unity/issues) on this repository.
 
 Alternative you can reach out on:
-- [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
+- Linkedin: [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
 - Discord: gamester7178
+- Email: game.gamester@gmail.com
 
 ## Contributing
 

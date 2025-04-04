@@ -21,6 +21,7 @@ namespace McpUnity.Unity
         private bool _isInitialized = false;
         private string _mcpConfigJson = "";
         private bool _tabsIndentationJson = false;
+        private Vector2 _helpTabScrollPosition = Vector2.zero;
 
         [MenuItem("Tools/MCP Unity/Server Window", false, 1)]
         public static void ShowWindow()
@@ -201,9 +202,12 @@ namespace McpUnity.Unity
             
             EditorGUILayout.EndVertical();
         }
-
+        
         private void DrawHelpTab()
         {
+            // Begin scrollable area
+            _helpTabScrollPosition = EditorGUILayout.BeginScrollView(_helpTabScrollPosition);
+            
             WrappedLabel("About MCP Unity", _subHeaderStyle);
             EditorGUILayout.BeginVertical(_boxStyle);
             WrappedLabel("MCP Unity is a Unity Editor integration of the Model Context Protocol (MCP), which enables standardized communication between AI models and applications.");
@@ -299,6 +303,15 @@ namespace McpUnity.Unity
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
             WrappedLabel("Send a notification to Unity that the task has been completed", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
             EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
+            // add_asset_to_scene
+            WrappedLabel("add_asset_to_scene", EditorStyles.boldLabel);
+            WrappedLabel("Adds an asset from the AssetDatabase to the Unity scene");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Add the Player prefab from my project to the current scene", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
             
             EditorGUILayout.EndVertical();
             
@@ -308,8 +321,8 @@ namespace McpUnity.Unity
             
             EditorGUILayout.BeginVertical(_boxStyle);
             
-            // get_menu_items
-            WrappedLabel("get_menu_items", EditorStyles.boldLabel);
+            // unity://menu-items
+            WrappedLabel("unity://menu-items", EditorStyles.boldLabel);
             WrappedLabel("Retrieves a list of all available menu items in the Unity Editor");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
@@ -317,8 +330,8 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
-            // get_hierarchy
-            WrappedLabel("get_hierarchy", EditorStyles.boldLabel);
+            // unity://hierarchy
+            WrappedLabel("unity://hierarchy", EditorStyles.boldLabel);
             WrappedLabel("Retrieves a list of all game objects in the Unity hierarchy");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
@@ -326,8 +339,8 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
-            // get_gameobject
-            WrappedLabel("get_gameobject", EditorStyles.boldLabel);
+            // unity://gameobject/{id}
+            WrappedLabel("unity://gameobject/{id}", EditorStyles.boldLabel);
             WrappedLabel("Retrieves detailed information about a specific GameObject, including all components with serialized properties and fields");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
@@ -335,8 +348,8 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
-            // get_console_logs
-            WrappedLabel("get_console_logs", EditorStyles.boldLabel);
+            // unity://logs
+            WrappedLabel("unity://logs", EditorStyles.boldLabel);
             WrappedLabel("Retrieves a list of all logs from the Unity console");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
@@ -344,8 +357,8 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
-            // get_packages
-            WrappedLabel("get_packages", EditorStyles.boldLabel);
+            // unity://packages
+            WrappedLabel("unity://packages", EditorStyles.boldLabel);
             WrappedLabel("Retrieves information about installed and available packages from the Unity Package Manager");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
@@ -353,8 +366,8 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
-            // get_assets
-            WrappedLabel("get_assets", EditorStyles.boldLabel);
+            // unity://assets
+            WrappedLabel("unity://assets", EditorStyles.boldLabel);
             WrappedLabel("Retrieves information about assets in the Unity Asset Database");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
@@ -362,8 +375,8 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
-            // get_tests
-            WrappedLabel("get_tests", EditorStyles.boldLabel);
+            // unity://tests/{testMode}
+            WrappedLabel("unity://tests/{testMode}", EditorStyles.boldLabel);
             WrappedLabel("Retrieves information about tests in the Unity Test Runner");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
@@ -400,6 +413,9 @@ namespace McpUnity.Unity
             EditorGUILayout.EndHorizontal();
             
             EditorGUILayout.EndVertical();
+            
+            // End scrollable area
+            EditorGUILayout.EndScrollView();
         }
 
         #endregion

@@ -28,7 +28,7 @@ namespace McpUnity.Resources
         {
             Name = "get_console_logs";
             Description = "Retrieves all logs from the Unity console";
-            Uri = "logs://console";
+            Uri = "unity://logs";
             
             // Register for log messages
             Application.logMessageReceived += OnLogMessageReceived;
