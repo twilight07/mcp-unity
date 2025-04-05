@@ -6,9 +6,11 @@
 
 [![smithery badge](https://smithery.ai/badge/@CoderGamester/mcp-unity)](https://smithery.ai/server/@CoderGamester/mcp-unity)
 [![](https://img.shields.io/github/stars/CoderGamester/mcp-unity 'Stars')](https://github.com/CoderGamester/mcp-unity/stargazers)
-[![](https://img.shields.io/github/forks/CoderGamester/mcp-unity 'Forks')](https://github.com/CoderGamester/mcp-unity/network/members)
 [![](https://img.shields.io/github/last-commit/CoderGamester/mcp-unity 'Last Commit')](https://github.com/CoderGamester/mcp-unity/commits/main)
 [![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
+
+| [English](README.md) | [🇨🇳简体中文](README_zh-CN.md) | [🇯🇵日本語](README-ja.md) |
+|----------------------|---------------------------------|----------------------|
 
 ```                                                                        
                               ,/(/.   *(/,                                  
@@ -356,3 +358,10 @@ Contributions are welcome! Please feel free to submit a Pull Request or open an 
 ## License
 
 This project is under [MIT License](License.md)
+
+## Acknowledgements
+
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Unity Technologies](https://unity.com)
+- [Node.js](https://nodejs.org)
+- [WebSocket-Sharp](https://github.com/sta/websocket-sharp)
