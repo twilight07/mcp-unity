@@ -173,17 +173,7 @@ Installing this MCP Unity Server is a multi-step process:
 </details>
 
 <details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Option 2: Configure via Smithery</span></summary>
-
-To install MCP Unity via [Smithery](https://smithery.ai/server/@CoderGamester/mcp-unity):
-
-```
-Currently not available
-```
-</details>
-
-<details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Option 3: Configure Manually</span></summary>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Option 2: Configure Manually</span></summary>
 
 Open the MCP configuration file of your AI client (e.g. claude_desktop_config.json in Claude Desktop) and copy the following text:
 
@@ -192,15 +182,12 @@ Open the MCP configuration file of your AI client (e.g. claude_desktop_config.js
 ```json
 {
    "mcpServers": {
-   "mcp-unity": {
-      "command": "node",
-      "args": [
-         "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
-      ],
-      "env": {
-         "UNITY_PORT": "8090"
-      }
-   }
+       "mcp-unity": {
+          "command": "node",
+          "args": [
+             "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+          ]
+       }
    }
 }
 ```
@@ -285,11 +272,11 @@ To build the server, open a terminal and:
 Debug the server with [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector):
    - Powershell
    ```powershell
-   $env:UNITY_PORT=8090; npx @modelcontextprotocol/inspector node Server/build/index.js
+   npx @modelcontextprotocol/inspector node Server/build/index.js
    ```
    - Command Prompt/Terminal
    ```cmd
-   set UNITY_PORT=8090 && npx @modelcontextprotocol/inspector node Server/build/index.js
+   npx @modelcontextprotocol/inspector node Server/build/index.js
    ```
 
 Don't forget to shutdown the server with `Ctrl + C` before closing the terminal or debugging it with the [MCP Inspector](https://github.com/modelcontextprotocol/inspector).

@@ -173,17 +173,7 @@ MCP Unityは、Unityの`Library/PackedCache`フォルダーをワークスペー
 </details>
 
 <details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">オプション2: Smithery経由で設定</span></summary>
-
-[Smithery](https://smithery.ai/server/@CoderGamester/mcp-unity)経由でMCP Unityをインストール：
-
-```
-現在利用不可
-```
-</details>
-
-<details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">オプション3: 手動設定</span></summary>
+<summary><span style="font-size: 1.1em; font-weight: bold;">オプション2: 手動設定</span></summary>
 
 AIクライアントのMCP設定ファイル（例：Claude Desktopのclaude_desktop_config.json）を開き、以下のテキストをコピー：
 
@@ -191,16 +181,15 @@ AIクライアントのMCP設定ファイル（例：Claude Desktopのclaude_des
 
 ```json
 {
-   "mcpServers": {
-   "mcp-unity": {
+  "mcpServers": {
+    "mcp-unity": {
       "command": "node",
       "args": [
-         "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
-      ],
-      "env": {
-         "UNITY_PORT": "8090"
-      }
-   }
+        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+      ]
+    }
+  }
+}
 ```
 
 </details>

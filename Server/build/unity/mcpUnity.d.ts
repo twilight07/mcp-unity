@@ -46,5 +46,15 @@ export declare class McpUnity {
      * Only returns true if the connection is guaranteed to be active
      */
     get isConnected(): boolean;
+    /**
+     * Retrieves the UNITY_PORT value from the Windows registry (HKCU\Environment)
+     * @returns The port value as a string if found, otherwise an empty string
+     */
+    private getUnityPortFromWindowsRegistry;
+    /**
+     * Retrieves the UNITY_PORT value from Unix-like system environment variables
+     * @returns The port value as a string if found, otherwise an empty string
+     */
+    private getUnityPortFromUnixRegistry;
 }
 export {};

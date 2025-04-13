@@ -1,6 +1,8 @@
 import WebSocket from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
+import { execSync } from 'child_process';
+import { default as winreg } from 'winreg';
 export class McpUnity {
     logger;
     port;
@@ -10,7 +12,10 @@ export class McpUnity {
     constructor(logger) {
         this.logger = logger;
         // Initialize port from environment variable or use default
-        const envPort = process.env.UNITY_PORT;
+        const envRegistry = process.platform === 'win32'
+            ? this.getUnityPortFromWindowsRegistry()
+            : this.getUnityPortFromUnixRegistry();
+        const envPort = process.env.UNITY_PORT || envRegistry;
         this.port = envPort ? parseInt(envPort, 10) : 8090;
         this.logger.info(`Using port: ${this.port} for Unity WebSocket connection`);
     }
@@ -211,5 +216,29 @@ export class McpUnity {
     get isConnected() {
         // Basic WebSocket connection check
         return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+    }
+    /**
+     * Retrieves the UNITY_PORT value from the Windows registry (HKCU\Environment)
+     * @returns The port value as a string if found, otherwise an empty string
+     */
+    getUnityPortFromWindowsRegistry() {
+        const regKey = new winreg({ hive: winreg.HKCU, key: '\\Environment' });
+        let result = '';
+        regKey.get('UNITY_PORT', (err, item) => {
+            if (err) {
+                this.logger.error(`Error getting registry value: ${err.message}`);
+            }
+            else {
+                result = item.value;
+            }
+        });
+        return result;
+    }
+    /**
+     * Retrieves the UNITY_PORT value from Unix-like system environment variables
+     * @returns The port value as a string if found, otherwise an empty string
+     */
+    getUnityPortFromUnixRegistry() {
+        return execSync('printenv UNITY_PORT', { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim();
     }
 }

@@ -99,6 +99,9 @@ namespace McpUnity.Unity
                 settings.Port = newPort;
                 settings.SaveSettings();
                 mcpUnityServer.StopServer();
+                EditorUtility.DisplayDialog("Restart MCP Client",
+                    "Please restart your MCP Client (Windsurf, Cursor, Calude Destktop, etc.) to apply the changes.",
+                    "OK");
             }
             EditorGUILayout.EndHorizontal();
             

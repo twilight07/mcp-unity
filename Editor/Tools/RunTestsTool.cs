@@ -161,7 +161,7 @@ namespace McpUnity.Tools
             // Set the test run completion result
             try
             {
-                _testRunCompletionSource.SetResult(new JObject
+                _testRunCompletionSource?.SetResult(new JObject
                 {
                     ["success"] = true,
                     ["type"] = "text",
@@ -171,7 +171,7 @@ namespace McpUnity.Tools
             catch (Exception ex)
             {
                 Debug.LogError($"[MCP Unity] Failed to set test results: {ex.Message}");
-                _testRunCompletionSource.TrySetException(ex);
+                _testRunCompletionSource?.TrySetException(ex);
             }
             finally
             {

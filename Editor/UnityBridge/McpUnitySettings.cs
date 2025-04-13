@@ -86,7 +86,7 @@ namespace McpUnity.Unity
                 
                 // Set environment variable PORT for the Node.js process
                 // Note: This will only affect processes started after this point
-                System.Environment.SetEnvironmentVariable("UNITY_PORT", Port.ToString(), System.EnvironmentVariableTarget.Process);
+                System.Environment.SetEnvironmentVariable("UNITY_PORT", Port.ToString(), System.EnvironmentVariableTarget.User);
             }
             catch (Exception ex)
             {

@@ -175,16 +175,6 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 </details>
 
 <details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">选项 2: 通过 Smithery 配置</span></summary>
-
-要通过 [Smithery](https://smithery.ai/server/@CoderGamester/mcp-unity) 安装 MCP Unity：
-
-```
-当前不可用
-```
-</details>
-
-<details>
 <summary><span style="font-size: 1.1em; font-weight: bold;">选项 3: 手动配置</span></summary>
 
 打开您的 AI 客户端的 MCP 配置文件（例如 Claude Desktop 中的 claude_desktop_config.json）并复制以下文本：
@@ -193,16 +183,15 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 
 ```json
 {
-   "mcpServers": {
-   "mcp-unity": {
+  "mcpServers": {
+    "mcp-unity": {
       "command": "node",
       "args": [
-         "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
-      ],
-      "env": {
-         "UNITY_PORT": "8090"
-      }
-   }
+        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+      ]
+    }
+  }
+}
 ```
 
 </details>
