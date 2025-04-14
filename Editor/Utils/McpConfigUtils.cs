@@ -106,19 +106,28 @@ namespace McpUnity.Utils
         /// <summary>
         /// Adds the MCP configuration to the Windsurf MCP config file
         /// </summary>
-        public static void AddToWindsurfIdeConfig(bool useTabsIndentation)
+        public static bool AddToWindsurfIdeConfig(bool useTabsIndentation)
         {
             string configFilePath = GetWindsurfMcpConfigPath();
-            AddToConfigFile(configFilePath, useTabsIndentation, "Windsurf");
+            return AddToConfigFile(configFilePath, useTabsIndentation, "Windsurf");
         }
         
         /// <summary>
         /// Adds the MCP configuration to the Claude Desktop config file
         /// </summary>
-        public static void AddToClaudeDesktopConfig(bool useTabsIndentation)
+        public static bool AddToClaudeDesktopConfig(bool useTabsIndentation)
         {
             string configFilePath = GetClaudeDesktopConfigPath();
-            AddToConfigFile(configFilePath, useTabsIndentation, "Claude Desktop");
+            return AddToConfigFile(configFilePath, useTabsIndentation, "Claude Desktop");
+        }
+        
+        /// <summary>
+        /// Adds the MCP configuration to the Cursor config file
+        /// </summary>
+        public static bool AddToCursorConfig(bool useTabsIndentation)
+        {
+            string configFilePath = GetCursorConfigPath();
+            return AddToConfigFile(configFilePath, useTabsIndentation, "Cursor");
         }
 
         /// <summary>
@@ -127,14 +136,15 @@ namespace McpUnity.Utils
         /// <param name="configFilePath">Path to the config file</param>
         /// <param name="useTabsIndentation">Whether to use tabs for indentation</param>
         /// <param name="productName">Name of the product (for error messages)</param>
-        private static void AddToConfigFile(string configFilePath, bool useTabsIndentation, string productName)
+        /// <returns>True if successfuly added the config, false otherwise</returns>
+        private static bool AddToConfigFile(string configFilePath, bool useTabsIndentation, string productName)
         {
             try
             {
                 if (string.IsNullOrEmpty(configFilePath))
                 {
-                    EditorUtility.DisplayDialog("Error", $"{productName} config file not found. Please make sure {productName} is installed.", "OK");
-                    return;
+                    Debug.LogError($"{productName} config file not found. Please make sure {productName} is installed.");
+                    return false;
                 }
                 
                 // Generate fresh MCP config JSON
@@ -148,17 +158,7 @@ namespace McpUnity.Utils
                 {
                     // Read the existing config
                     string existingConfigJson = File.ReadAllText(configFilePath);
-                    JObject existingConfig;
-                    
-                    try
-                    {
-                        existingConfig = JObject.Parse(existingConfigJson);
-                    }
-                    catch (JsonException)
-                    {
-                        // If the file exists but isn't valid JSON, create a new one
-                        existingConfig = new JObject();
-                    }
+                    JObject existingConfig = JObject.Parse(existingConfigJson);
                     
                     // Merge the mcpServers from our config into the existing config
                     if (mcpConfig["mcpServers"] != null && mcpConfig["mcpServers"] is JObject mcpServers)
@@ -177,26 +177,26 @@ namespace McpUnity.Utils
                         
                         // Write the updated config back to the file
                         File.WriteAllText(configFilePath, existingConfig.ToString(Formatting.Indented));
-                        
-                        EditorUtility.DisplayDialog("Success", $"MCP Unity configuration added to {productName}.", "OK");
+                        return true;
                     }
                 }
                 else if(Directory.Exists(Path.GetDirectoryName(configFilePath)))
                 {
                     // Create a new config file with just our config
                     File.WriteAllText(configFilePath, mcpConfigJson);
-                    EditorUtility.DisplayDialog("Success", $"Created new {productName} config file with MCP Unity configuration.", "OK");
+                    return true;
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("Failed", $"Cannot find {productName} config file or {productName} is currently not installed. Expecting {productName} to be installed in the {configFilePath} path", "OK");
+                    Debug.LogError($"Cannot find {productName} config file or {productName} is currently not installed. Expecting {productName} to be installed in the {configFilePath} path");
                 }
             }
             catch (Exception ex)
             {
-                EditorUtility.DisplayDialog("Error", $"Failed to add MCP configuration to {productName}: {ex.Message}", "OK");
                 Debug.LogError($"Failed to add MCP configuration to {productName}: {ex}");
             }
+
+            return false;
         }
         
         /// <summary>
@@ -262,37 +262,38 @@ namespace McpUnity.Utils
             return Path.Combine(basePath, "claude_desktop_config.json");
         }
         
+        
+        
         /// <summary>
-        /// Adds the MCP configuration to Cursor IDE by generating the command-line format
+        /// Gets the path to the Cursor config file based on the current OS
         /// </summary>
-        public static void AddToCursorIdeConfig()
+        /// <returns>The path to the Cursor config file</returns>
+        private static string GetCursorConfigPath()
         {
-            try
+            // Base path depends on the OS
+            string basePath;
+            
+            if (Application.platform == RuntimePlatform.WindowsEditor)
             {
-                string serverPath = GetServerPath();
-                string port = McpUnitySettings.Instance.Port.ToString();
-                
-                // Generate the command-line format for Cursor IDE
-                string cursorCommand = $"env UNITY_PORT={port} node {serverPath}/build/index.js";
-                
-                // Copy to clipboard
-                EditorGUIUtility.systemCopyBuffer = cursorCommand;
-                
-                // Show instructions to the user
-                EditorUtility.DisplayDialog(
-                    "Cursor IDE Configuration", 
-                    "The Cursor IDE command has been copied to your clipboard. Please add it to Cursor IDE with these settings:\n\n" +
-                    "Name: MCP Unity\n" +
-                    "Type: command\n" +
-                    $"Command: {cursorCommand}\n\n" +
-                    "Go to Cursor → Settings → MCP → Configure and paste this command.", 
-                    "OK");
+                // Windows: %USERPROFILE%/.cursor
+                basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cursor");
+                Debug.Log(basePath);
             }
-            catch (Exception ex)
+            else if (Application.platform == RuntimePlatform.OSXEditor)
             {
-                EditorUtility.DisplayDialog("Error", $"Failed to generate Cursor IDE configuration: {ex.Message}", "OK");
-                Debug.LogError($"Failed to generate Cursor IDE configuration: {ex}");
+                // macOS: ~/Library/Application Support/.cursor
+                string homeDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                basePath = Path.Combine(homeDir, "Library", "Application Support", ".cursor");
             }
+            else
+            {
+                // Unsupported platform
+                Debug.LogError("Unsupported platform for Cursor MCP config");
+                return null;
+            }
+            
+            // Return the path to the mcp_config.json file
+            return Path.Combine(basePath, "mcp.json");
         }
     }
 }

@@ -186,21 +186,47 @@ namespace McpUnity.Unity
             
             if (GUILayout.Button("Configure Windsurf IDE", GUILayout.Height(30)))
             {
-                McpConfigUtils.AddToWindsurfIdeConfig(_tabsIndentationJson);
+                bool added = McpConfigUtils.AddToWindsurfIdeConfig(_tabsIndentationJson);
+                if (added)
+                {
+                    EditorUtility.DisplayDialog("Success", "The MCP configuration was successfully added to the Windsurf config file.", "OK");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "The MCP configuration could not be added to the Windsurf config file.", "OK");
+                }
             }
             
             EditorGUILayout.Space();
             
-            if (GUILayout.Button("Configure Cursor IDE", GUILayout.Height(30)))
-            {
-                McpConfigUtils.AddToCursorIdeConfig();
-            }
+            //EditorGUILayout.BeginVertical(_connectedClientBoxStyle);
+            //EditorGUILayout.LabelField("Cursor IDE configuration is done automatically. Restart your Cursor IDE to apply the changes.", EditorStyles.boldLabel);
+            //EditorGUILayout.EndVertical();
             
-            EditorGUILayout.Space();
+            //EditorGUILayout.Space();
             
             if (GUILayout.Button("Configure Claude Desktop", GUILayout.Height(30)))
             {
-                McpConfigUtils.AddToClaudeDesktopConfig(_tabsIndentationJson);
+                bool added = McpConfigUtils.AddToClaudeDesktopConfig(_tabsIndentationJson);
+                if (added)
+                {
+                    EditorUtility.DisplayDialog("Success", "The MCP configuration was successfully added to the Claude Desktop config file.", "OK");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "The MCP configuration could not be added to the Claude Desktop config file.", "OK");
+                }
+            }
+            
+            EditorGUILayout.Space();
+            
+            if (GUILayout.Button("Configure Cursor", GUILayout.Height(30)))
+            {
+                bool added = McpConfigUtils.AddToCursorConfig(_tabsIndentationJson);
+                if (added)
+                {
+                    EditorUtility.DisplayDialog("Success", "The MCP configuration was successfully added to the Cursor config file.", "OK");
+                }
             }
             
             EditorGUILayout.EndVertical();
