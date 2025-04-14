@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using Newtonsoft.Json.Linq;
 using McpUnity.Unity;
+using McpUnity.Utils;
 
 namespace McpUnity.Tools
 {
@@ -113,7 +114,7 @@ namespace McpUnity.Tools
                     }
                     else
                     {
-                        Debug.LogWarning($"[MCP Unity] Parent object not found, asset will be created at the root of the scene");
+                        McpLogger.LogWarning($"Parent object not found, asset will be created at the root of the scene");
                     }
                 }
                 
@@ -130,7 +131,7 @@ namespace McpUnity.Tools
             }
             
             // Log the action
-            Debug.Log($"[MCP Unity] Added asset '{asset.name}' to scene from path '{assetPath}'");
+            McpLogger.LogInfo($"Added asset '{asset.name}' to scene from path '{assetPath}'");
             
             // Create the response
             return new JObject

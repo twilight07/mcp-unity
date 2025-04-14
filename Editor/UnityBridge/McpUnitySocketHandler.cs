@@ -11,6 +11,7 @@ using McpUnity.Resources;
 using Unity.EditorCoroutines.Editor;
 using System.Collections;
 using System.Collections.Specialized;
+using McpUnity.Utils;
 
 namespace McpUnity.Unity
 {
@@ -54,7 +55,7 @@ namespace McpUnity.Unity
         {
             try
             {
-                Debug.Log($"[MCP Unity] WebSocket message received: {e.Data}");
+                McpLogger.LogInfo($"WebSocket message received: {e.Data}");
                 
                 var requestJson = JObject.Parse(e.Data);
                 var method = requestJson["method"]?.ToString();
@@ -87,14 +88,14 @@ namespace McpUnity.Unity
                 JObject jsonRpcResponse = CreateResponse(requestId, responseJson);
                 string responseStr = jsonRpcResponse.ToString(Formatting.None);
                 
-                Debug.Log($"[MCP Unity] WebSocket message response: {responseStr}");
+                McpLogger.LogInfo($"WebSocket message response: {responseStr}");
                 
                 // Send the response back to the client
                 Send(responseStr);
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Error processing message: {ex.Message}");
+                McpLogger.LogError($"Error processing message: {ex.Message}");
                 
                 Send(CreateErrorResponse($"Internal server error: {ex.Message}", "internal_error").ToString(Formatting.None));
             }
@@ -116,7 +117,7 @@ namespace McpUnity.Unity
                 _server.Clients.Add(ID, clientName);
             }
             
-            Debug.Log($"[MCP Unity] WebSocket client '{clientName}' connected");
+            McpLogger.LogInfo($"WebSocket client '{clientName}' connected");
         }
         
         /// <summary>
@@ -129,7 +130,7 @@ namespace McpUnity.Unity
             // Remove the client from the server
             _server.Clients.Remove(ID);
             
-            Debug.Log($"[MCP Unity] WebSocket client '{clientName}' disconnected: {e.Reason}");
+            McpLogger.LogInfo($"WebSocket client '{clientName}' disconnected: {e.Reason}");
         }
         
         /// <summary>
@@ -137,7 +138,7 @@ namespace McpUnity.Unity
         /// </summary>
         protected override void OnError(ErrorEventArgs e)
         {
-            Debug.LogError($"[MCP Unity] WebSocket error: {e.Message}");
+            McpLogger.LogError($"WebSocket error: {e.Message}");
         }
         
         /// <summary>
@@ -159,7 +160,7 @@ namespace McpUnity.Unity
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Error executing tool {tool.Name}: {ex.Message}");
+                McpLogger.LogError($"Error executing tool {tool.Name}: {ex.Message}");
                 tcs.SetResult(CreateErrorResponse(
                     $"Failed to execute tool {tool.Name}: {ex.Message}",
                     "tool_execution_error"
@@ -181,7 +182,7 @@ namespace McpUnity.Unity
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Error fetching resource {resource.Name}: {ex.Message}");
+                McpLogger.LogError($"Error fetching resource {resource.Name}: {ex.Message}");
                 tcs.SetResult(CreateErrorResponse(
                     $"Failed to fetch resource {resource.Name}: {ex.Message}",
                     "resource_fetch_error"

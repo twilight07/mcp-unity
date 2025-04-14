@@ -64,8 +64,6 @@ namespace McpUnity.Services
             // Unity 2022.3 implementation using reflection
             EditorApplication.update -= CheckConsoleClearViaReflection;
 #endif
-            
-            Debug.Log("[MCP Unity] Console logs service shutdown");
         }
         
         /// <summary>

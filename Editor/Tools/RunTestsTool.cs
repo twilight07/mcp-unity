@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using UnityEditor.TestTools.TestRunner.Api;
 using McpUnity.Services;
+using McpUnity.Utils;
 
 namespace McpUnity.Tools
 {
@@ -81,7 +82,7 @@ namespace McpUnity.Tools
             }
             
             // Log the execution
-            Debug.Log($"[MCP Unity] Running tests: Mode={testMode}, Filter={testFilter}");
+            McpLogger.LogInfo($"[MCP Unity] Running tests: Mode={testMode}, Filter={testFilter}");
             
             // Reset state
             _isRunning = true;
@@ -101,7 +102,7 @@ namespace McpUnity.Tools
         // Called when a test run starts
         public void RunStarted(ITestAdaptor testsToRun)
         {
-            Debug.Log($"[MCP Unity] Test run started: {testsToRun.Name}");
+            McpLogger.LogInfo($"[MCP Unity] Test run started: {testsToRun.Name}");
         }
         
         // Called when a test runs
@@ -122,13 +123,13 @@ namespace McpUnity.Tools
                 Duration = result.Duration
             });
             
-            Debug.Log($"[MCP Unity] Test finished: {result.Test.Name} - {result.ResultState}");
+            McpLogger.LogInfo($"[MCP Unity] Test finished: {result.Test.Name} - {result.ResultState}");
         }
         
         // Called when a test run completes
         public void RunFinished(ITestResultAdaptor result)
         {
-            Debug.Log($"[MCP Unity] Test run completed: {result.Test.Name} - {result.ResultState}");
+            McpLogger.LogInfo($"[MCP Unity] {_testResults.Count} tests completed in {result.Duration}: {result.Test.Name} - {result.ResultState}");
             
             _isRunning = false;
             
@@ -170,7 +171,7 @@ namespace McpUnity.Tools
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Failed to set test results: {ex.Message}");
+                McpLogger.LogError($"[MCP Unity] Failed to set test results: {ex.Message}");
                 _testRunCompletionSource?.TrySetException(ex);
             }
             finally

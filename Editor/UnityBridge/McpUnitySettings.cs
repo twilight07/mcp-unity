@@ -24,6 +24,9 @@ namespace McpUnity.Unity
         
         [Tooltip("Whether to automatically start the MCP server when Unity opens")]
         public bool AutoStartServer = true;
+        
+        [Tooltip("Whether to show info logs in the Unity console")]
+        public bool EnableInfoLogs = true;
 
         /// <summary>
         /// Singleton instance of settings
@@ -72,6 +75,7 @@ namespace McpUnity.Unity
             }
             catch (Exception ex)
             {
+                // Can't use LoggerService here as it depends on settings
                 Debug.LogError($"[MCP Unity] Failed to load settings: {ex.Message}");
             }
         }
@@ -93,6 +97,7 @@ namespace McpUnity.Unity
             }
             catch (Exception ex)
             {
+                // Can't use LoggerService here as it might create circular dependency
                 Debug.LogError($"[MCP Unity] Failed to save settings: {ex.Message}");
             }
         }

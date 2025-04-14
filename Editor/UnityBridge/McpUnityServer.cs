@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using McpUnity.Tools;
 using McpUnity.Resources;
 using McpUnity.Services;
+using McpUnity.Utils;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -76,7 +77,7 @@ namespace McpUnity.Unity
             RegisterResources();
             RegisterTools();
             
-            Debug.Log($"[MCP Unity] Created WebSocket server on port {McpUnitySettings.Instance.Port}");
+            McpLogger.LogInfo($"Created WebSocket server on port {McpUnitySettings.Instance.Port}");
 
             if (McpUnitySettings.Instance.AutoStartServer || Application.internetReachability != NetworkReachability.NotReachable)
             {
@@ -101,11 +102,11 @@ namespace McpUnity.Unity
                 // Start the server
                 _webSocketServer.Start();
                 
-                Debug.Log("[MCP Unity] WebSocket server started");
+                McpLogger.LogInfo("WebSocket server started");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Failed to start WebSocket server: {ex.Message}");
+                McpLogger.LogError($"Failed to start WebSocket server: {ex.Message}");
             }
         }
         
@@ -120,11 +121,11 @@ namespace McpUnity.Unity
             {
                 _webSocketServer?.Stop();
                 
-                Debug.Log("[MCP Unity] WebSocket server stopped");
+                McpLogger.LogInfo("WebSocket server stopped");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Error stopping WebSocket server: {ex.Message}");
+                McpLogger.LogError($"Error stopping WebSocket server: {ex.Message}");
             }
         }
         

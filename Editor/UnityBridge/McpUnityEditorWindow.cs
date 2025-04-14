@@ -117,6 +117,16 @@ namespace McpUnity.Unity
             
             EditorGUILayout.Space();
             
+            // Enable info logs toggle
+            bool enableInfoLogs = EditorGUILayout.Toggle(new GUIContent("Enable Info Logs", "Show informational logs in the Unity console"), settings.EnableInfoLogs);
+            if (enableInfoLogs != settings.EnableInfoLogs)
+            {
+                settings.EnableInfoLogs = enableInfoLogs;
+                settings.SaveSettings();
+            }
+            
+            EditorGUILayout.Space();
+            
             // Server control buttons
             EditorGUILayout.BeginHorizontal();
             
@@ -208,12 +218,6 @@ namespace McpUnity.Unity
             }
             
             EditorGUILayout.Space();
-            
-            //EditorGUILayout.BeginVertical(_connectedClientBoxStyle);
-            //EditorGUILayout.LabelField("Cursor IDE configuration is done automatically. Restart your Cursor IDE to apply the changes.", EditorStyles.boldLabel);
-            //EditorGUILayout.EndVertical();
-            
-            //EditorGUILayout.Space();
             
             if (GUILayout.Button("Configure Claude Desktop", GUILayout.Height(30)))
             {

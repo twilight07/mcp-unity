@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using McpUnity.Unity;
+using McpUnity.Utils;
 using UnityEngine;
 using UnityEditor;
 using Newtonsoft.Json.Linq;
@@ -77,7 +78,7 @@ namespace McpUnity.Tools
                 );
             }
             
-            Debug.Log($"[MCP Unity] Updating component '{componentName}' on GameObject '{gameObject.name}' (found by {identifier})");
+            McpLogger.LogInfo($"[MCP Unity] Updating component '{componentName}' on GameObject '{gameObject.name}' (found by {identifier})");
             
             // Try to find the component by name
             Component component = gameObject.GetComponent(componentName);
@@ -97,7 +98,7 @@ namespace McpUnity.Tools
                 
                 component = Undo.AddComponent(gameObject, componentType);
                 wasAdded = true;
-                Debug.Log($"[MCP Unity] Added component '{componentName}' to GameObject '{gameObject.name}'");
+                McpLogger.LogInfo($"[MCP Unity] Added component '{componentName}' to GameObject '{gameObject.name}'");
             }
             
             // Update component fields
@@ -272,7 +273,7 @@ namespace McpUnity.Tools
                 }
                 else
                 {
-                    Debug.LogWarning($"[MCP Unity] Field '{fieldName}' not found on component '{componentType.Name}'");
+                    McpLogger.LogWarning($"Field '{fieldName}' not found on component '{componentType.Name}'");
                 }
             }
             
@@ -402,7 +403,7 @@ namespace McpUnity.Tools
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[MCP Unity] Error converting value to type {targetType.Name}: {ex.Message}");
+                McpLogger.LogError($"[MCP Unity] Error converting value to type {targetType.Name}: {ex.Message}");
                 return null;
             }
         }

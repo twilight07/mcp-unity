@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using McpUnity.Tools;
 using McpUnity.Unity;
+using McpUnity.Utils;
 
 namespace McpUnity.Tools
 {
@@ -124,7 +125,7 @@ namespace McpUnity.Tools
                 packageIdentifier = $"{packageName}@{version}";
             }
             
-            Debug.Log($"[MCP Unity] Adding package from registry: {packageIdentifier}");
+            McpLogger.LogInfo($"Adding package from registry: {packageIdentifier}");
             
             try
             {
@@ -188,7 +189,7 @@ namespace McpUnity.Tools
                 }
             }
             
-            Debug.Log($"[MCP Unity] Adding package from GitHub: {packageUrl}");
+            McpLogger.LogInfo($"Adding package from GitHub: {packageUrl}");
             
             try
             {
@@ -225,7 +226,7 @@ namespace McpUnity.Tools
             // Format as file URL
             string packageUrl = $"file:{path}";
             
-            Debug.Log($"[MCP Unity] Adding package from disk: {packageUrl}");
+            McpLogger.LogInfo($"Adding package from disk: {packageUrl}");
             
             try
             {
@@ -289,7 +290,7 @@ namespace McpUnity.Tools
         {
             if (operation.CompletionSource == null)
             {
-                Debug.LogError("[MCP Unity] TaskCompletionSource is null when processing completed operation");
+                McpLogger.LogError("TaskCompletionSource is null when processing completed operation");
                 return;
             }
             
@@ -321,6 +322,8 @@ namespace McpUnity.Tools
                         ["message"] = $"Package operation completed successfully, but no package information was returned."
                     });
                 }
+                
+                McpLogger.LogInfo($"Added package {result.displayName} ({result.name}) version {result.version}");
             }
             else if (operation.Request.Status == StatusCode.Failure)
             {
