@@ -22,6 +22,9 @@ namespace McpUnity.Unity
         // Server settings
         public int Port { get; set; } = 8090;
         
+        [Tooltip("Whether to automatically start the MCP server when Unity opens")]
+        public bool AutoStartServer = true;
+
         /// <summary>
         /// Singleton instance of settings
         /// </summary>

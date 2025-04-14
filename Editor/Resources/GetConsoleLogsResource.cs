@@ -148,8 +148,6 @@ namespace McpUnity.Resources
             {
                 _logEntries.Clear();
             }
-            
-            Debug.Log("[MCP Unity] Console logs cleared");
         }
     }
 }

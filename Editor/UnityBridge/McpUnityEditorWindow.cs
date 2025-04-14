@@ -107,6 +107,16 @@ namespace McpUnity.Unity
             
             EditorGUILayout.Space();
             
+            // Auto start server toggle
+            bool autoStartServer = EditorGUILayout.Toggle(new GUIContent("Auto Start Server", "Automatically starts the MCP server when Unity opens"), settings.AutoStartServer);
+            if (autoStartServer != settings.AutoStartServer)
+            {
+                settings.AutoStartServer = autoStartServer;
+                settings.SaveSettings();
+            }
+            
+            EditorGUILayout.Space();
+            
             // Server control buttons
             EditorGUILayout.BeginHorizontal();
             

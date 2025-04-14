@@ -76,8 +76,11 @@ namespace McpUnity.Unity
             RegisterTools();
             
             Debug.Log($"[MCP Unity] Created WebSocket server on port {McpUnitySettings.Instance.Port}");
-            
-            StartServer();
+
+            if (McpUnitySettings.Instance.AutoStartServer || Application.internetReachability != NetworkReachability.NotReachable)
+            {
+                StartServer();
+            }
         }
         
         /// <summary>
