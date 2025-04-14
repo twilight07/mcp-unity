@@ -29,6 +29,7 @@ namespace McpUnity.Unity
         private WebSocketServer _webSocketServer;
         private CancellationTokenSource _cts;
         private TestRunnerService _testRunnerService;
+        private ConsoleLogsService _consoleLogsService;
         private Dictionary<string, string> _clients = new Dictionary<string, string>();
         
         /// <summary>
@@ -187,7 +188,7 @@ namespace McpUnity.Unity
             _resources.Add(getMenuItemsResource.Name, getMenuItemsResource);
             
             // Register GetConsoleLogsResource
-            GetConsoleLogsResource getConsoleLogsResource = new GetConsoleLogsResource();
+            GetConsoleLogsResource getConsoleLogsResource = new GetConsoleLogsResource(_consoleLogsService);
             _resources.Add(getConsoleLogsResource.Name, getConsoleLogsResource);
             
             // Register GetHierarchyResource
@@ -212,12 +213,15 @@ namespace McpUnity.Unity
         }
         
         /// <summary>
-        /// Initialize services used by tools and resources
+        /// Initialize services used by the server
         /// </summary>
         private void InitializeServices()
         {
-            // Create TestRunnerService
+            // Initialize the test runner service
             _testRunnerService = new TestRunnerService();
+            
+            // Initialize the console logs service
+            _consoleLogsService = new ConsoleLogsService();
         }
     }
 }
