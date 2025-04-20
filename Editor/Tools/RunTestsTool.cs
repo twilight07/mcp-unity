@@ -114,6 +114,12 @@ namespace McpUnity.Tools
         // Called when a test finishes
         public void TestFinished(ITestResultAdaptor result)
         {
+            // Skip test suites (tests with children)
+            if (result.Test.HasChildren)
+            {
+                return;
+            }
+            
             _testResults.Add(new TestResult
             {
                 Name = result.Test.Name,
