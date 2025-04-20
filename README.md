@@ -327,6 +327,19 @@ Don't forget to shutdown the server with `Ctrl + C` before closing the terminal 
 - Verify that the menu item is available in the current context
 </details>
 
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Connection failed when running Play Mode tests</span></summary>
+
+The `run_tests` tool returns the following response:
+```
+Error:
+Connection failed: Unknown error
+```
+
+This error occurs because the bridge connection is lost when the domain reloading when switching to the Play Mode.  
+The workaround is to turn off **Reload Domain** in **Edit > Project Settings > Editor > "Enter Play Mode Settings"**.
+</details>
+
 ## Support & Feedback
 
 If you have any questions or need support, please open an [issue](https://github.com/CoderGamester/mcp-unity/issues) on this repository.
