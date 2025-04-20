@@ -336,7 +336,7 @@ Error:
 Connection failed: Unknown error
 ```
 
-This error occurs because the bridge connection is lost when the domain reloading when switching to the Play Mode.  
+This error occurs because the bridge connection is lost when the domain reloads upon switching to Play Mode.  
 The workaround is to turn off **Reload Domain** in **Edit > Project Settings > Editor > "Enter Play Mode Settings"**.
 </details>
 

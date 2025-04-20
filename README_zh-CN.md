@@ -254,7 +254,7 @@ Error:
 Connection failed: Unknown error
 ```
 
-发生此错误的原因是，在切换到播放模式时域重新加载时桥接连接丢失。  
+发生此错误的原因是在切换到播放模式触发域重新加载时，桥接连接会丢失。  
 解决方法是在 **Edit > Project Settings > Editor > "Enter Play Mode Settings"** 中关闭 **Reload Domain**。
 
 ## 贡献
