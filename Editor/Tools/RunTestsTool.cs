@@ -166,7 +166,10 @@ namespace McpUnity.Tools
                 {
                     ["success"] = true,
                     ["type"] = "text",
-                    ["message"] = summary["message"].Value<string>()
+                    ["message"] = summary["message"].Value<string>(),
+                    ["testCount"] = summary["testCount"],
+                    ["passCount"] = summary["passCount"],
+                    ["results"] = summary["results"]
                 });
             }
             catch (Exception ex)
