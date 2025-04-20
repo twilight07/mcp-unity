@@ -136,8 +136,11 @@ namespace McpUnity.Tools
             // Create test results summary
             var summary = new JObject
             {
-                ["testCount"] = _testResults.Count,
-                ["passCount"] = _testResults.FindAll(r => r.Passed).Count,
+                ["testCount"] = result.PassCount + result.FailCount + result.SkipCount + result.InconclusiveCount,
+                ["passCount"] = result.PassCount,
+                ["failCount"] = result.FailCount,
+                ["skipCount"] = result.SkipCount,
+                ["inconclusiveCount"] = result.InconclusiveCount,
                 ["duration"] = result.Duration,
                 ["success"] = result.ResultState == "Passed",
                 ["status"] = "completed",
@@ -169,6 +172,9 @@ namespace McpUnity.Tools
                     ["message"] = summary["message"].Value<string>(),
                     ["testCount"] = summary["testCount"],
                     ["passCount"] = summary["passCount"],
+                    ["failCount"] = summary["failCount"],
+                    ["skipCount"] = summary["skipCount"],
+                    ["inconclusiveCount"] = summary["inconclusiveCount"],
                     ["results"] = summary["results"]
                 });
             }
