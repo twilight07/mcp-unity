@@ -246,6 +246,17 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 - 检查菜单项是否需要确认
 - 验证菜单项在当前上下文中是否可用
 
+#### 运行播放模式测试时连接失败
+
+`run_tests` 工具返回以下响应：
+```
+Error:
+Connection failed: Unknown error
+```
+
+发生此错误的原因是在切换到播放模式触发域重新加载时，桥接连接会丢失。  
+解决方法是在 **Edit > Project Settings > Editor > "Enter Play Mode Settings"** 中关闭 **Reload Domain**。
+
 ## 贡献
 
 欢迎贡献！请阅读我们的[贡献指南](CONTRIBUTING.md)以获取更多信息。
