@@ -114,6 +114,12 @@ namespace McpUnity.Tools
         // Called when a test finishes
         public void TestFinished(ITestResultAdaptor result)
         {
+            // Skip test suites (tests with children)
+            if (result.Test.HasChildren)
+            {
+                return;
+            }
+            
             _testResults.Add(new TestResult
             {
                 Name = result.Test.Name,
@@ -136,8 +142,11 @@ namespace McpUnity.Tools
             // Create test results summary
             var summary = new JObject
             {
-                ["testCount"] = _testResults.Count,
-                ["passCount"] = _testResults.FindAll(r => r.Passed).Count,
+                ["testCount"] = result.PassCount + result.FailCount + result.SkipCount + result.InconclusiveCount,
+                ["passCount"] = result.PassCount,
+                ["failCount"] = result.FailCount,
+                ["skipCount"] = result.SkipCount,
+                ["inconclusiveCount"] = result.InconclusiveCount,
                 ["duration"] = result.Duration,
                 ["success"] = result.ResultState == "Passed",
                 ["status"] = "completed",
@@ -166,7 +175,13 @@ namespace McpUnity.Tools
                 {
                     ["success"] = true,
                     ["type"] = "text",
-                    ["message"] = summary["message"].Value<string>()
+                    ["message"] = summary["message"].Value<string>(),
+                    ["testCount"] = summary["testCount"],
+                    ["passCount"] = summary["passCount"],
+                    ["failCount"] = summary["failCount"],
+                    ["skipCount"] = summary["skipCount"],
+                    ["inconclusiveCount"] = summary["inconclusiveCount"],
+                    ["results"] = summary["results"]
                 });
             }
             catch (Exception ex)
