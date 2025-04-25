@@ -34,6 +34,7 @@ export class McpUnity {
   private ws: WebSocket | null = null;
   private pendingRequests: Map<string, PendingRequest> = new Map<string, PendingRequest>();
   private readonly REQUEST_TIMEOUT = 10000;
+  private retryDelay = 1000;
   
   constructor(logger: Logger) {
     this.logger = logger;
@@ -129,6 +130,8 @@ export class McpUnity {
       this.ws.onclose = () => {
         this.logger.debug('WebSocket closed');
         this.disconnect();
+        //this.logger.debug('WebSocket closed. Reconnecting in', this.retryDelay);
+        //setTimeout(this.connect, this.retryDelay);
       };
     });
   }

@@ -9,6 +9,7 @@ export class McpUnity {
     ws = null;
     pendingRequests = new Map();
     REQUEST_TIMEOUT = 10000;
+    retryDelay = 1000;
     constructor(logger) {
         this.logger = logger;
         // Initialize port from environment variable or use default
@@ -87,6 +88,8 @@ export class McpUnity {
             this.ws.onclose = () => {
                 this.logger.debug('WebSocket closed');
                 this.disconnect();
+                //this.logger.debug('WebSocket closed. Reconnecting in', this.retryDelay);
+                //setTimeout(this.connect, this.retryDelay);
             };
         });
     }

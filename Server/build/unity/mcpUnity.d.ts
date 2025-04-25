@@ -10,6 +10,7 @@ export declare class McpUnity {
     private ws;
     private pendingRequests;
     private readonly REQUEST_TIMEOUT;
+    private retryDelay;
     constructor(logger: Logger);
     /**
      * Start the Unity connection

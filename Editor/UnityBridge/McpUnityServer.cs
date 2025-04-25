@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEditor;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using McpUnity.Tools;
 using McpUnity.Resources;
 using McpUnity.Services;
 using McpUnity.Utils;
-using WebSocketSharp;
 using WebSocketSharp.Server;
 
 namespace McpUnity.Unity
@@ -31,8 +27,7 @@ namespace McpUnity.Unity
         private CancellationTokenSource _cts;
         private TestRunnerService _testRunnerService;
         private ConsoleLogsService _consoleLogsService;
-        private Dictionary<string, string> _clients = new Dictionary<string, string>();
-        
+
         /// <summary>
         /// Static constructor that gets called when Unity loads due to InitializeOnLoad attribute
         /// </summary>
@@ -40,7 +35,16 @@ namespace McpUnity.Unity
         {
             // Initialize the singleton instance when Unity loads
             // This ensures the bridge is available as soon as Unity starts
-            EditorApplication.quitting += () => Instance.StopServer();
+            EditorApplication.quitting += Instance.StopServer;
+
+            // Auto-restart server after domain reload
+            EditorApplication.delayCall += () =>
+            {
+                if (McpUnitySettings.Instance.AutoStartServer)
+                {
+                    Instance.StartServer();
+                }
+            };
         }
         
         /// <summary>
@@ -66,8 +70,8 @@ namespace McpUnity.Unity
         /// <summary>
         /// Dictionary of connected clients with this server
         /// </summary>
-        public Dictionary<string, string> Clients => _clients;
-        
+        public Dictionary<string, string> Clients { get; } = new Dictionary<string, string>();
+
         /// <summary>
         /// Private constructor to enforce singleton pattern
         /// </summary>
@@ -76,13 +80,6 @@ namespace McpUnity.Unity
             InitializeServices();
             RegisterResources();
             RegisterTools();
-            
-            McpLogger.LogInfo($"Created WebSocket server on port {McpUnitySettings.Instance.Port}");
-
-            if (McpUnitySettings.Instance.AutoStartServer || Application.internetReachability != NetworkReachability.NotReachable)
-            {
-                StartServer();
-            }
         }
         
         /// <summary>
@@ -102,7 +99,7 @@ namespace McpUnity.Unity
                 // Start the server
                 _webSocketServer.Start();
                 
-                McpLogger.LogInfo("WebSocket server started");
+                McpLogger.LogInfo($"WebSocket server started on port {McpUnitySettings.Instance.Port}");
             }
             catch (Exception ex)
             {

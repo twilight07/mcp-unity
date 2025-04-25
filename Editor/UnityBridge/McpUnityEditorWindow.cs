@@ -178,7 +178,9 @@ namespace McpUnity.Unity
             }
             else
             {
-                EditorGUILayout.LabelField("No clients connected", EditorStyles.centeredGreyMiniLabel);
+                GUIStyle wrapStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
+                wrapStyle.wordWrap = true;
+                GUILayout.Label("No clients connected\nInvoke a tool from the MCP Client to connect", wrapStyle, GUILayout.ExpandWidth(true));
             }
                 
             EditorGUILayout.EndVertical();
