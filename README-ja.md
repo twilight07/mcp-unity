@@ -244,6 +244,17 @@ MCP Unityサーバーをデバッグするには、以下の方法を使用で�
 - メニュー項目が確認を必要とするかどうかを確認
 - メニュー項目が現在のコンテキストで利用可能であることを確認
 
+#### Play Modeテスト実行時に `Connection failed` エラー
+
+`run_tests` ツールの実行が次のエラーを返します：
+```
+Error:
+Connection failed: Unknown error
+```
+
+このエラーは、Play Modeに切り替わる際にドメインがリロードされるため、ブリッジ接続が失われることで発生します。  
+回避方法は、**Edit > Project Settings > Editor > "Enter Play Mode Settings"** で **Reload Domain** をオフにすることです。
+
 ## 貢献
 
 貢献は大歓迎です！詳細については[貢献ガイド](CONTRIBUTING.md)をお読みください。

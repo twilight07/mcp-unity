@@ -57,6 +57,9 @@ async function toolHandler(mcpUnity, params) {
     const testResults = response.results || [];
     const testCount = response.testCount || 0;
     const passCount = response.passCount || 0;
+    const failCount = response.failCount || 0;
+    const inconclusiveCount = response.inconclusiveCount || 0;
+    const skipCount = response.skipCount || 0;
     // Format the result message
     let resultMessage = `${passCount}/${testCount} tests passed`;
     if (testCount > 0 && passCount < testCount) {
@@ -69,14 +72,16 @@ async function toolHandler(mcpUnity, params) {
         content: [
             {
                 type: 'text',
-                text: response.message || resultMessage
+                text: resultMessage || response.message
             },
             {
                 type: 'text',
                 text: JSON.stringify({
                     testCount,
                     passCount,
-                    failCount: testCount - passCount,
+                    failCount,
+                    inconclusiveCount,
+                    skipCount,
                     results: testResults
                 }, null, 2)
             }
