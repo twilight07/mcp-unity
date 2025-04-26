@@ -236,6 +236,38 @@ By default, the WebSocket server runs on port 8090. You can change this port in 
 
 </details>
 
+## Optional: Set Timeout
+
+### WebSocket Timeout
+
+By default, the timeout between the MCP server and the WebSocket is 10 seconds.
+You can specify it as an environment variable `UNITY_REQUEST_TIMEOUT` in your MCP configuration file as follows:
+
+```json
+{
+  "mcpServers": {
+    "mcp-unity": {
+      "command": "node",
+      "args": [
+        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+      ],
+      "env": {
+        "UNITY_PORT": "8090",
+        "UNITY_REQUEST_TIMEOUT": "300"
+      }
+    }
+  }
+}
+```
+
+> [!TIP]  
+> The timeout between your AI Coding IDE (e.g., Claude Desktop, Cursor IDE, Windsurf IDE) and the MCP Server depends on the AI coding IDE.
+
+### Test Execution Timeout
+
+By default, the execution timeout for the `run_tests` tool in the Unity editor is 60 seconds.
+You can specify it in **Test Timeout (seconds)** in the **Tools > MCP Unity > Server Window**.
+
 ## <a name="debug-server"></a>Debugging the Server
 
 <details>

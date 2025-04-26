@@ -213,6 +213,38 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
    node Server/build/index.js
    ```
 
+## 可选：设置超时
+
+### WebSocket 超时
+
+默认情况下，MCP 服务器与 WebSocket 之间的超时时间为 10 秒。
+您可以在 MCP 配置文件中将其指定为环境变量 `UNITY_REQUEST_TIMEOUT`，如下所示：
+
+```json
+{
+  "mcpServers": {
+    "mcp-unity": {
+      "command": "node",
+      "args": [
+        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+      ],
+      "env": {
+        "UNITY_PORT": "8090",
+        "UNITY_REQUEST_TIMEOUT": "300"
+      }
+    }
+  }
+}
+```
+
+> [!TIP]  
+> 您的 AI 编码 IDE（例如，Claude Desktop、Cursor IDE、Windsurf IDE）和 MCP 服务器之间的超时取决于 AI 编码 IDE。
+
+### 测试执行超时
+
+默认情况下，Unity 编辑器中 `run_tests` 工具的执行超时时间为 60 秒。
+您可以在 **Tools > MCP Unity > Server Window** 中的 **Test Timeout (seconds)** 中指定它。
+
 ## <a name="debug-server"></a>调试服务器
 
 要调试 MCP Unity 服务器，您可以使用以下方法：
