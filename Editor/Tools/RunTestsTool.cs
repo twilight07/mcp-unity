@@ -19,6 +19,7 @@ namespace McpUnity.Tools
         private readonly ITestRunnerService _testRunnerService;
         
         private bool _isRunning = false;
+        private bool _returnsOnlyFailures = true;
         private TaskCompletionSource<JObject> _testRunCompletionSource;
         private List<TestResult> _testResults = new List<TestResult>();
         
@@ -31,6 +32,7 @@ namespace McpUnity.Tools
             public string Message { get; set; }
             public double Duration { get; set; }
             public bool Passed => ResultState == "Passed";
+            public bool Skipped => ResultState.StartsWith("Skipped");
         }
         
         public RunTestsTool(ITestRunnerService testRunnerService)
@@ -65,6 +67,7 @@ namespace McpUnity.Tools
             // Extract parameters
             string testModeStr = parameters["testMode"]?.ToObject<string>() ?? "editmode";
             string testFilter = parameters["testFilter"]?.ToObject<string>() ?? "";
+            _returnsOnlyFailures = parameters["returnsOnlyFailures"]?.ToObject<bool>() ?? true;
             
             // Parse test mode
             TestMode testMode;
@@ -157,6 +160,12 @@ namespace McpUnity.Tools
             var resultArray = new JArray();
             foreach (var testResult in _testResults)
             {
+                // If returnsOnlyFailures is true, only include failed tests
+                if (_returnsOnlyFailures && (testResult.Passed || testResult.Skipped))
+                {
+                    continue;
+                }
+                
                 resultArray.Add(new JObject
                 {
                     ["name"] = testResult.Name,
