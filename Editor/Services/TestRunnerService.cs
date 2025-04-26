@@ -71,7 +71,7 @@ namespace McpUnity.Services
             _testRunnerApi.Execute(new ExecutionSettings(filter));
 
             // Use timeout from settings if not specified
-            var timeoutSeconds =  McpUnitySettings.Instance.TestTimeoutSeconds;
+            var timeoutSeconds =  McpUnitySettings.Instance.RequestTimeoutSeconds;
             
             Task completedTask = await Task.WhenAny(
                 completionSource.Task,

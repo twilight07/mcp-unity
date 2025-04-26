@@ -109,16 +109,16 @@ namespace McpUnity.Unity
             
             // Test timeout setting
             EditorGUILayout.BeginHorizontal();
-            int newTimeout = EditorGUILayout.IntField(new GUIContent("Test Timeout (seconds)", "Timeout in seconds for test execution"), settings.TestTimeoutSeconds);
+            int newTimeout = EditorGUILayout.IntField(new GUIContent("Request Timeout (seconds)", "Timeout in seconds for tool request"), settings.RequestTimeoutSeconds);
             if (newTimeout < 60)
             {
                 newTimeout = 60;
-                Debug.LogError("Test timeout must be at least 60 seconds.");
+                Debug.LogError("Request timeout must be at least 60 seconds.");
             }
             
-            if (newTimeout != settings.TestTimeoutSeconds)
+            if (newTimeout != settings.RequestTimeoutSeconds)
             {
-                settings.TestTimeoutSeconds = newTimeout;
+                settings.RequestTimeoutSeconds = newTimeout;
                 settings.SaveSettings();
             }
             EditorGUILayout.EndHorizontal();

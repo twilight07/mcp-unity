@@ -15,6 +15,11 @@ namespace McpUnity.Unity
         // Constants
         public const string ServerVersion = "1.0.0";
         public const string PackageName = "com.gamelovers.mcp-unity";
+
+#if UNITY_EDITOR_WIN
+        private const string EnvUnityPort = "UNITY_PORT";
+        private const string EnvUnityRequestTimeout = "UNITY_REQUEST_TIMEOUT";
+#endif
         
         private static McpUnitySettings _instance;
         private static readonly string SettingsPath = "ProjectSettings/McpUnitySettings.json";
@@ -25,14 +30,17 @@ namespace McpUnity.Unity
 #endif
         public int Port { get; set; } = 8090;
         
+#if !UNITY_EDITOR_WIN
+        [field: SerializeField] // Note: On Windows, this property is  persisted in per-user environment variables.
+#endif
+        [Tooltip("Timeout in seconds for tool request")]
+        public int RequestTimeoutSeconds { get; set; } = 60;
+        
         [Tooltip("Whether to automatically start the MCP server when Unity opens")]
         public bool AutoStartServer = true;
         
         [Tooltip("Whether to show info logs in the Unity console")]
         public bool EnableInfoLogs = true;
-        
-        [Tooltip("Timeout in seconds for test execution")]
-        public int TestTimeoutSeconds = 60;
 
         /// <summary>
         /// Singleton instance of settings
@@ -74,10 +82,15 @@ namespace McpUnity.Unity
                 
 #if UNITY_EDITOR_WIN
                 // Check for environment variable PORT
-                string envPort = System.Environment.GetEnvironmentVariable("UNITY_PORT");
+                string envPort = System.Environment.GetEnvironmentVariable(EnvUnityPort);
                 if (!string.IsNullOrEmpty(envPort) && int.TryParse(envPort, out int port))
                 {
                     Port = port;
+                }
+                string envTimeout = System.Environment.GetEnvironmentVariable(EnvUnityRequestTimeout);
+                if (!string.IsNullOrEmpty(envTimeout) && int.TryParse(envTimeout, out int timeout))
+                {
+                    RequestTimeoutSeconds = timeout;
                 }
 #endif
             }
@@ -104,7 +117,8 @@ namespace McpUnity.Unity
                 // Note: This will only affect processes started after this point
                 // Note: EnvironmentVariableTarget.User should be used on .NET implementations running on Windows systems only.
                 //          see: https://learn.microsoft.com/ja-jp/dotnet/api/system.environmentvariabletarget?view=net-8.0#fields
-                System.Environment.SetEnvironmentVariable("UNITY_PORT", Port.ToString(), System.EnvironmentVariableTarget.User);
+                Environment.SetEnvironmentVariable(EnvUnityPort, Port.ToString(), EnvironmentVariableTarget.User);
+                Environment.SetEnvironmentVariable(EnvUnityRequestTimeout, RequestTimeoutSeconds.ToString(), EnvironmentVariableTarget.User);
 #endif
             }
             catch (Exception ex)
