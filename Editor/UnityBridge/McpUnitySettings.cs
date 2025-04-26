@@ -20,6 +20,9 @@ namespace McpUnity.Unity
         private static readonly string SettingsPath = "ProjectSettings/McpUnitySettings.json";
 
         // Server settings
+#if !UNITY_EDITOR_WIN
+        [field: SerializeField] // Note: On Windows, this property is  persisted in per-user environment variables.
+#endif
         public int Port { get; set; } = 8090;
         
         [Tooltip("Whether to automatically start the MCP server when Unity opens")]
@@ -69,12 +72,14 @@ namespace McpUnity.Unity
                     JsonUtility.FromJsonOverwrite(json, this);
                 }
                 
+#if UNITY_EDITOR_WIN
                 // Check for environment variable PORT
                 string envPort = System.Environment.GetEnvironmentVariable("UNITY_PORT");
                 if (!string.IsNullOrEmpty(envPort) && int.TryParse(envPort, out int port))
                 {
                     Port = port;
                 }
+#endif
             }
             catch (Exception ex)
             {
@@ -93,10 +98,14 @@ namespace McpUnity.Unity
                 // Save settings to McpUnitySettings.json
                 string json = JsonUtility.ToJson(this, true);
                 File.WriteAllText(SettingsPath, json);
-                
+
+#if UNITY_EDITOR_WIN
                 // Set environment variable PORT for the Node.js process
                 // Note: This will only affect processes started after this point
+                // Note: EnvironmentVariableTarget.User should be used on .NET implementations running on Windows systems only.
+                //          see: https://learn.microsoft.com/ja-jp/dotnet/api/system.environmentvariabletarget?view=net-8.0#fields
                 System.Environment.SetEnvironmentVariable("UNITY_PORT", Port.ToString(), System.EnvironmentVariableTarget.User);
+#endif
             }
             catch (Exception ex)
             {
