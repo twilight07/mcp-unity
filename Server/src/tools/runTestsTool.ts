@@ -10,7 +10,8 @@ const toolName = 'run_tests';
 const toolDescription = 'Runs Unity\'s Test Runner tests';
 const paramsSchema = z.object({
   testMode: z.string().optional().describe('The test mode to run (EditMode or PlayMode) - defaults to EditMode (optional)'),
-  testFilter: z.string().optional().describe('The specific test filter to run (e.g. specific test name or namespace) (optional)')
+  testFilter: z.string().optional().describe('The specific test filter to run (e.g. specific test name or namespace) (optional)'),
+  returnsOnlyFailures: z.boolean().optional().default(true).describe('Whether to show only failed tests in the results (optional)')
 });
 
 /**
@@ -52,14 +53,15 @@ export function createRunTestsTool(server: McpServer, mcpUnity: McpUnity, logger
  * @throws McpUnityError if the request to Unity fails
  */
 async function toolHandler(mcpUnity: McpUnity, params: any): Promise<CallToolResult> {
-  const { testMode = 'EditMode', testFilter } = params;
+  const { testMode = 'EditMode', testFilter, returnsOnlyFailures = true } = params;
 
   // Create and wait for the test run
   const response = await mcpUnity.sendRequest({
     method: toolName,
     params: { 
       testMode,
-      testFilter
+      testFilter,
+      returnsOnlyFailures
     }
   });
   
@@ -84,6 +86,7 @@ async function toolHandler(mcpUnity: McpUnity, params: any): Promise<CallToolRes
   if (testCount > 0 && passCount < testCount) {
     resultMessage += `. Failed tests: ${testResults
       .filter((r: any) => r.result !== 'Passed')
+      .filter((r: any) => !r.result.startsWith('Skipped'))
       .map((r: any) => r.name)
       .join(', ')}`;
   }
