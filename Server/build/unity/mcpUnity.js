@@ -8,7 +8,7 @@ export class McpUnity {
     port;
     ws = null;
     pendingRequests = new Map();
-    REQUEST_TIMEOUT = 10000;
+    REQUEST_TIMEOUT;
     retryDelay = 1000;
     constructor(logger) {
         this.logger = logger;
@@ -19,6 +19,10 @@ export class McpUnity {
         const envPort = process.env.UNITY_PORT || envRegistry;
         this.port = envPort ? parseInt(envPort, 10) : 8090;
         this.logger.info(`Using port: ${this.port} for Unity WebSocket connection`);
+        // Initialize timeout from environment variable (in seconds; it is the same as Cline) or use default (10 seconds)
+        const envTimeout = process.env.UNITY_REQUEST_TIMEOUT;
+        this.REQUEST_TIMEOUT = envTimeout ? parseInt(envTimeout, 10) * 1000 : 10000;
+        this.logger.info(`Using request timeout: ${this.REQUEST_TIMEOUT / 1000} seconds`);
     }
     /**
      * Start the Unity connection
