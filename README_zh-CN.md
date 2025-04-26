@@ -215,35 +215,50 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 
 ## 可选：设置超时
 
+默认情况下，MCP 服务器与 WebSocket 之间的超时时间为 10 秒。
+您可以根据所使用的操作系统进行更改：
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Option 1: Windows OS</span></summary>
+
+1. 打开 Unity 编辑器
+2. 导航至 Tools > MCP Unity > Server Window
+3. 将 "Request Timeout (seconds)" 值更改为所需的超时秒数
+4. Unity 会将系统环境变量 UNITY_REQUEST_TIMEOUT 设置为新的超时值
+5. 重启 Node.js 服务器
+6. 再次点击“启动服务器”，将 Unity 编辑器 Web 套接字重新连接到 Node.js MCP 服务器
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Option 2: 非Windows操作系统</span></summary>
+
+对于非Windows操作系统，需要配置两个地方：
+
+### 编辑器进程超时
+
+1. 打开 Unity 编辑器
+2. 导航至 Tools > MCP Unity > Server Window
+3. 将 "Request Timeout (seconds)" 值更改为所需的超时秒数
+
 ### WebSocket 超时
 
-默认情况下，MCP 服务器与 WebSocket 之间的超时时间为 10 秒。
-您可以在 MCP 配置文件中将其指定为环境变量 `UNITY_REQUEST_TIMEOUT`，如下所示：
+1. 在终端中设置 UNITY_REQUEST_TIMEOUT 环境变量
+    - Powershell
+   ```powershell
+   $env:UNITY_REQUEST_TIMEOUT = "300"
+   ```
+    - Command Prompt/Terminal
+   ```cmd
+   set UNITY_REQUEST_TIMEOUT=300
+   ```
+2. 重启 Node.js 服务器
+3. 再次点击“启动服务器”，将 Unity 编辑器 Web 套接字重新连接到 Node.js MCP 服务器
 
-```json
-{
-  "mcpServers": {
-    "mcp-unity": {
-      "command": "node",
-      "args": [
-        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
-      ],
-      "env": {
-        "UNITY_PORT": "8090",
-        "UNITY_REQUEST_TIMEOUT": "300"
-      }
-    }
-  }
-}
-```
+</details>
 
 > [!TIP]  
-> 您的 AI 编码 IDE（例如，Claude Desktop、Cursor IDE、Windsurf IDE）和 MCP 服务器之间的超时取决于 AI 编码 IDE。
-
-### 测试执行超时
-
-默认情况下，Unity 编辑器中 `run_tests` 工具的执行超时时间为 60 秒。
-您可以在 **Tools > MCP Unity > Server Window** 中的 **Test Timeout (seconds)** 中指定它。
+> 您的 AI 编码 IDE（例如，Claude Desktop、Cursor IDE、Windsurf IDE）和 MCP 服务器之间的超时取决于 IDE。
 
 ## <a name="debug-server"></a>调试服务器
 
