@@ -3,6 +3,7 @@ using System.IO;
 using McpUnity.Utils;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Serialization;
 
 namespace McpUnity.Unity
 {
@@ -27,6 +28,9 @@ namespace McpUnity.Unity
         
         [Tooltip("Whether to show info logs in the Unity console")]
         public bool EnableInfoLogs = true;
+        
+        [Tooltip("Timeout in seconds for test execution")]
+        public int TestTimeoutSeconds = 60;
 
         /// <summary>
         /// Singleton instance of settings

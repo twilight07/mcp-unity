@@ -107,6 +107,24 @@ namespace McpUnity.Unity
             
             EditorGUILayout.Space();
             
+            // Test timeout setting
+            EditorGUILayout.BeginHorizontal();
+            int newTimeout = EditorGUILayout.IntField(new GUIContent("Test Timeout (seconds)", "Timeout in seconds for test execution"), settings.TestTimeoutSeconds);
+            if (newTimeout < 60)
+            {
+                newTimeout = 60;
+                Debug.LogError("Test timeout must be at least 60 seconds.");
+            }
+            
+            if (newTimeout != settings.TestTimeoutSeconds)
+            {
+                settings.TestTimeoutSeconds = newTimeout;
+                settings.SaveSettings();
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.Space();
+            
             // Auto start server toggle
             bool autoStartServer = EditorGUILayout.Toggle(new GUIContent("Auto Start Server", "Automatically starts the MCP server when Unity opens"), settings.AutoStartServer);
             if (autoStartServer != settings.AutoStartServer)
