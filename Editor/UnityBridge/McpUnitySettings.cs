@@ -15,6 +15,7 @@ namespace McpUnity.Unity
         // Constants
         public const string ServerVersion = "1.0.0";
         public const string PackageName = "com.gamelovers.mcp-unity";
+        public const int RequestTimeoutMinimum = 10;
 
 #if UNITY_EDITOR_WIN
         private const string EnvUnityPort = "UNITY_PORT";
@@ -34,7 +35,7 @@ namespace McpUnity.Unity
         [field: SerializeField] // Note: On Windows, this property is  persisted in per-user environment variables.
 #endif
         [Tooltip("Timeout in seconds for tool request")]
-        public int RequestTimeoutSeconds { get; set; } = 60;
+        public int RequestTimeoutSeconds { get; set; } = RequestTimeoutMinimum;
         
         [Tooltip("Whether to automatically start the MCP server when Unity opens")]
         public bool AutoStartServer = true;

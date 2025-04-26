@@ -110,10 +110,10 @@ namespace McpUnity.Unity
             // Test timeout setting
             EditorGUILayout.BeginHorizontal();
             int newTimeout = EditorGUILayout.IntField(new GUIContent("Request Timeout (seconds)", "Timeout in seconds for tool request"), settings.RequestTimeoutSeconds);
-            if (newTimeout < 60)
+            if (newTimeout < McpUnitySettings.RequestTimeoutMinimum)
             {
-                newTimeout = 60;
-                Debug.LogError("Request timeout must be at least 60 seconds.");
+                newTimeout = McpUnitySettings.RequestTimeoutMinimum;
+                Debug.LogError($"Request timeout must be at least {McpUnitySettings.RequestTimeoutMinimum} seconds.");
             }
             
             if (newTimeout != settings.RequestTimeoutSeconds)
