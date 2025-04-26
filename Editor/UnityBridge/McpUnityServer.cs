@@ -163,9 +163,9 @@ namespace McpUnity.Unity
             RunTestsTool runTestsTool = new RunTestsTool(_testRunnerService);
             _tools.Add(runTestsTool.Name, runTestsTool);
             
-            // Register NotifyMessageTool
-            NotifyMessageTool notifyMessageTool = new NotifyMessageTool();
-            _tools.Add(notifyMessageTool.Name, notifyMessageTool);
+            // Register SendConsoleLogTool
+            SendConsoleLogTool sendConsoleLogTool = new SendConsoleLogTool();
+            _tools.Add(sendConsoleLogTool.Name, sendConsoleLogTool);
             
             // Register UpdateComponentTool
             UpdateComponentTool updateComponentTool = new UpdateComponentTool();

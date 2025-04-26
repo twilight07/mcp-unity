@@ -76,8 +76,8 @@ MCP Unity provides automatic integration with VSCode-like IDEs (Visual Studio Co
 - `run_tests`: Runs tests using the Unity Test Runner
   > **Example prompt:** "Run all the EditMode tests in my project"
 
-- `notify_message`: Displays messages in the Unity Editor
-  > **Example prompt:** "Send a notification to Unity that the task has been completed"
+- `send_console_log`: Send a console log to Unity
+  > **Example prompt:** "Send a console log to Unity Editor"
 
 - `add_asset_to_scene`: Adds an asset from the AssetDatabase to the Unity scene
   > **Example prompt:** "Add the Player prefab from my project to the current scene"
@@ -306,8 +306,7 @@ Don't forget to shutdown the server with `Ctrl + C` before closing the terminal 
 <summary><span style="font-size: 1.1em; font-weight: bold;">Connection Issues</span></summary>
 
 - Ensure the WebSocket server is running (check the Server Window in Unity)
-- Check if there are any firewall restrictions blocking the connection
-- Make sure the port number is correct (default is 8080)
+- Send a console log message from MCP client to force a reconnection between MCP client and Unity server
 - Change the port number in the Unity Editor MCP Server window. (Tools > MCP Unity > Server Window)
 </details>
 
@@ -317,14 +316,6 @@ Don't forget to shutdown the server with `Ctrl + C` before closing the terminal 
 - Check the Unity Console for error messages
 - Ensure Node.js is properly installed and accessible in your PATH
 - Verify that all dependencies are installed in the Server directory
-</details>
-
-<details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Menu Items Not Executing</span></summary>
-
-- Ensure the menu item path is correct (case-sensitive)
-- Check if the menu item requires confirmation
-- Verify that the menu item is available in the current context
 </details>
 
 <details>

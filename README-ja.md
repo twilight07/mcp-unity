@@ -76,8 +76,8 @@ MCP Unityは、Unityの`Library/PackedCache`フォルダーをワークスペー
 - `run_tests`: Unityテストランナーを使用してテストを実行
   > **例:** "プロジェクト内のすべてのEditModeテストを実行"
 
-- `notify_message`: Unityエディターにメッセージを表示
-  > **例:** "タスクが完了したことをUnityに通知"
+- `send_console_log`: Unityにコンソールログを送信
+  > **例:** "Unity Editorにコンソールログを送信"
 
 - `add_asset_to_scene`: AssetDatabaseからアセットをUnityシーンに追加
   > **例:** "プロジェクトからPlayerプレハブを現在のシーンに追加"
@@ -230,30 +230,61 @@ MCP Unityサーバーをデバッグするには、以下の方法を使用で�
 
 ## トラブルシューティング
 
-### <a name="common-issues"></a>よくある問題
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">接続の問題</span></summary>
 
-#### サーバーが起動しない
+- WebSocketサーバーが実行中であることを確認してください（UnityのServer Windowを確認）
+- ファイアウォールの制限が接続を妨げていないか確認してください
+- ポート番号が正しいことを確認してください（デフォルトは8080）
+- UnityエディターのMCP Serverウィンドウでポート番号を変更できます（ツール > MCP Unity > Server Window）
+</details>
 
-- Node.js 18以降がインストールされていることを確認
-- npm 9以降がインストールされていることを確認
-- MCP Unityサーバーディレクトリが正しいことを確認
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">サーバーが起動しない</span></summary>
 
-#### メニュー項目が実行されない
+- Unityコンソールにエラーメッセージがないか確認してください
+- Node.jsが正しくインストールされ、PATHで利用可能であることを確認してください
+- Serverディレクトリ内の依存関係がすべてインストールされていることを確認してください
+</details>
 
-- メニュー項目のパスが正しいことを確認（大文字小文字を区別）
-- メニュー項目が確認を必要とするかどうかを確認
-- メニュー項目が現在のコンテキストで利用可能であることを確認
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Play Modeテスト実行時の接続失敗</span></summary>
 
-#### Play Modeテスト実行時に `Connection failed` エラー
-
-`run_tests` ツールの実行が次のエラーを返します：
+`run_tests` ツールは以下の応答を返します：
 ```
 Error:
 Connection failed: Unknown error
 ```
 
-このエラーは、Play Modeに切り替わる際にドメインがリロードされるため、ブリッジ接続が失われることで発生します。  
-回避方法は、**Edit > Project Settings > Editor > "Enter Play Mode Settings"** で **Reload Domain** をオフにすることです。
+このエラーは、Play Modeへ切り替える際にドメインリロードが発生し、ブリッジ接続が失われるために発生します。  
+回避策は、**Edit > Project Settings > Editor > "Enter Play Mode Settings"** で **Reload Domain** をオフにすることです。
+</details>
+
+## サポート・フィードバック
+
+ご質問やサポートが必要な場合は、このリポジトリの[issue](https://github.com/CoderGamester/mcp-unity/issues)をご利用ください。
+
+また、以下でも連絡可能です：
+- Linkedin: [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
+- Discord: gamester7178
+- メール: game.gamester@gmail.com
+
+## コントリビューション
+
+コントリビューションは大歓迎です！Pull Requestの送信やIssueの提出をお待ちしています。
+
+**変更は [Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) フォーマットに従ってください。**
+
+## ライセンス
+
+本プロジェクトは [MIT License](License.md) の下で提供されています。
+
+## 謝辞
+
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Unity Technologies](https://unity.com)
+- [Node.js](https://nodejs.org)
+- [WebSocket-Sharp](https://github.com/sta/websocket-sharp)
 
 ## 貢献
 

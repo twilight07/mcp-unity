@@ -8,11 +8,11 @@ namespace McpUnity.Tools
     /// <summary>
     /// Tool for sending notification messages to the Unity console
     /// </summary>
-    public class NotifyMessageTool : McpToolBase
+    public class SendConsoleLogTool : McpToolBase
     {
-        public NotifyMessageTool()
+        public SendConsoleLogTool()
         {
-            Name = "notify_message";
+            Name = "send_console_log";
             Description = "Sends a message to the Unity console";
         }
         

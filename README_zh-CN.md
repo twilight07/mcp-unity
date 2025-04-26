@@ -78,8 +78,8 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 - `run_tests`: 使用 Unity 测试运行器运行测试
   > **示例提示:** "运行我项目中所有的 EditMode 测试"
 
-- `notify_message`: 在 Unity 编辑器中显示消息
-  > **示例提示:** "发送通知到 Unity 告知任务已完成"
+- `send_console_log`: 发送控制台日志到 Unity
+  > **示例提示:** "发送控制台日志到 Unity 编辑器"
 
 - `add_asset_to_scene`: 将 AssetDatabase 中的资源添加到 Unity 场景中
   > **示例提示:** "将我的项目中的 Player 预制体添加到当前场景"
@@ -232,21 +232,25 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 
 ## 故障排除
 
-### <a name="common-issues"></a>常见问题
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">连接问题</span></summary>
 
-#### 服务器无法启动
+- 确保 WebSocket 服务器正在运行（检查 Unity 的 Server Window）
+- 检查是否有防火墙限制阻止连接
+- 确认端口号正确（默认是 8080）
+- 可在 Unity 编辑器 MCP Server 窗口更改端口号。(工具 > MCP Unity > Server Window)
+</details>
 
-- 确保 Node.js 18 或更高版本已安装
-- 验证 npm 9 或更高版本已安装
-- 检查 MCP Unity 服务器目录是否正确
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">服务器无法启动</span></summary>
 
-#### 菜单项无法执行
+- 检查 Unity 控制台是否有错误消息
+- 确保 Node.js 已正确安装并可在 PATH 中访问
+- 验证 Server 目录下所有依赖均已安装
+</details>
 
-- 确保菜单项路径正确（区分大小写）
-- 检查菜单项是否需要确认
-- 验证菜单项在当前上下文中是否可用
-
-#### 运行播放模式测试时连接失败
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">运行播放模式测试时连接失败</span></summary>
 
 `run_tests` 工具返回以下响应：
 ```
@@ -254,8 +258,35 @@ Error:
 Connection failed: Unknown error
 ```
 
-发生此错误的原因是在切换到播放模式触发域重新加载时，桥接连接会丢失。  
+发生此错误的原因是在切换到播放模式时域重新加载，导致桥接连接丢失。  
 解决方法是在 **Edit > Project Settings > Editor > "Enter Play Mode Settings"** 中关闭 **Reload Domain**。
+</details>
+
+## 支持与反馈
+
+如有任何问题或需要支持，请在本仓库[提交 issue](https://github.com/CoderGamester/mcp-unity/issues)。
+
+你也可以通过以下方式联系：
+- Linkedin: [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
+- Discord: gamester7178
+- 邮箱: game.gamester@gmail.com
+
+## 贡献
+
+欢迎贡献！请随时提交 Pull Request 或提出 Issue。
+
+**请遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/v1.0.0/) 格式提交更改。**
+
+## 许可证
+
+本项目采用 [MIT License](License.md) 授权。
+
+## 鸣谢
+
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Unity Technologies](https://unity.com)
+- [Node.js](https://nodejs.org)
+- [WebSocket-Sharp](https://github.com/sta/websocket-sharp)
 
 ## 贡献
 

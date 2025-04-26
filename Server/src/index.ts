@@ -7,7 +7,7 @@ import { createMenuItemTool } from './tools/menuItemTool.js';
 import { createSelectGameObjectTool } from './tools/selectGameObjectTool.js';
 import { createAddPackageTool } from './tools/addPackageTool.js';
 import { createRunTestsTool } from './tools/runTestsTool.js';
-import { createNotifyMessageTool } from './tools/notifyMessageTool.js';
+import { createSendConsoleLogTool } from './tools/sendConsoleLogTool.js';
 import { createUpdateComponentTool } from './tools/updateComponentTool.js';
 import { createAddAssetToSceneTool } from './tools/addAssetToSceneTool.js';
 import { createGetMenuItemsResource } from './resources/getMenuItemResource.js';
@@ -46,7 +46,7 @@ createMenuItemTool(server, mcpUnity, toolLogger);
 createSelectGameObjectTool(server, mcpUnity, toolLogger);
 createAddPackageTool(server, mcpUnity, toolLogger);
 createRunTestsTool(server, mcpUnity, toolLogger);
-createNotifyMessageTool(server, mcpUnity, toolLogger);
+createSendConsoleLogTool(server, mcpUnity, toolLogger);
 createUpdateComponentTool(server, mcpUnity, toolLogger);
 createAddAssetToSceneTool(server, mcpUnity, toolLogger);
 
