@@ -17,14 +17,20 @@ function listTestModes(resourceMimeType) {
         resources: [
             {
                 uri: `unity://tests/EditMode`,
-                name: "EditMode tests",
-                description: "List of all EditMode tests in Unity's test runner",
+                name: "List only 'EditMode' tests",
+                description: "List only 'EditMode' tests from Unity's test runner",
                 mimeType: resourceMimeType
             },
             {
                 uri: `unity://tests/PlayMode`,
-                name: "PlayMode tests",
-                description: "List of all PlayMode tests in Unity's test runner",
+                name: "List only 'PlayMode' tests",
+                description: "List only 'PlayMode' tests from Unity's test runner",
+                mimeType: resourceMimeType
+            },
+            {
+                uri: `unity://tests/`,
+                name: "List all tests",
+                description: "List of all tests in Unity's test runner, this includes PlayMode and EditMode tests",
                 mimeType: resourceMimeType
             }
         ]
@@ -66,7 +72,7 @@ export function createGetTestsResource(server, mcpUnity, logger) {
  */
 async function resourceHandler(mcpUnity, uri, variables) {
     // Convert the new handler signature to work with our existing code
-    const testMode = variables["testMode"] || 'EditMode';
+    const testMode = variables["testMode"];
     const response = await mcpUnity.sendRequest({
         method: resourceName,
         params: {

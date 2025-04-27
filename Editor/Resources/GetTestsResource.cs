@@ -14,12 +14,12 @@ namespace McpUnity.Resources
     /// </summary>
     public class GetTestsResource : McpResourceBase
     {
-        private readonly TestRunnerService _testRunnerService;
+        private readonly ITestRunnerService _testRunnerService;
         
         /// <summary>
         /// Constructor
         /// </summary>
-        public GetTestsResource(TestRunnerService testRunnerService)
+        public GetTestsResource(ITestRunnerService testRunnerService)
         {
             Name = "get_tests";
             Description = "Gets available tests from Unity Test Runner";
@@ -38,15 +38,7 @@ namespace McpUnity.Resources
             string testModeFilter = parameters["testMode"]?.ToObject<string>();
             
             // Get all tests from the service
-            var allTests = _testRunnerService.GetAllTests();
-            
-            // Apply test mode filter if provided
-            if (!string.IsNullOrEmpty(testModeFilter))
-            {
-                allTests = allTests.Where(t => 
-                    t.TestMode.Equals(testModeFilter, StringComparison.OrdinalIgnoreCase)
-                ).ToList();
-            }
+            var allTests = _testRunnerService.GetAllTests(testModeFilter);
             
             // Create the results array
             var results = new JArray();
@@ -67,9 +59,7 @@ namespace McpUnity.Resources
             {
                 ["success"] = true,
                 ["message"] = $"Retrieved {allTests.Count} tests",
-                ["tests"] = results,
-                ["editModeCount"] = allTests.Count(t => t.TestMode.Equals("EditMode", StringComparison.OrdinalIgnoreCase)),
-                ["playModeCount"] = allTests.Count(t => t.TestMode.Equals("PlayMode", StringComparison.OrdinalIgnoreCase))
+                ["tests"] = results
             };
         }
     }

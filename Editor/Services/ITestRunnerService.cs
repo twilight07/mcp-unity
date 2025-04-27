@@ -16,9 +16,11 @@ namespace McpUnity.Services
         TestRunnerApi TestRunnerApi { get; }
         
         /// <summary>
-        /// Get a list of all available tests
+        /// Get a list of available tests, optionally filtered by test mode
         /// </summary>
-        List<TestItemInfo> GetAllTests();
+        /// <param name="testMode">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
+        /// <returns>List of test items matching the specified test mode, or all tests if no mode specified</returns>
+        List<TestItemInfo> GetAllTests(string testMode = "");
 
         /// <summary>
         /// Execute tests with the provided parameters

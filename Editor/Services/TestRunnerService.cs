@@ -30,15 +30,25 @@ namespace McpUnity.Services
         }
         
         /// <summary>
-        /// Get a list of all available tests
+        /// Get a list of available tests, optionally filtered by test mode
         /// </summary>
-        public List<TestItemInfo> GetAllTests()
+        /// <param name="testMode">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
+        /// <returns>List of test items matching the specified test mode, or all tests if no mode specified</returns>
+        public List<TestItemInfo> GetAllTests(string testMode = "")
         {
             var tests = new List<TestItemInfo>();
             
-            // Get tests for both edit mode and play mode
-            _testRunnerApi.RetrieveTestList(TestMode.EditMode, adaptor => CollectTestItems(adaptor, tests));
-            _testRunnerApi.RetrieveTestList(TestMode.PlayMode, adaptor => CollectTestItems(adaptor, tests));
+            // Check if we need to retrieve EditMode tests
+            if (string.IsNullOrEmpty(testMode) || testMode.Equals("EditMode", StringComparison.OrdinalIgnoreCase))
+            {
+                _testRunnerApi.RetrieveTestList(TestMode.EditMode, adaptor => CollectTestItems(adaptor, tests));
+            }
+            
+            // Check if we need to retrieve PlayMode tests
+            if (string.IsNullOrEmpty(testMode) || testMode.Equals("PlayMode", StringComparison.OrdinalIgnoreCase))
+            {
+                _testRunnerApi.RetrieveTestList(TestMode.PlayMode, adaptor => CollectTestItems(adaptor, tests));
+            }
             
             return tests;
         }

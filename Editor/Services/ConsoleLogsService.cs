@@ -70,15 +70,18 @@ namespace McpUnity.Services
         /// Get all logs as a JSON array
         /// </summary>
         /// <returns>JArray containing all logs</returns>
-        public JArray GetAllLogsAsJson()
+        public JArray GetAllLogsAsJson(string logType = "")
         {
-            // Convert log entries to a JSON array
+            // Convert log entries to a JSON array, filtering by logType if provided
             JArray logsArray = new JArray();
+            bool filter = !string.IsNullOrEmpty(logType);
             
             lock (_logEntries)
             {
                 foreach (var entry in _logEntries)
                 {
+                    if (filter && !entry.Type.ToString().Equals(logType, System.StringComparison.OrdinalIgnoreCase))
+                        continue;
                     logsArray.Add(new JObject
                     {
                         ["message"] = entry.Message,
