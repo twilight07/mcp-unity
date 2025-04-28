@@ -59,13 +59,11 @@ namespace McpUnity.Services
         /// <param name="testMode">Test mode to run</param>
         /// <param name="testFilter">Optional test filter</param>
         /// <param name="completionSource">TaskCompletionSource to resolve when tests are complete</param>
-        /// <param name="timeoutMinutes">Timeout in minutes, defaults to 10</param>
         /// <returns>Task that resolves with test results when tests are complete</returns>
         public async void ExecuteTests(
             TestMode testMode, 
             string testFilter, 
-            TaskCompletionSource<JObject> completionSource, 
-            int timeoutMinutes = 1)
+            TaskCompletionSource<JObject> completionSource)
         {
             // Create filter
             var filter = new Filter
@@ -82,15 +80,18 @@ namespace McpUnity.Services
             // Execute tests
             _testRunnerApi.Execute(new ExecutionSettings(filter));
 
+            // Use timeout from settings if not specified
+            var timeoutSeconds =  McpUnitySettings.Instance.RequestTimeoutSeconds;
+            
             Task completedTask = await Task.WhenAny(
                 completionSource.Task,
-                Task.Delay(TimeSpan.FromMinutes(timeoutMinutes))
+                Task.Delay(TimeSpan.FromSeconds(timeoutSeconds))
             );
 
             if (completedTask != completionSource.Task)
             {
                 completionSource.SetResult(McpUnitySocketHandler.CreateErrorResponse(
-                    $"Test run timed out after {timeoutMinutes} minutes",
+                    $"Test run timed out after {timeoutSeconds} seconds",
                     "test_runner_timeout"
                 ));
             }

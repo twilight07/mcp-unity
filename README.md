@@ -236,6 +236,53 @@ By default, the WebSocket server runs on port 8090. You can change this port in 
 
 </details>
 
+## Optional: Set Timeout
+
+By default, the timeout between the MCP server and the WebSocket is 10 seconds.
+You can change depending on the OS you are using:
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Option 1: Windows OS</span></summary>
+
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Change the "Request Timeout (seconds)" value to your desired timeout seconds
+4. Unity will setup the system environment variable UNITY_REQUEST_TIMEOUT to the new timeout value
+5. Restart the Node.js server
+6. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Option 2: Non-Windows OS</span></summary>
+
+For non-Windows OS, you need to configure two places:
+
+### In Editor Process Timeout
+
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Change the "Request Timeout (seconds)" value to your desired timeout seconds
+
+### WebSocket Timeout
+
+1. Set the UNITY_REQUEST_TIMEOUT environment variable in the terminal
+    - Powershell
+   ```powershell
+   $env:UNITY_REQUEST_TIMEOUT = "300"
+   ```
+    - Command Prompt/Terminal
+   ```cmd
+   set UNITY_REQUEST_TIMEOUT=300
+   ```
+2. Restart the Node.js server
+3. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
+
+</details>
+
+> [!TIP]  
+> The timeout between your AI Coding IDE (e.g., Claude Desktop, Cursor IDE, Windsurf IDE) and the MCP Server depends on the IDE.
+
 ## <a name="debug-server"></a>Debugging the Server
 
 <details>

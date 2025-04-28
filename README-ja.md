@@ -211,6 +211,53 @@ MCP Unityサーバーを起動するには2つの方法があります：
    node Server/build/index.js
    ```
 
+## オプション: タイムアウト設定
+
+デフォルトでは、MCPサーバーとWebSocket間のタイムアウトは 10 秒です。
+お使いのOSに応じて変更できます。
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Option 1: Windows OS</span></summary>
+
+1. Unityエディターを開きます
+2. **Tools > MCP Unity > Server Window** に移動します
+3. **Request Timeout (seconds)** の値を希望のタイムアウト秒数に変更します
+4. Unityはシステム環境変数UNITY_REQUEST_TIMEOUTに新しいタイムアウト値を設定します
+5. Node.jsサーバーを再起動します
+6. **Start Server** をもう一度クリックして、UnityエディターのWebソケットをNode.js MCPサーバーに再接続します
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Option 2: Windows以外のOS</span></summary>
+
+Windows 以外の OS の場合は、次の 2 か所で設定する必要があります。
+
+### エディター内プロセスのタイムアウト
+
+1. Unityエディターを開きます
+2. **Tools > MCP Unity > Server Window** に移動します
+3. **Request Timeout (seconds)** の値を希望のタイムアウト秒数に変更します
+
+### WebSocketのタイムアウト
+
+1. ターミナルで UNITY_REQUEST_TIMEOUT 環境変数を設定します
+    - Powershell
+   ```powershell
+   $env:UNITY_REQUEST_TIMEOUT = "300"
+   ```
+    - Command Prompt/Terminal
+   ```cmd
+   set UNITY_REQUEST_TIMEOUT=300
+   ```
+2. Node.jsサーバーを再起動します
+3. **Start Server** をもう一度クリックして、UnityエディターのWebソケットをNode.js MCPサーバーに再接続します
+
+</details>
+
+> [!TIP]  
+> AIコーディングIDE（Claude Desktop、Cursor IDE、Windsurf IDE など）とMCPサーバー間のタイムアウト設定は、IDEによって異なります。
+
 ## <a name="debug-server"></a>サーバーのデバッグ
 
 MCP Unityサーバーをデバッグするには、以下の方法を使用できます：

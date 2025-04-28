@@ -107,6 +107,24 @@ namespace McpUnity.Unity
             
             EditorGUILayout.Space();
             
+            // Test timeout setting
+            EditorGUILayout.BeginHorizontal();
+            int newTimeout = EditorGUILayout.IntField(new GUIContent("Request Timeout (seconds)", "Timeout in seconds for tool request"), settings.RequestTimeoutSeconds);
+            if (newTimeout < McpUnitySettings.RequestTimeoutMinimum)
+            {
+                newTimeout = McpUnitySettings.RequestTimeoutMinimum;
+                Debug.LogError($"Request timeout must be at least {McpUnitySettings.RequestTimeoutMinimum} seconds.");
+            }
+            
+            if (newTimeout != settings.RequestTimeoutSeconds)
+            {
+                settings.RequestTimeoutSeconds = newTimeout;
+                settings.SaveSettings();
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.Space();
+            
             // Auto start server toggle
             bool autoStartServer = EditorGUILayout.Toggle(new GUIContent("Auto Start Server", "Automatically starts the MCP server when Unity opens"), settings.AutoStartServer);
             if (autoStartServer != settings.AutoStartServer)
