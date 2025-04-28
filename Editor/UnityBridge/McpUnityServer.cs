@@ -38,13 +38,10 @@ namespace McpUnity.Unity
             EditorApplication.quitting += Instance.StopServer;
 
             // Auto-restart server after domain reload
-            EditorApplication.delayCall += () =>
+            if (McpUnitySettings.Instance.AutoStartServer)
             {
-                if (McpUnitySettings.Instance.AutoStartServer)
-                {
-                    Instance.StartServer();
-                }
-            };
+                Instance.StartServer();
+            }
         }
         
         /// <summary>
