@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
 
@@ -31,10 +32,33 @@ namespace McpUnity.Resources
         public bool IsEnabled { get; protected set; } = true;
         
         /// <summary>
-        /// Fetch the resource data with the provided parameters
+        /// Indicates if the fetch operation is asynchronous.
         /// </summary>
-        /// <param name="parameters">Resource parameters as a JObject</param>
-        /// <returns>The result of the resource fetch as a JObject</returns>
-        public abstract JObject Fetch(JObject parameters);
+        public bool IsAsync { get; protected set; } = false;
+
+        /// <summary>
+        /// Synchronously fetch the resource data.
+        /// Implement this for synchronous resources (IsAsync = false).
+        /// </summary>
+        /// <param name="parameters">Parameters extracted from the URI or query.</param>
+        /// <returns>Result as JObject.</returns>
+        public virtual JObject Fetch(JObject parameters)
+        {
+            // Default implementation throws, forcing sync resources to override.
+            throw new NotImplementedException($"Synchronous Fetch not implemented for resource '{Name}'. Mark IsAsync=true and implement FetchAsync, or override Fetch.");
+        }
+
+        /// <summary>
+        /// Asynchronously fetch the resource data.
+        /// Implement this for asynchronous resources (IsAsync = true).
+        /// The implementation MUST eventually call tcs.SetResult() or tcs.SetException().
+        /// </summary>
+        /// <param name="parameters">Parameters extracted from the URI or query.</param>
+        /// <param name="tcs">TaskCompletionSource to set the result on.</param>
+        public virtual void FetchAsync(JObject parameters, TaskCompletionSource<JObject> tcs)
+        {
+            // Default implementation throws, forcing async resources to override.
+            tcs.SetException(new NotImplementedException($"Asynchronous FetchAsync not implemented for resource '{Name}'. Mark IsAsync=false and implement Fetch, or override FetchAsync."));
+        }
     }
 }

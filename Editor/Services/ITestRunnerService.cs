@@ -14,13 +14,13 @@ namespace McpUnity.Services
         /// Get the TestRunnerApi instance
         /// </summary>
         TestRunnerApi TestRunnerApi { get; }
-        
+
         /// <summary>
-        /// Get a list of available tests, optionally filtered by test mode
+        /// Async retrieval of all tests using TestRunnerApi callbacks
         /// </summary>
         /// <param name="testMode">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
         /// <returns>List of test items matching the specified test mode, or all tests if no mode specified</returns>
-        List<TestItemInfo> GetAllTests(string testMode = "");
+        Task<List<TestItemInfo>> GetAllTestsAsync(string testMode = "");
 
         /// <summary>
         /// Execute tests with the provided parameters

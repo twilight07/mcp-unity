@@ -1,11 +1,7 @@
-using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
-using Newtonsoft.Json.Linq;
-using McpUnity.Unity;
 using McpUnity.Services;
+using Newtonsoft.Json.Linq;
 
 namespace McpUnity.Resources
 {
@@ -24,25 +20,23 @@ namespace McpUnity.Resources
             Name = "get_tests";
             Description = "Gets available tests from Unity Test Runner";
             Uri = "unity://tests/{testMode}";
-            
+            IsAsync = true;
             _testRunnerService = testRunnerService;
         }
         
         /// <summary>
-        /// Fetch tests based on provided parameters
+        /// Asynchronously fetch tests based on provided parameters
         /// </summary>
         /// <param name="parameters">Resource parameters as a JObject</param>
-        public override JObject Fetch(JObject parameters)
+        /// <param name="tcs">TaskCompletionSource to set the result or exception</param>
+        public override async void FetchAsync(JObject parameters, TaskCompletionSource<JObject> tcs)
         {
             // Get filter parameters
             string testModeFilter = parameters["testMode"]?.ToObject<string>();
-            
-            // Get all tests from the service
-            var allTests = _testRunnerService.GetAllTests(testModeFilter);
-            
-            // Create the results array
+            List<TestItemInfo> allTests = await _testRunnerService.GetAllTestsAsync(testModeFilter);
             var results = new JArray();
-            foreach (var test in allTests)
+            
+            foreach (TestItemInfo test in allTests)
             {
                 results.Add(new JObject
                 {
@@ -54,13 +48,12 @@ namespace McpUnity.Resources
                 });
             }
             
-            // Return the results
-            return new JObject
+            tcs.SetResult(new JObject
             {
                 ["success"] = true,
                 ["message"] = $"Retrieved {allTests.Count} tests",
                 ["tests"] = results
-            };
+            });
         }
     }
 }

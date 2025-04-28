@@ -177,18 +177,24 @@ namespace McpUnity.Unity
         {
             try
             {
-                var result = resource.Fetch(parameters);
-                tcs.SetResult(result);
+                if (resource.IsAsync)
+                {
+                    resource.FetchAsync(parameters, tcs);
+                }
+                else
+                {
+                    var result = resource.Fetch(parameters);
+                    tcs.SetResult(result);
+                }
             }
             catch (Exception ex)
             {
-                McpLogger.LogError($"Error fetching resource {resource.Name}: {ex.Message}");
+                McpLogger.LogError($"Error fetching resource {resource.Name}: {ex}");
                 tcs.SetResult(CreateErrorResponse(
                     $"Failed to fetch resource {resource.Name}: {ex.Message}",
                     "resource_fetch_error"
                 ));
             }
-            
             yield return null;
         }
         

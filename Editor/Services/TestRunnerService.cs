@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using McpUnity.Unity;
 using UnityEngine;
+using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
 using Newtonsoft.Json.Linq;
 
@@ -28,29 +29,59 @@ namespace McpUnity.Services
         {
             _testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
         }
-        
+
+        [MenuItem("Tools/MCP Unity/Debug call path")]
+        public static async void DebugCallGetAllTests()
+        {
+            var service = new TestRunnerService();
+            var tests = await service.GetAllTestsAsync();
+            Debug.Log($"Retrieved {tests.Count} tests:");
+            foreach (var t in tests)
+                Debug.Log($"Test: {t.FullName} ({t.TestMode}) - State: {t.RunState}");
+        }
+
         /// <summary>
-        /// Get a list of available tests, optionally filtered by test mode
+        /// Async retrieval of all tests using TestRunnerApi callbacks
         /// </summary>
         /// <param name="testMode">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
         /// <returns>List of test items matching the specified test mode, or all tests if no mode specified</returns>
-        public List<TestItemInfo> GetAllTests(string testMode = "")
+        public async Task<List<TestItemInfo>> GetAllTestsAsync(string testMode = "")
         {
             var tests = new List<TestItemInfo>();
-            
-            // Check if we need to retrieve EditMode tests
+            var tcs = new TaskCompletionSource<bool>();
+            int pending = 0;
+
             if (string.IsNullOrEmpty(testMode) || testMode.Equals("EditMode", StringComparison.OrdinalIgnoreCase))
             {
-                _testRunnerApi.RetrieveTestList(TestMode.EditMode, adaptor => CollectTestItems(adaptor, tests));
+                Interlocked.Increment(ref pending);
+                _testRunnerApi.RetrieveTestList(TestMode.EditMode, adaptor =>
+                {
+                    CollectTestItems(adaptor, tests);
+                    CheckDone();
+                });
             }
-            
-            // Check if we need to retrieve PlayMode tests
             if (string.IsNullOrEmpty(testMode) || testMode.Equals("PlayMode", StringComparison.OrdinalIgnoreCase))
             {
-                _testRunnerApi.RetrieveTestList(TestMode.PlayMode, adaptor => CollectTestItems(adaptor, tests));
+                Interlocked.Increment(ref pending);
+                _testRunnerApi.RetrieveTestList(TestMode.PlayMode, adaptor =>
+                {
+                    CollectTestItems(adaptor, tests);
+                    CheckDone();
+                });
             }
-            
+
+            if (pending == 0)
+                tcs.SetResult(true);
+
+            await tcs.Task;
+
             return tests;
+
+            void CheckDone()
+            {
+                if (Interlocked.Decrement(ref pending) == 0)
+                    tcs.TrySetResult(true);
+            }
         }
 
         /// <summary>

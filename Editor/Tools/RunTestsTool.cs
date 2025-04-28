@@ -145,12 +145,15 @@ namespace McpUnity.Tools
             // Create test results summary
             var summary = new JObject
             {
+                ["name"] = result.Name,
+                ["fullName"] = result.FullName,
                 ["testCount"] = result.PassCount + result.FailCount + result.SkipCount + result.InconclusiveCount,
                 ["passCount"] = result.PassCount,
                 ["failCount"] = result.FailCount,
                 ["skipCount"] = result.SkipCount,
                 ["inconclusiveCount"] = result.InconclusiveCount,
                 ["duration"] = result.Duration,
+                ["resultState"] = result.ResultState,
                 ["success"] = result.ResultState == "Passed",
                 ["status"] = "completed",
                 ["message"] = $"Test run completed: {result.Test.Name} - {result.ResultState}"

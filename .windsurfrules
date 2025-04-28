@@ -55,6 +55,7 @@
 
 - MCP Protocol: https://modelcontextprotocol.io
 - TypeScript SDK: https://github.com/modelcontextprotocol/typescript-sdk
+- Inspector: https://github.com/modelcontextprotocol/inspector
 
 ## 9. Conventions
 
@@ -62,3 +63,13 @@
 - Follow the MCP protocol for all tool/resource definitions.
 - All new tools/resources should be registered in both Unity and Node.js server entry points.
 - Follow Conventional Commits for all commit messages.
+
+## 10. Debugging with MCP Inspector
+
+To debug the MCP Node.js server using the Model Context Protocol Inspector, run the following command from the project root:
+
+```shell
+npx @modelcontextprotocol/inspector node Server/build/index.js
+```
+
+This will launch the MCP Inspector, allowing you to inspect and debug live MCP traffic between the Node.js server and connected clients (such as Unity or LLM IDEs).
