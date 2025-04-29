@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using McpUnity.Unity;
+using McpUnity.Utils;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
@@ -12,22 +14,23 @@ namespace McpUnity.Services
 {
     /// <summary>
     /// Service for accessing Unity Test Runner functionality
+    /// Implements ICallbacks for TestRunnerApi.
     /// </summary>
-    public class TestRunnerService : ITestRunnerService
+    public class TestRunnerService : ITestRunnerService, ICallbacks
     {
         private readonly TestRunnerApi _testRunnerApi;
-        
-        /// <summary>
-        /// Get the TestRunnerApi instance
-        /// </summary>
-        public TestRunnerApi TestRunnerApi => _testRunnerApi;
-        
+        private TaskCompletionSource<JObject> _tcs;
+        private bool _returnOnlyFailures;
+        private List<ITestResultAdaptor> _results;
+
         /// <summary>
         /// Constructor
         /// </summary>
         public TestRunnerService()
         {
             _testRunnerApi = ScriptableObject.CreateInstance<TestRunnerApi>();
+            
+            _testRunnerApi.RegisterCallbacks(this);
         }
 
         [MenuItem("Tools/MCP Unity/Debug call path")]
@@ -43,131 +46,179 @@ namespace McpUnity.Services
         /// <summary>
         /// Async retrieval of all tests using TestRunnerApi callbacks
         /// </summary>
-        /// <param name="testMode">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
+        /// <param name="testModeFilter">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
         /// <returns>List of test items matching the specified test mode, or all tests if no mode specified</returns>
-        public async Task<List<TestItemInfo>> GetAllTestsAsync(string testMode = "")
+        public async Task<List<ITestAdaptor>> GetAllTestsAsync(string testModeFilter = "")
         {
-            var tests = new List<TestItemInfo>();
-            var tcs = new TaskCompletionSource<bool>();
-            int pending = 0;
+            var tests = new List<ITestAdaptor>();
+            var tasks = new List<Task<List<ITestAdaptor>>>();
 
-            if (string.IsNullOrEmpty(testMode) || testMode.Equals("EditMode", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(testModeFilter) || testModeFilter.Equals("EditMode", StringComparison.OrdinalIgnoreCase))
             {
-                Interlocked.Increment(ref pending);
-                _testRunnerApi.RetrieveTestList(TestMode.EditMode, adaptor =>
-                {
-                    CollectTestItems(adaptor, tests);
-                    CheckDone();
-                });
+                tasks.Add(RetrieveTestsAsync(TestMode.EditMode));
             }
-            if (string.IsNullOrEmpty(testMode) || testMode.Equals("PlayMode", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(testModeFilter) || testModeFilter.Equals("PlayMode", StringComparison.OrdinalIgnoreCase))
             {
-                Interlocked.Increment(ref pending);
-                _testRunnerApi.RetrieveTestList(TestMode.PlayMode, adaptor =>
-                {
-                    CollectTestItems(adaptor, tests);
-                    CheckDone();
-                });
+                tasks.Add(RetrieveTestsAsync(TestMode.PlayMode));
             }
 
-            if (pending == 0)
-                tcs.SetResult(true);
+            var results = await Task.WhenAll(tasks);
 
-            await tcs.Task;
+            foreach (var result in results)
+            {
+                tests.AddRange(result);
+            }
 
             return tests;
-
-            void CheckDone()
-            {
-                if (Interlocked.Decrement(ref pending) == 0)
-                    tcs.TrySetResult(true);
-            }
         }
 
         /// <summary>
-        /// Execute tests with the provided parameters
+        /// Executes tests and returns a JSON summary.
         /// </summary>
-        /// <param name="testMode">Test mode to run</param>
-        /// <param name="testFilter">Optional test filter</param>
-        /// <param name="completionSource">TaskCompletionSource to resolve when tests are complete</param>
+        /// <param name="testMode">The test mode to run (EditMode or PlayMode).</param>
+        /// <param name="returnOnlyFailures">If true, only failed test results are included in the output.</param>
+        /// <param name="testFilter">A filter string to select specific tests to run.</param>
         /// <returns>Task that resolves with test results when tests are complete</returns>
-        public async void ExecuteTests(
-            TestMode testMode, 
-            string testFilter, 
-            TaskCompletionSource<JObject> completionSource)
+        public async Task<JObject> ExecuteTestsAsync(TestMode testMode, bool returnOnlyFailures, string testFilter = "")
         {
-            // Create filter
-            var filter = new Filter
-            {
-                testMode = testMode
-            };
-                
-            // Apply name filter if provided
+            _tcs = new TaskCompletionSource<JObject>();
+            _results = new List<ITestResultAdaptor>();
+            _returnOnlyFailures = returnOnlyFailures;
+            var filter = new Filter { testMode = testMode };
+
             if (!string.IsNullOrEmpty(testFilter))
             {
                 filter.testNames = new[] { testFilter };
             }
-                
-            // Execute tests
+
             _testRunnerApi.Execute(new ExecutionSettings(filter));
 
-            // Use timeout from settings if not specified
-            var timeoutSeconds =  McpUnitySettings.Instance.RequestTimeoutSeconds;
-            
-            Task completedTask = await Task.WhenAny(
-                completionSource.Task,
-                Task.Delay(TimeSpan.FromSeconds(timeoutSeconds))
-            );
+            return await WaitForCompletionAsync(
+                McpUnitySettings.Instance.RequestTimeoutSeconds);
+        }
+        
+        /// <summary>
+        /// Asynchronously retrieves all test adaptors for the specified test mode.
+        /// </summary>
+        /// <param name="mode">The test mode to retrieve tests for (EditMode or PlayMode).</param>
+        /// <returns>A task that resolves to a list of ITestAdaptor representing all tests in the given mode.</returns>
+        private Task<List<ITestAdaptor>> RetrieveTestsAsync(TestMode mode)
+        {
+            var tcs = new TaskCompletionSource<List<ITestAdaptor>>();
+            var tests = new List<ITestAdaptor>();
 
-            if (completedTask != completionSource.Task)
+            _testRunnerApi.RetrieveTestList(mode, adaptor =>
             {
-                completionSource.SetResult(McpUnitySocketHandler.CreateErrorResponse(
-                    $"Test run timed out after {timeoutSeconds} seconds",
-                    "test_runner_timeout"
-                ));
-            }
+                CollectTestItems(adaptor, tests);
+                tcs.SetResult(tests);
+            });
+
+            return tcs.Task;
         }
         
         /// <summary>
         /// Recursively collect test items from test adaptors
         /// </summary>
-        private void CollectTestItems(ITestAdaptor testAdaptor, List<TestItemInfo> tests, string parentPath = "")
+        private void CollectTestItems(ITestAdaptor testAdaptor, List<ITestAdaptor> tests)
         {
             if (testAdaptor.IsSuite)
             {
                 // For suites (namespaces, classes), collect all children
                 foreach (var child in testAdaptor.Children)
                 {
-                    string currentPath = string.IsNullOrEmpty(parentPath) ? testAdaptor.Name : $"{parentPath}.{testAdaptor.Name}";
-                    CollectTestItems(child, tests, currentPath);
+                    CollectTestItems(child, tests);
                 }
             }
             else
             {
-                // For individual tests, add to the list
-                string fullPath = string.IsNullOrEmpty(parentPath) ? testAdaptor.Name : $"{parentPath}.{testAdaptor.Name}";
-                
-                tests.Add(new TestItemInfo
-                {
-                    Name = testAdaptor.Name,
-                    FullName = testAdaptor.FullName,
-                    Path = fullPath,
-                    TestMode = testAdaptor.TestMode.ToString(),
-                    RunState = testAdaptor.RunState.ToString()
-                });
+                tests.Add(testAdaptor);
             }
         }
-    }
-    
-    /// <summary>
-    /// Information about a test item
-    /// </summary>
-    public class TestItemInfo
-    {
-        public string Name { get; set; }
-        public string FullName { get; set; }
-        public string Path { get; set; }
-        public string TestMode { get; set; }
-        public string RunState { get; set; }
+
+        #region ICallbacks Implementation
+
+        /// <summary>
+        /// Called when the test run starts.
+        /// </summary>
+        public void RunStarted(ITestAdaptor testsToRun)
+        {
+            McpLogger.LogInfo($"Test run started: {testsToRun?.Name}");
+        }
+
+        /// <summary>
+        /// Called when an individual test starts.
+        /// </summary>
+        public void TestStarted(ITestAdaptor test)
+        {
+            // Optionally implement per-test start logic or logging.
+        }
+
+        /// <summary>
+        /// Called when an individual test finishes.
+        /// </summary>
+        public void TestFinished(ITestResultAdaptor result)
+        {
+            _results.Add(result);
+        }
+
+        /// <summary>
+        /// Called when the test run finishes.
+        /// </summary>
+        public void RunFinished(ITestResultAdaptor result)
+        {
+            var summary = BuildResultJson(_results, result);
+            _tcs?.TrySetResult(summary);
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private async Task<JObject> WaitForCompletionAsync(int timeoutSeconds)
+        {
+            var delayTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds));
+            var winner = await Task.WhenAny(_tcs.Task, delayTask);
+            
+            if (winner != _tcs.Task)
+            {
+                _tcs.TrySetResult(
+                    McpUnitySocketHandler.CreateErrorResponse(
+                        $"Test run timed out after {timeoutSeconds} seconds",
+                        "test_runner_timeout"));
+            }
+            return await _tcs.Task;
+        }
+
+        private JObject BuildResultJson(List<ITestResultAdaptor> results, ITestResultAdaptor result)
+        {
+            int pass = results.Count(r => r.ResultState == "Passed");
+            int fail = results.Count(r => r.ResultState == "Failed");
+            int skip = results.Count(r => r.ResultState == "Skipped");
+
+            var arr = new JArray(results
+                .Where(r => !_returnOnlyFailures || r.ResultState == "Failed")
+                .Select(r => new JObject {
+                    ["name"]      = r.Name,
+                    ["fullName"]  = r.FullName,
+                    ["state"]     = r.ResultState,
+                    ["message"]   = r.Message,
+                    ["duration"]  = r.Duration
+                }));
+
+            return new JObject { 
+                ["success"]           = true,
+                ["type"]              = "text",
+                ["message"]           = $"{result.Test.Name} test run completed: {pass}/{results.Count} passed - {fail}/{results.Count} failed - {skip}/{results.Count} skipped",
+                ["resultState"]       = result.ResultState,
+                ["durationSeconds"]   = result.Duration,
+                ["testCount"]         = results.Count,
+                ["passCount"]         = pass,
+                ["failCount"]         = fail,
+                ["skipCount"]         = skip,
+                ["results"]           = arr
+            };
+        }
+
+        #endregion
     }
 }

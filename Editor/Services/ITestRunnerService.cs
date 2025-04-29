@@ -11,27 +11,19 @@ namespace McpUnity.Services
     public interface ITestRunnerService
     {
         /// <summary>
-        /// Get the TestRunnerApi instance
+        /// Asynchronously retrieves all available tests using the TestRunnerApi.
         /// </summary>
-        TestRunnerApi TestRunnerApi { get; }
-
-        /// <summary>
-        /// Async retrieval of all tests using TestRunnerApi callbacks
-        /// </summary>
-        /// <param name="testMode">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
+        /// <param name="testModeFilter">Optional test mode filter (EditMode, PlayMode, or empty for all)</param>
         /// <returns>List of test items matching the specified test mode, or all tests if no mode specified</returns>
-        Task<List<TestItemInfo>> GetAllTestsAsync(string testMode = "");
+        Task<List<ITestAdaptor>> GetAllTestsAsync(string testModeFilter = "");
 
         /// <summary>
-        /// Execute tests with the provided parameters
+        /// Executes tests using the TestRunnerApi and returns the results as a JSON object.
         /// </summary>
-        /// <param name="testMode">Test mode to run</param>
-        /// <param name="testFilter">Optional test filter</param>
-        /// <param name="completionSource">TaskCompletionSource to resolve when tests are complete</param>
+        /// <param name="testMode">The test mode to run (EditMode or PlayMode).</param>
+        /// <param name="returnOnlyFailures">If true, only failed test results are included in the output.</param>
+        /// <param name="testFilter">A filter string to select specific tests to run.</param>
         /// <returns>Task that resolves with test results when tests are complete</returns>
-        void ExecuteTests(
-            TestMode testMode,
-            string testFilter,
-            TaskCompletionSource<JObject> completionSource);
+        Task<JObject> ExecuteTestsAsync(TestMode testMode, bool returnOnlyFailures, string testFilter);
     }
 }

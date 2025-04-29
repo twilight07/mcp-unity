@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using McpUnity.Services;
 using Newtonsoft.Json.Linq;
+using UnityEditor.TestTools.TestRunner.Api;
 
 namespace McpUnity.Resources
 {
@@ -33,18 +34,17 @@ namespace McpUnity.Resources
         {
             // Get filter parameters
             string testModeFilter = parameters["testMode"]?.ToObject<string>();
-            List<TestItemInfo> allTests = await _testRunnerService.GetAllTestsAsync(testModeFilter);
+            List<ITestAdaptor> allTests = await _testRunnerService.GetAllTestsAsync(testModeFilter);
             var results = new JArray();
             
-            foreach (TestItemInfo test in allTests)
+            foreach (ITestAdaptor test in allTests)
             {
                 results.Add(new JObject
                 {
                     ["name"] = test.Name,
                     ["fullName"] = test.FullName,
-                    ["path"] = test.Path,
-                    ["testMode"] = test.TestMode,
-                    ["runState"] = test.RunState
+                    ["testMode"] = test.TestMode.ToString(),
+                    ["runState"] = test.RunState.ToString()
                 });
             }
             

@@ -4,9 +4,9 @@ import { McpUnityError, ErrorType } from '../utils/errors.js';
 const toolName = 'run_tests';
 const toolDescription = 'Runs Unity\'s Test Runner tests';
 const paramsSchema = z.object({
-    testMode: z.string().optional().describe('The test mode to run (EditMode or PlayMode) - defaults to EditMode (optional)'),
-    testFilter: z.string().optional().describe('The specific test filter to run (e.g. specific test name or namespace) (optional)'),
-    returnsOnlyFailures: z.boolean().optional().default(true).describe('Whether to show only failed tests in the results (optional)')
+    testMode: z.string().optional().default('EditMode').describe('The test mode to run (EditMode or PlayMode) - defaults to EditMode (optional)'),
+    testFilter: z.string().optional().default('').describe('The specific test filter to run (e.g. specific test name or namespace) (optional)'),
+    returnOnlyFailures: z.boolean().optional().default(true).describe('Whether to show only failed tests in the results (optional)')
 });
 /**
  * Creates and registers the Run Tests tool with the MCP server
@@ -19,7 +19,7 @@ const paramsSchema = z.object({
 export function createRunTestsTool(server, mcpUnity, logger) {
     logger.info(`Registering tool: ${toolName}`);
     // Register this tool with the MCP server
-    server.tool(toolName, toolDescription, paramsSchema.shape, async (params) => {
+    server.tool(toolName, toolDescription, paramsSchema.shape, async (params = {}) => {
         try {
             logger.info(`Executing tool: ${toolName}`, params);
             const result = await toolHandler(mcpUnity, params);
@@ -40,15 +40,15 @@ export function createRunTestsTool(server, mcpUnity, logger) {
  * @returns A promise that resolves to the tool execution result
  * @throws McpUnityError if the request to Unity fails
  */
-async function toolHandler(mcpUnity, params) {
-    const { testMode = 'EditMode', testFilter, returnsOnlyFailures = true } = params;
+async function toolHandler(mcpUnity, params = {}) {
+    const { testMode = 'EditMode', testFilter = '', returnOnlyFailures = true } = params;
     // Create and wait for the test run
     const response = await mcpUnity.sendRequest({
         method: toolName,
         params: {
             testMode,
             testFilter,
-            returnsOnlyFailures
+            returnOnlyFailures
         }
     });
     // Process the test results
@@ -60,22 +60,12 @@ async function toolHandler(mcpUnity, params) {
     const testCount = response.testCount || 0;
     const passCount = response.passCount || 0;
     const failCount = response.failCount || 0;
-    const inconclusiveCount = response.inconclusiveCount || 0;
     const skipCount = response.skipCount || 0;
-    // Format the result message
-    let resultMessage = `${passCount}/${testCount} tests passed`;
-    if (testCount > 0 && passCount < testCount) {
-        resultMessage += `. Failed tests: ${testResults
-            .filter((r) => r.result !== 'Passed')
-            .filter((r) => !r.result.startsWith('Skipped'))
-            .map((r) => r.name)
-            .join(', ')}`;
-    }
     return {
         content: [
             {
                 type: 'text',
-                text: resultMessage || response.message
+                text: response.message
             },
             {
                 type: 'text',
@@ -83,7 +73,6 @@ async function toolHandler(mcpUnity, params) {
                     testCount,
                     passCount,
                     failCount,
-                    inconclusiveCount,
                     skipCount,
                     results: testResults
                 }, null, 2)
