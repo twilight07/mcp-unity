@@ -17,7 +17,7 @@ import { registerGetPackagesResource } from './resources/getPackagesResource.js'
 import { registerGetAssetsResource } from './resources/getAssetsResource.js';
 import { registerGetTestsResource } from './resources/getTestsResource.js';
 import { registerGetGameObjectResource } from './resources/getGameObjectResource.js';
-import { registerGameObjectHandlingStrategyPrompt } from './prompts/gameobjectHandlingStrategyPrompt.js';
+import { registerGameObjectHandlingPrompt } from './prompts/gameobjectHandlingPrompt.js';
 // Initialize loggers
 const serverLogger = new Logger('Server', LogLevel.INFO);
 const unityLogger = new Logger('Unity', LogLevel.INFO);
@@ -53,7 +53,7 @@ registerGetHierarchyResource(server, mcpUnity, resourceLogger);
 registerGetPackagesResource(server, mcpUnity, resourceLogger);
 registerGetAssetsResource(server, mcpUnity, resourceLogger);
 // Register all prompts into the MCP server
-registerGameObjectHandlingStrategyPrompt(server);
+registerGameObjectHandlingPrompt(server);
 // Server startup function
 async function startServer() {
     try {
