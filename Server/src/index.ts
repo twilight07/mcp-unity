@@ -3,20 +3,21 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { McpUnity } from './unity/mcpUnity.js';
 import { Logger, LogLevel } from './utils/logger.js';
-import { createMenuItemTool } from './tools/menuItemTool.js';
-import { createSelectGameObjectTool } from './tools/selectGameObjectTool.js';
-import { createAddPackageTool } from './tools/addPackageTool.js';
-import { createRunTestsTool } from './tools/runTestsTool.js';
-import { createSendConsoleLogTool } from './tools/sendConsoleLogTool.js';
-import { createUpdateComponentTool } from './tools/updateComponentTool.js';
-import { createAddAssetToSceneTool } from './tools/addAssetToSceneTool.js';
-import { createGetMenuItemsResource } from './resources/getMenuItemResource.js';
-import { createGetConsoleLogsResource } from './resources/getConsoleLogResource.js';
-import { createGetHierarchyResource } from './resources/getHierarchyResource.js';
-import { createGetPackagesResource } from './resources/getPackagesResource.js';
-import { createGetAssetsResource } from './resources/getAssetsResource.js';
-import { createGetTestsResource } from './resources/getTestsResource.js';
-import { createGetGameObjectResource } from './resources/getGameObjectResource.js';
+import { registerMenuItemTool } from './tools/menuItemTool.js';
+import { registerSelectGameObjectTool } from './tools/selectGameObjectTool.js';
+import { registerAddPackageTool } from './tools/addPackageTool.js';
+import { registerRunTestsTool } from './tools/runTestsTool.js';
+import { registerSendConsoleLogTool } from './tools/sendConsoleLogTool.js';
+import { registerUpdateComponentTool } from './tools/updateComponentTool.js';
+import { registerAddAssetToSceneTool } from './tools/addAssetToSceneTool.js';
+import { registerGetMenuItemsResource } from './resources/getMenuItemResource.js';
+import { registerGetConsoleLogsResource } from './resources/getConsoleLogResource.js';
+import { registerGetHierarchyResource } from './resources/getHierarchyResource.js';
+import { registerGetPackagesResource } from './resources/getPackagesResource.js';
+import { registerGetAssetsResource } from './resources/getAssetsResource.js';
+import { registerGetTestsResource } from './resources/getTestsResource.js';
+import { registerGetGameObjectResource } from './resources/getGameObjectResource.js';
+import { registerGameObjectHandlingStrategyPrompt } from './prompts/gameobjectHandlingStrategyPrompt.js';
 
 // Initialize loggers
 const serverLogger = new Logger('Server', LogLevel.INFO);
@@ -34,6 +35,7 @@ const server = new McpServer (
     capabilities: {
       tools: {},
       resources: {},
+      prompts: {},
     },
   }
 );
@@ -41,23 +43,26 @@ const server = new McpServer (
 // Initialize MCP HTTP bridge with Unity editor
 const mcpUnity = new McpUnity(unityLogger);
 
-// Add all tools to the registry
-createMenuItemTool(server, mcpUnity, toolLogger);
-createSelectGameObjectTool(server, mcpUnity, toolLogger);
-createAddPackageTool(server, mcpUnity, toolLogger);
-createRunTestsTool(server, mcpUnity, toolLogger);
-createSendConsoleLogTool(server, mcpUnity, toolLogger);
-createUpdateComponentTool(server, mcpUnity, toolLogger);
-createAddAssetToSceneTool(server, mcpUnity, toolLogger);
+// Register all tools into the MCP server
+registerMenuItemTool(server, mcpUnity, toolLogger);
+registerSelectGameObjectTool(server, mcpUnity, toolLogger);
+registerAddPackageTool(server, mcpUnity, toolLogger);
+registerRunTestsTool(server, mcpUnity, toolLogger);
+registerSendConsoleLogTool(server, mcpUnity, toolLogger);
+registerUpdateComponentTool(server, mcpUnity, toolLogger);
+registerAddAssetToSceneTool(server, mcpUnity, toolLogger);
 
-// Create and register all resources with the MCP server
-createGetTestsResource(server, mcpUnity, resourceLogger);
-createGetGameObjectResource(server, mcpUnity, resourceLogger);
-createGetMenuItemsResource(server, mcpUnity, resourceLogger);
-createGetConsoleLogsResource(server, mcpUnity, resourceLogger);
-createGetHierarchyResource(server, mcpUnity, resourceLogger);
-createGetPackagesResource(server, mcpUnity, resourceLogger);
-createGetAssetsResource(server, mcpUnity, resourceLogger);
+// Register all resources into the MCP server
+registerGetTestsResource(server, mcpUnity, resourceLogger);
+registerGetGameObjectResource(server, mcpUnity, resourceLogger);
+registerGetMenuItemsResource(server, mcpUnity, resourceLogger);
+registerGetConsoleLogsResource(server, mcpUnity, resourceLogger);
+registerGetHierarchyResource(server, mcpUnity, resourceLogger);
+registerGetPackagesResource(server, mcpUnity, resourceLogger);
+registerGetAssetsResource(server, mcpUnity, resourceLogger);
+
+// Register all prompts into the MCP server
+registerGameObjectHandlingStrategyPrompt(server);
 
 // Server startup function
 async function startServer() {

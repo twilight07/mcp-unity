@@ -17,7 +17,7 @@ const resourceMimeType = 'application/json';
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createGetAssetsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
+export function registerGetAssetsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
   logger.info(`Registering resource: ${resourceName}`);
       
   // Register this resource with the MCP server

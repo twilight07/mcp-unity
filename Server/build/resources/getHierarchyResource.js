@@ -11,7 +11,7 @@ export const resourceMimeType = 'application/json';
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createGetHierarchyResource(server, mcpUnity, logger) {
+export function registerGetHierarchyResource(server, mcpUnity, logger) {
     logger.info(`Registering resource: ${resourceName}`);
     // Register this resource with the MCP server
     server.resource(resourceName, resourceUri, {

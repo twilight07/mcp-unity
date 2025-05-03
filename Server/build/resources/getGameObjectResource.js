@@ -13,7 +13,7 @@ const resourceMimeType = 'application/json';
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createGetGameObjectResource(server, mcpUnity, logger) {
+export function registerGetGameObjectResource(server, mcpUnity, logger) {
     // Create a resource template with the MCP SDK
     const resourceTemplate = new ResourceTemplate(resourceUri, {
         // This list method is commented because is calling getHierarchyResource every second to the MCP client in the current format.

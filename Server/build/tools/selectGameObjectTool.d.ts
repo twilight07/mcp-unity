@@ -9,4 +9,4 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export declare function createSelectGameObjectTool(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;
+export declare function registerSelectGameObjectTool(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;

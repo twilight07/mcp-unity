@@ -59,7 +59,7 @@ function listTestModes(resourceMimeType: string) {
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createGetTestsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
+export function registerGetTestsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
   logger.info(`Registering resource: ${resourceName}`);
       
   // Register this resource with the MCP server

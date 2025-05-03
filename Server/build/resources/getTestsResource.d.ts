@@ -16,4 +16,4 @@ export interface TestItem {
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export declare function createGetTestsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;
+export declare function registerGetTestsResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;

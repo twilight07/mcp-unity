@@ -12,4 +12,4 @@ export declare const resourceMimeType = "application/json";
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export declare function createGetHierarchyResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;
+export declare function registerGetHierarchyResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;

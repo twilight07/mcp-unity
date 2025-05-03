@@ -9,4 +9,4 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export declare function createGetPackagesResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;
+export declare function registerGetPackagesResource(server: McpServer, mcpUnity: McpUnity, logger: Logger): void;

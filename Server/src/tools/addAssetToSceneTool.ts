@@ -28,7 +28,7 @@ const paramsSchema = z.object({
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createAddAssetToSceneTool(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
+export function registerAddAssetToSceneTool(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
   logger.info(`Registering tool: ${toolName}`);
   
   server.tool(

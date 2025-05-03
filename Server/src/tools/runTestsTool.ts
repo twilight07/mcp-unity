@@ -9,8 +9,8 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 const toolName = 'run_tests';
 const toolDescription = 'Runs Unity\'s Test Runner tests';
 const paramsSchema = z.object({
-  testMode: z.string().optional().describe('The test mode to run (EditMode or PlayMode) - defaults to EditMode (optional)'),
-  testFilter: z.string().optional().describe('The specific test filter to run (e.g. specific test name or namespace) (optional)'),
+  testMode: z.string().optional().default('EditMode').describe('The test mode to run (EditMode or PlayMode) - defaults to EditMode (optional)'),
+  testFilter: z.string().optional().default('').describe('The specific test filter to run (e.g. specific test name or namespace) (optional)'),
   returnOnlyFailures: z.boolean().optional().default(true).describe('Whether to show only failed tests in the results (optional)')
 });
 
@@ -22,7 +22,7 @@ const paramsSchema = z.object({
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createRunTestsTool(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
+export function registerRunTestsTool(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
   logger.info(`Registering tool: ${toolName}`);
   
   // Register this tool with the MCP server

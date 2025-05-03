@@ -25,7 +25,7 @@ const paramsSchema = z.object({
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createAddPackageTool(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
+export function registerAddPackageTool(server: McpServer, mcpUnity: McpUnity, logger: Logger) {
   logger.info(`Registering tool: ${toolName}`);
       
   // Register this tool with the MCP server

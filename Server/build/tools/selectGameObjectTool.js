@@ -15,7 +15,7 @@ const paramsSchema = z.object({
  * @param mcpUnity The McpUnity instance to communicate with Unity
  * @param logger The logger instance for diagnostic information
  */
-export function createSelectGameObjectTool(server, mcpUnity, logger) {
+export function registerSelectGameObjectTool(server, mcpUnity, logger) {
     logger.info(`Registering tool: ${toolName}`);
     // Register this tool with the MCP server
     server.tool(toolName, toolDescription, paramsSchema.shape, async (params) => {
