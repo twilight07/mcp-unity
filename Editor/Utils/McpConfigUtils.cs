@@ -139,26 +139,26 @@ namespace McpUnity.Utils
         /// <returns>True if successfuly added the config, false otherwise</returns>
         private static bool AddToConfigFile(string configFilePath, bool useTabsIndentation, string productName)
         {
+            if (string.IsNullOrEmpty(configFilePath))
+            {
+                Debug.LogError($"{productName} config file not found. Please make sure {productName} is installed.");
+                return false;
+            }
+                
+            // Generate fresh MCP config JSON
+            string mcpConfigJson = GenerateMcpConfigJson(useTabsIndentation);
+                
+            // Parse the MCP config JSON
+            JObject mcpConfig = JObject.Parse(mcpConfigJson);
+            
             try
             {
-                if (string.IsNullOrEmpty(configFilePath))
-                {
-                    Debug.LogError($"{productName} config file not found. Please make sure {productName} is installed.");
-                    return false;
-                }
-                
-                // Generate fresh MCP config JSON
-                string mcpConfigJson = GenerateMcpConfigJson(useTabsIndentation);
-                
-                // Parse the MCP config JSON
-                JObject mcpConfig = JObject.Parse(mcpConfigJson);
-                
                 // Check if the file exists
                 if (File.Exists(configFilePath))
                 {
                     // Read the existing config
                     string existingConfigJson = File.ReadAllText(configFilePath);
-                    JObject existingConfig = JObject.Parse(existingConfigJson);
+                    JObject existingConfig = string.IsNullOrEmpty(existingConfigJson) ? new JObject() : JObject.Parse(existingConfigJson);
                     
                     // Merge the mcpServers from our config into the existing config
                     if (mcpConfig["mcpServers"] != null && mcpConfig["mcpServers"] is JObject mcpServers)
@@ -212,7 +212,6 @@ namespace McpUnity.Utils
             {
                 // Windows: %USERPROFILE%/.codeium/windsurf
                 basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".codeium/windsurf");
-                Debug.Log(basePath);
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
@@ -277,7 +276,6 @@ namespace McpUnity.Utils
             {
                 // Windows: %USERPROFILE%/.cursor
                 basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cursor");
-                Debug.Log(basePath);
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
