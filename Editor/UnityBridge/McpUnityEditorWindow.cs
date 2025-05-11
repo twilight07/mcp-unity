@@ -359,12 +359,12 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
-            // notify_message
-            WrappedLabel("notify_message", EditorStyles.boldLabel);
-            WrappedLabel("Displays messages in the Unity Editor console");
+            // send_console_log
+            WrappedLabel("send_console_log", EditorStyles.boldLabel);
+            WrappedLabel("Sends console logs to the Unity Editor console");
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
-            WrappedLabel("Send a notification to Unity that the task has been completed", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            WrappedLabel("Send a console log to Unity that the task has been completed", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             

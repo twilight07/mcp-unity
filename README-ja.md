@@ -185,7 +185,7 @@ AIクライアントのMCP設定ファイル（例：Claude Desktopのclaude_des
     "mcp-unity": {
       "command": "node",
       "args": [
-        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+        "ABSOLUTE/PATH/TO/mcp-unity/Server~/build/index.js"
       ]
     }
   }
@@ -208,7 +208,7 @@ MCP Unityサーバーを起動するには2つの方法があります：
 2. MCP Unityサーバーディレクトリに移動
 3. 以下のコマンドを実行：
    ```bash
-   node Server/build/index.js
+   node Server~/build/index.js
    ```
 
 ## オプション: タイムアウト設定

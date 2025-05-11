@@ -187,7 +187,7 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
     "mcp-unity": {
       "command": "node",
       "args": [
-        "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+        "ABSOLUTE/PATH/TO/mcp-unity/Server~/build/index.js"
       ]
     }
   }
@@ -210,7 +210,7 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 2. 导航到 MCP Unity 服务器目录
 3. 运行以下命令：
    ```bash
-   node Server/build/index.js
+   node Server~/build/index.js
    ```
 
 ## 可选：设置超时

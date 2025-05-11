@@ -185,7 +185,7 @@ Open the MCP configuration file of your AI client (e.g. claude_desktop_config.js
        "mcp-unity": {
           "command": "node",
           "args": [
-             "ABSOLUTE/PATH/TO/mcp-unity/Server/build/index.js"
+             "ABSOLUTE/PATH/TO/mcp-unity/Server~/build/index.js"
           ]
        }
    }
@@ -293,7 +293,7 @@ To build the server, open a terminal and:
 
 1. Navigate to the Server directory:
    ```bash
-   cd ABSOLUTE/PATH/TO/mcp-unity/Server
+   cd ABSOLUTE/PATH/TO/mcp-unity/Server~
    ```
 
 2. Install dependencies:
@@ -319,11 +319,11 @@ To build the server, open a terminal and:
 Debug the server with [@modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector):
    - Powershell
    ```powershell
-   npx @modelcontextprotocol/inspector node Server/build/index.js
+   npx @modelcontextprotocol/inspector node Server~/build/index.js
    ```
    - Command Prompt/Terminal
    ```cmd
-   npx @modelcontextprotocol/inspector node Server/build/index.js
+   npx @modelcontextprotocol/inspector node Server~/build/index.js
    ```
 
 Don't forget to shutdown the server with `Ctrl + C` before closing the terminal or debugging it with the [MCP Inspector](https://github.com/modelcontextprotocol/inspector).

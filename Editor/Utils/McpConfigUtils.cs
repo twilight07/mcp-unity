@@ -70,7 +70,7 @@ namespace McpUnity.Utils
                 
             if (packageInfo != null && !string.IsNullOrEmpty(packageInfo.resolvedPath))
             {
-                return Path.Combine(packageInfo.resolvedPath, "Server");
+                return Path.Combine(packageInfo.resolvedPath, "Server~");
             }
             
             var assets = AssetDatabase.FindAssets("tsconfig");
@@ -88,7 +88,7 @@ namespace McpUnity.Utils
                     string relativePath = AssetDatabase.GUIDToAssetPath(assetJson);
                     string fullPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", relativePath));
                     
-                    if(Path.GetFileName(Path.GetDirectoryName(fullPath)) == "Server")
+                    if(Path.GetFileName(Path.GetDirectoryName(fullPath)) == "Server~")
                     {
                         return Path.GetDirectoryName(fullPath);
                     }
@@ -281,9 +281,9 @@ namespace McpUnity.Utils
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
-                // macOS: ~/Library/Application Support/.cursor
+                // macOS: ~/.cursor
                 string homeDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                basePath = Path.Combine(homeDir, "Library", "Application Support", ".cursor");
+                basePath = Path.Combine(homeDir, ".cursor");
             }
             else
             {
