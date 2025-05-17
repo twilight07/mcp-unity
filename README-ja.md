@@ -87,8 +87,8 @@ MCP Unityは、Unityの`Library/PackedCache`フォルダーをワークスペー
 - `unity://menu-items`: `execute_menu_item`ツールを容易にするために、Unityエディターで利用可能なすべてのメニュー項目のリストを取得
   > **例:** "GameObject作成に関連する利用可能なすべてのメニュー項目を表示"
 
-- `unity://hierarchy`: Unity階層内のすべてのゲームオブジェクトのリストを取得
-  > **例:** "現在のシーンの階層構造を表示"
+- `unity://scenes-hierarchy`: 現在のUnityシーン階層内のすべてのゲームオブジェクトのリストを取得
+  > **例:** "現在のシーン階層構造を表示"
 
 - `unity://gameobject/{id}`: シーン階層内のインスタンスIDまたはオブジェクトパスで特定のGameObjectに関する詳細情報を取得
   > **例:** "Player GameObjectに関する詳細情報を取得"

@@ -87,8 +87,8 @@ MCP Unity provides automatic integration with VSCode-like IDEs (Visual Studio Co
 - `unity://menu-items`: Retrieves a list of all available menu items in the Unity Editor to facilitate `execute_menu_item` tool
   > **Example prompt:** "Show me all available menu items related to GameObject creation"
 
-- `unity://hierarchy`: Retrieves a list of all game objects in the Unity hierarchy
-  > **Example prompt:** "Show me the current scene hierarchy structure"
+- `unity://scenes-hierarchy`: Retrieves a list of all game objects in the current Unity scene hierarchy
+  > **Example prompt:** "Show me the current scenes hierarchy structure"
 
 - `unity://gameobject/{id}`: Retrieves detailed information about a specific GameObject by instance ID or object path in the scene hierarchy, including all GameObject components with it's serialized properties and fields
   > **Example prompt:** "Get me detailed information about the Player GameObject"

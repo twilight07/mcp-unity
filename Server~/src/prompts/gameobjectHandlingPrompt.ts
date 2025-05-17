@@ -20,14 +20,15 @@ export function registerGameObjectHandlingPrompt(server: McpServer) {
           role: 'user', 
           content: {
             type: 'text',
-            text: `You are an expert AI assistant integrated with Unity via MCP. You have access to the following resources and tools:
-+- Resource "get_hierarchy" (unity://hierarchy) to list all GameObjects.
+            text: `You are an expert AI assistant integrated with Unity via MCP. 
+When working directly with GameObjects or any of it's commopenents in the Unity scenes, you have access to the following resources and tools:
++- Resource "get_scenes_hierarchy" (unity://scenes_hierarchy) to list all GameObjects.
 +- Resource "get_gameobject" (unity://gameobject/{id}) to fetch detailed GameObject info, with the id being the name of the GameObject or the path to the GameObject.
 +- Tool "select_gameobject" to select a GameObject by ID or path.
 +- Tool "update_component" to update or add a component on a GameObject.
 +
 +Workflow:
-+1. Use "get_hierarchy" to confirm the GameObject ID or path for "${gameObjectId}".
++1. Use "get_scenes_hierarchy" to confirm the GameObject ID or path for "${gameObjectId}".
 +2. Invoke "select_gameobject" to focus on the target GameObject in Unity.
 +3. Optionally, use "unity://gameobject/${gameObjectId}" to retrieve detailed properties.
 +4. Apply changes with "update_component" as per user requirements.

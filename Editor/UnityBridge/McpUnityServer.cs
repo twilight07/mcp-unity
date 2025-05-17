@@ -186,9 +186,9 @@ namespace McpUnity.Unity
             GetConsoleLogsResource getConsoleLogsResource = new GetConsoleLogsResource(_consoleLogsService);
             _resources.Add(getConsoleLogsResource.Name, getConsoleLogsResource);
             
-            // Register GetHierarchyResource
-            GetHierarchyResource getHierarchyResource = new GetHierarchyResource();
-            _resources.Add(getHierarchyResource.Name, getHierarchyResource);
+            // Register GetScenesHierarchyResource
+            GetScenesHierarchyResource getScenesHierarchyResource = new GetScenesHierarchyResource();
+            _resources.Add(getScenesHierarchyResource.Name, getScenesHierarchyResource);
             
             // Register GetPackagesResource
             GetPackagesResource getPackagesResource = new GetPackagesResource();

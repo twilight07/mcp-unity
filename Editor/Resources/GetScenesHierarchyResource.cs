@@ -7,15 +7,18 @@ using Newtonsoft.Json.Linq;
 namespace McpUnity.Resources
 {
     /// <summary>
-    /// Resource for retrieving all game objects in the Unity hierarchy
+    /// Resource for retrieving all game objects in the Unity scenes hierarchy
     /// </summary>
-    public class GetHierarchyResource : McpResourceBase
+    /// <summary>
+/// Resource for retrieving all game objects in the Unity scenes hierarchy
+/// </summary>
+public class GetScenesHierarchyResource : McpResourceBase
     {
-        public GetHierarchyResource()
+        public GetScenesHierarchyResource()
         {
-            Name = "get_hierarchy";
+            Name = "get_scenes_hierarchy";
             Description = "Retrieves all game objects in the Unity loaded scenes with their active state";
-            Uri = "unity://hierarchy";
+            Uri = "unity://scenes_hierarchy";
         }
         
         /// <summary>

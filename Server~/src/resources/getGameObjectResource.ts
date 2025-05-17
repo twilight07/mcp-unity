@@ -4,7 +4,7 @@ import { ReadResourceResult } from '@modelcontextprotocol/sdk/types.js';
 import { McpUnity } from '../unity/mcpUnity.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
-import { resourceName as hierarchyResourceName } from './getHierarchyResource.js';
+import { resourceName as hierarchyResourceName } from './getScenesHierarchyResource.js';
 
 // Constants for the resource
 const resourceName = 'get_gameobject';

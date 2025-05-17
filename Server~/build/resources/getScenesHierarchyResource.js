@@ -1,10 +1,10 @@
 import { McpUnityError, ErrorType } from '../utils/errors.js';
-// Constants for the scenes hierarchy resource
+// Constants for the resource
 export const resourceName = 'get_scenes_hierarchy';
 export const resourceUri = 'unity://scenes_hierarchy';
 export const resourceMimeType = 'application/json';
 /**
- * Creates and registers the Hierarchy resource with the MCP server
+ * Creates and registers the Scenes Hierarchy resource with the MCP server
  * This resource provides access to the Unity scene hierarchy
  *
  * @param server The MCP server instance to register with
@@ -15,7 +15,7 @@ export function registerGetHierarchyResource(server, mcpUnity, logger) {
     logger.info(`Registering resource: ${resourceName}`);
     // Register this resource with the MCP server
     server.resource(resourceName, resourceUri, {
-        description: 'Retrieve all GameObjects in the Unity loaded scenes with their active state',
+        description: 'Retrieve all GameObjects in the Unity loaded scenes with their active state (scenes hierarchy)',
         mimeType: resourceMimeType
     }, async () => {
         try {
