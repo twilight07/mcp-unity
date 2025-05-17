@@ -11,7 +11,7 @@ import { registerSendConsoleLogTool } from './tools/sendConsoleLogTool.js';
 import { registerUpdateComponentTool } from './tools/updateComponentTool.js';
 import { registerAddAssetToSceneTool } from './tools/addAssetToSceneTool.js';
 import { registerGetMenuItemsResource } from './resources/getMenuItemResource.js';
-import { registerGetConsoleLogsResource } from './resources/getConsoleLogResource.js';
+import { registerGetConsoleLogsResource } from './resources/getConsoleLogsResource.js';
 import { registerGetHierarchyResource } from './resources/getHierarchyResource.js';
 import { registerGetPackagesResource } from './resources/getPackagesResource.js';
 import { registerGetAssetsResource } from './resources/getAssetsResource.js';

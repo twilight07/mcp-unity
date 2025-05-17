@@ -38,7 +38,7 @@ namespace McpUnity.Services
         public void StartListening()
         {
             // Register for log messages
-            Application.logMessageReceived += OnLogMessageReceived;
+            Application.logMessageReceivedThreaded += OnLogMessageReceived;
 
 #if UNITY_6000_0_OR_NEWER
             // Unity 6 specific implementation
@@ -55,7 +55,7 @@ namespace McpUnity.Services
         public void StopListening()
         {
             // Unregister from log messages
-            Application.logMessageReceived -= OnLogMessageReceived;
+            Application.logMessageReceivedThreaded -= OnLogMessageReceived;
             
 #if UNITY_6000_0_OR_NEWER
             // Unity 6 specific implementation
@@ -145,13 +145,16 @@ namespace McpUnity.Services
         private void OnLogMessageReceived(string logString, string stackTrace, LogType type)
         {
             // Add the log entry to our collection
-            _logEntries.Add(new LogEntry
+            lock (_logEntries)
             {
-                Message = logString,
-                StackTrace = stackTrace,
-                Type = type,
-                Timestamp = DateTime.Now
-            });
+                _logEntries.Add(new LogEntry
+                {
+                    Message = logString,
+                    StackTrace = stackTrace,
+                    Type = type,
+                    Timestamp = DateTime.Now
+                });
+            }
         }
         
 #if UNITY_6000_0_OR_NEWER

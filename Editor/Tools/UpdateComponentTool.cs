@@ -134,6 +134,7 @@ namespace McpUnity.Tools
         {
             // Split the path by '/'
             string[] pathParts = path.Split('/');
+            GameObject[] rootGameObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
             
             // If the path is empty, return null
             if (pathParts.Length == 0)
@@ -142,7 +143,7 @@ namespace McpUnity.Tools
             }
             
             // Search through all root GameObjects in all scenes
-            foreach (GameObject rootObj in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+            foreach (GameObject rootObj in rootGameObjects)
             {
                 if (rootObj.name == pathParts[0])
                 {

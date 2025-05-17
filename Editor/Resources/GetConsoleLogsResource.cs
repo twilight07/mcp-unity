@@ -13,27 +13,36 @@ namespace McpUnity.Resources
         public GetConsoleLogsResource(IConsoleLogsService consoleLogsService)
         {
             Name = "get_console_logs";
-            Description = "Retrieves all logs from the Unity console";
-            Uri = "unity://logs";
+            Description = "Retrieves logs from the Unity console, optionally filtered by type (error, warning, info)";
+            Uri = "unity://logs/{logType}";
             
             _consoleLogsService = consoleLogsService;
         }
 
         /// <summary>
-        /// Fetch all logs from the Unity console
+        /// Fetch logs from the Unity console, optionally filtered by type
         /// </summary>
-        /// <param name="parameters">Resource parameters as a JObject (not used)</param>
+        /// <param name="parameters">Resource parameters as a JObject (may include 'logType')</param>
         /// <returns>A JObject containing the list of logs</returns>
         public override JObject Fetch(JObject parameters)
         {
-            // Get logs from the service
-            JArray logsArray = _consoleLogsService.GetAllLogsAsJson();
-            
+            string logType = null;
+            if (parameters != null && parameters.ContainsKey("logType") && parameters["logType"] != null)
+            {
+                logType = parameters["logType"].ToString()?.ToLowerInvariant();
+                if (string.IsNullOrWhiteSpace(logType))
+                {
+                    logType = null;
+                }
+            }
+
+            JArray logsArray = _consoleLogsService.GetAllLogsAsJson(logType);
+
             // Create the response
             return new JObject
             {
                 ["success"] = true,
-                ["message"] = $"Retrieved {logsArray.Count} log entries",
+                ["message"] = $"Retrieved {logsArray.Count} log entries" + (logType != null ? $" of type '{logType}'" : ""),
                 ["logs"] = logsArray
             };
         }

@@ -99,9 +99,7 @@ namespace McpUnity.Unity
                 settings.Port = newPort;
                 settings.SaveSettings();
                 mcpUnityServer.StopServer();
-                EditorUtility.DisplayDialog("Restart MCP Client",
-                    "Please restart your MCP Client (Windsurf, Cursor, Calude Destktop, etc.) to apply the changes.",
-                    "OK");
+                mcpUnityServer.StartServer(); // Restart the server.newPort
             }
             EditorGUILayout.EndHorizontal();
             
@@ -260,6 +258,10 @@ namespace McpUnity.Unity
                 if (added)
                 {
                     EditorUtility.DisplayDialog("Success", "The MCP configuration was successfully added to the Cursor config file.", "OK");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "The MCP configuration could not be added to the Cursor Desktop config file.", "OK");
                 }
             }
             
