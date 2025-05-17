@@ -334,6 +334,15 @@ namespace McpUnity.Unity
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
             
+            // update_gameobject
+            WrappedLabel("update_gameobject", EditorStyles.boldLabel);
+            WrappedLabel("Updates a GameObject's core properties (name, tag, layer, active/static state), or creates the GameObject if it does not exist");
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
+            WrappedLabel("Set the Player object's tag to 'Enemy' and make it inactive", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
+            
             // update_component
             WrappedLabel("update_component", EditorStyles.boldLabel);
             WrappedLabel("Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component");
@@ -447,6 +456,7 @@ namespace McpUnity.Unity
             EditorGUILayout.LabelField("Example prompt:", EditorStyles.miniLabel);
             WrappedLabel("List all available tests in my Unity project", new GUIStyle(EditorStyles.miniLabel) { fontStyle = FontStyle.Italic });
             EditorGUILayout.EndVertical();
+            EditorGUILayout.Space();
             
             EditorGUILayout.EndVertical();
             

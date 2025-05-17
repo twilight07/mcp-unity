@@ -69,6 +69,9 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
 - `select_gameobject`: 通过路径或实例 ID 选择 Unity 层次结构中的游戏对象
   > **示例提示:** "选择场景中的 Main Camera 对象"
 
+- `update_gameobject`: 更新 GameObject 的核心属性（名称、标签、层、激活/静态状态），如果不存在则创建
+  > **示例提示:** "将 Player 对象的标签设置为 ‘Enemy’ 并使其不可用"
+
 - `update_component`: 更新 GameObject 上的组件字段，如果 GameObject 不包含该组件则添加它
   > **示例提示:** "给 Player 对象添加 Rigidbody 组件并设置其质量为 5"
 
@@ -96,7 +99,7 @@ MCP Unity 通过将 Unity `Library/PackedCache` 文件夹添加到您的工作�
   > **示例提示:** "获取 Player GameObject 的详细信息"
 
 - `unity://logs`: 获取 Unity 控制台的所有日志列表
-  > **示例提示:** "显示 Unity 控制台最近的错误消息"
+  > **示例提示:** "显示 Unity 控制台最近的错误信息"
 
 - `unity://packages`: 从 Unity 包管理器获取已安装和可用包的信息
   > **示例提示:** "列出我 Unity 项目中当前安装的所有包"

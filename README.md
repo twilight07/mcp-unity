@@ -61,11 +61,16 @@ MCP Unity provides automatic integration with VSCode-like IDEs (Visual Studio Co
 
 ### MCP Server Tools
 
+The following tools are available for manipulating and querying Unity scenes and GameObjects via MCP:
+
 - `execute_menu_item`: Executes Unity menu items (functions tagged with the MenuItem attribute)
   > **Example prompt:** "Execute the menu item 'GameObject/Create Empty' to create a new empty GameObject"
 
 - `select_gameobject`: Selects game objects in the Unity hierarchy by path or instance ID
   > **Example prompt:** "Select the Main Camera object in my scene"
+
+- `update_gameobject`: Updates a GameObject's core properties (name, tag, layer, active/static state), or creates the GameObject if it does not exist
+  > **Example prompt:** "Set the Player object's tag to 'Enemy' and make it inactive"
 
 - `update_component`: Updates component fields on a GameObject or adds it to the GameObject if it does not contain the component
   > **Example prompt:** "Add a Rigidbody component to the Player object and set its mass to 5"

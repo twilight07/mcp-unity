@@ -67,6 +67,9 @@ MCP Unityは、Unityの`Library/PackedCache`フォルダーをワークスペー
 - `select_gameobject`: パスまたはインスタンスIDでUnity階層内のゲームオブジェクトを選択
   > **例:** "シーン内のMain Cameraオブジェクトを選択"
 
+- `update_gameobject`: GameObject のコアプロパティ（名前、タグ、レイヤー、アクティブ/静的状態）を更新、または存在しない場合は作成します
+  > **例:** "Playerオブジェクトのタグを ‘Enemy’ に設定し、非アクティブにする"
+
 - `update_component`: GameObject上のコンポーネントフィールドを更新、またはGameObjectに含まれていない場合は追加
   > **例:** "PlayerオブジェクトにRigidbodyコンポーネントを追加し、その質量を5に設定"
 
@@ -96,14 +99,14 @@ MCP Unityは、Unityの`Library/PackedCache`フォルダーをワークスペー
 - `unity://logs`: Unityコンソールからのすべてのログのリストを取得
   > **例:** "Unityコンソールからの最近のエラーメッセージを表示"
 
-- `unity://packages`: Unityパッケージマネージャーからインストール済みおよび利用可能なパッケージに関する情報を取得
-  > **例:** "Unityプロジェクトに現在インストールされているすべてのパッケージをリスト"
+- `unity://packages`: Unityパッケージマネージャーからインストール済みおよび利用可能なパッケージ情報を取得
+  > **例:** "プロジェクトに現在インストールされているすべてのパッケージをリスト"
 
-- `unity://assets`: Unityアセットデータベース内のアセットに関する情報を取得
+- `unity://assets`: Unityアセットデータベース内のアセット情報を取得
   > **例:** "プロジェクト内のすべてのテクスチャアセットを検索"
 
-- `unity://tests/{testMode}`: Unityテストランナー内のテストに関する情報を取得
-  > **例:** "Unityプロジェクトで利用可能なすべてのテストをリスト"
+- `unity://tests/{testMode}`: Unityテストランナー内のテスト情報を取得
+  > **例:** "プロジェクトで利用可能なすべてのテストをリスト"
 
 ## 要件
 - Unity 2022.3以降 - [サーバーをインストール](#install-server)するため
