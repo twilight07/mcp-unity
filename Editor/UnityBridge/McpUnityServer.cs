@@ -151,6 +151,10 @@ namespace McpUnity.Unity
             // Register SelectGameObjectTool
             SelectGameObjectTool selectGameObjectTool = new SelectGameObjectTool();
             _tools.Add(selectGameObjectTool.Name, selectGameObjectTool);
+
+            // Register UpdateGameObjectTool
+            UpdateGameObjectTool updateGameObjectTool = new UpdateGameObjectTool();
+            _tools.Add(updateGameObjectTool.Name, updateGameObjectTool);
             
             // Register PackageManagerTool
             AddPackageTool addPackageTool = new AddPackageTool();
