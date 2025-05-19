@@ -217,7 +217,7 @@ namespace McpUnity.Utils
             {
                 // macOS: ~/Library/Application Support/.codeium/windsurf
                 string homeDir = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                basePath = Path.Combine(homeDir, "Library", "Application Support", ".codeium/windsurf");
+                basePath = Path.Combine(homeDir, ".codeium/windsurf");
             }
             else
             {
