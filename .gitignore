@@ -113,6 +113,7 @@ GvhProjectSettings.xml
 #Project Specific
 **/package-lock.json
 **/package-lock.json.meta
+**/node_modules/
 .codeiumignore
 .windsurf
 Server/log.txt
