@@ -1,10 +1,13 @@
-import * as z from 'zod';
-import { McpUnityError, ErrorType } from '../utils/errors.js';
+import * as z from "zod";
+import { McpUnityError, ErrorType } from "../utils/errors.js";
 // Constants for the tool
-const toolName = 'get_console_logs';
-const toolDescription = 'Retrieves logs from the Unity console';
+const toolName = "get_console_logs";
+const toolDescription = "Retrieves logs from the Unity console";
 const paramsSchema = z.object({
-    logType: z.string().optional().describe('The type of logs to retrieve (info, warning, error) - defaults to all logs if not specified')
+    logType: z
+        .enum(["info", "warning", "error"])
+        .optional()
+        .describe("The type of logs to retrieve (info, warning, error) - defaults to all logs if not specified"),
 });
 /**
  * Creates and registers the Get Console Logs tool with the MCP server
@@ -43,18 +46,20 @@ async function toolHandler(mcpUnity, params) {
     // Send request to Unity using the same method name as the resource
     // This allows reusing the existing Unity-side implementation
     const response = await mcpUnity.sendRequest({
-        method: 'get_console_logs',
+        method: "get_console_logs",
         params: {
-            logType: logType
-        }
+            logType: logType,
+        },
     });
     if (!response.success) {
-        throw new McpUnityError(ErrorType.TOOL_EXECUTION, response.message || 'Failed to fetch logs from Unity');
+        throw new McpUnityError(ErrorType.TOOL_EXECUTION, response.message || "Failed to fetch logs from Unity");
     }
     return {
-        content: [{
-                type: 'text',
-                text: JSON.stringify(response, null, 2)
-            }]
+        content: [
+            {
+                type: "text",
+                text: JSON.stringify(response.data || response.logs || response, null, 2),
+            },
+        ],
     };
 }
