@@ -60,7 +60,7 @@ namespace McpUnity.Utils
         }
 
         /// <summary>
-        /// Gets the absolute path to the Server directory containing package.json
+        /// Gets the absolute path to the Server directory containing package.json (root server dir).
         /// Works whether MCP Unity is installed via Package Manager or directly in the Assets folder
         /// </summary>
         public static string GetServerPath()

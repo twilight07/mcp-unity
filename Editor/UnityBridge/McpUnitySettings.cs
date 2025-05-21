@@ -110,11 +110,31 @@ namespace McpUnity.Unity
                 // see: https://learn.microsoft.com/en-us/dotnet/api/system.environmentvariabletarget?view=net-8.0#remarks
                 Environment.SetEnvironmentVariable(EnvUnityPort, Port.ToString(), EnvironmentVariableTarget.Process);
                 Environment.SetEnvironmentVariable(EnvUnityRequestTimeout, RequestTimeoutSeconds.ToString(), EnvironmentVariableTarget.Process);
+
+                // For non w32 systems.
+                SaveSettingsToNodeServer();
             }
             catch (Exception ex)
             {
                 // Can't use LoggerService here as it might create circular dependency
                 Debug.LogError($"[MCP Unity] Failed to save settings: {ex.Message}");
+            }
+        }
+
+        
+        public void SaveSettingsToNodeServer() {
+            try
+            {
+                string propertiesPath = GetServerPath() + "/build/server.env";
+                using (var writer = new StreamWriter(propertiesPath, false))
+                {
+                    writer.WriteLine($"{EnvUnityPort}={Port}");
+                    writer.WriteLine($"{EnvUnityRequestTimeout}={RequestTimeoutSeconds}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[MCP Unity] Failed to write server env properties: {ex.Message}");
             }
         }
     }
