@@ -4,6 +4,8 @@ import { Logger } from '../utils/logger.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 import { execSync } from 'child_process';
 import { default as winreg } from 'winreg';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 interface PendingRequest {
   resolve: (value: any) => void;
@@ -42,11 +44,11 @@ export class McpUnity {
     // Initialize port from environment variable or use default
     const envRegistry = process.platform === 'win32' 
         ? this.getUnityPortFromWindowsRegistry()
-        : this.getUnityPortFromUnixRegistry();
+        : this.getUnityPortFromConfig();
     
     const envPort = process.env.UNITY_PORT || envRegistry;
     this.port = envPort ? parseInt(envPort, 10) : 8090;
-    this.logger.info(`Using port: ${this.port} for Unity WebSocket connection`);
+    this.logger.warn(`Using port: ${this.port} for Unity WebSocket connection`);
     
     // Initialize timeout from environment variable (in seconds; it is the same as Cline) or use default (10 seconds)
     const envTimeout = process.env.UNITY_REQUEST_TIMEOUT;
@@ -300,11 +302,16 @@ export class McpUnity {
     return result;
   }
 
-  /**
-   * Retrieves the UNITY_PORT value from Unix-like system environment variables
-   * @returns The port value as a string if found, otherwise an empty string
-   */
-  private getUnityPortFromUnixRegistry(): string {
-    return execSync('printenv UNITY_PORT', { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim();
+  private getUnityPortFromConfig(): string {
+    // Read UNITY_PORT value from env.config synchronously using execSync
+    const configPath = path.resolve(process.cwd(), 'env.config');
+    try {
+      const content = execSync(`cat "${configPath}"`, { stdio: ['pipe', 'pipe', 'ignore'] }).toString();
+      const match = content.match(/^UNITY_PORT\s*=\s*(\d+)/m);
+      return match ? match[1] : '';
+    } catch (err) {
+      this.logger.debug(`env.config not found or unreadable: ${err instanceof Error ? err.message : String(err)}`);
+      return '';
+    }
   }
 }
