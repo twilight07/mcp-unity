@@ -3,8 +3,6 @@
 [![](https://badge.mcpx.dev?status=on 'MCP Enabled')](https://modelcontextprotocol.io/introduction)
 [![](https://img.shields.io/badge/Unity-000000?style=flat&logo=unity&logoColor=white 'Unity')](https://unity.com/releases/editor/archive)
 [![](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white 'Node.js')](https://nodejs.org/en/download/)
-
-[![smithery badge](https://smithery.ai/badge/@CoderGamester/mcp-unity)](https://smithery.ai/server/@CoderGamester/mcp-unity)
 [![](https://img.shields.io/github/stars/CoderGamester/mcp-unity 'Stars')](https://github.com/CoderGamester/mcp-unity/stargazers)
 [![](https://img.shields.io/github/last-commit/CoderGamester/mcp-unity 'Last Commit')](https://github.com/CoderGamester/mcp-unity/commits/main)
 [![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
@@ -45,11 +43,11 @@
 
 MCP Unity is an implementation of the Model Context Protocol for Unity Editor, allowing AI assistants to interact with your Unity projects. This package provides a bridge between Unity and a Node.js server that implements the MCP protocol, enabling AI agents like Claude, Windsurf, and Cursor to execute operations within the Unity Editor.
 
-## Features
-
 <a href="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity">
   <img width="400" height="200" src="https://glama.ai/mcp/servers/@CoderGamester/mcp-unity/badge" alt="Unity MCP server" />
 </a>
+
+## Features
 
 ### IDE Integration - Package Cache Access
 
@@ -352,26 +350,104 @@ Don't forget to shutdown the server with `Ctrl + C` before closing the terminal 
 
 </details>
 
-## Troubleshooting
+## Frequently Asked Questions
 
 <details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Connection Issues</span></summary>
+<summary><span style="font-size: 1.1em; font-weight: bold;">What is MCP Unity?</span></summary>
+
+MCP Unity is a powerful bridge that connects your Unity Editor environment to AI assistants LLM tools using the Model Context Protocol (MCP).
+
+In essence, MCP Unity:
+-   Exposes Unity Editor functionalities (like creating objects, modifying components, running tests, etc.) as "tools" and "resources" that an AI can understand and use.
+-   Runs a WebSocket server inside Unity and a Node.js server (acting as a WebSocket client to Unity) that implements the MCP. This allows AI assistants to send commands to Unity and receive information back.
+-   Enables you to use natural language prompts with your AI assistant to perform complex tasks within your Unity project, significantly speeding up development workflows.
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Why use MCP Unity?</span></summary>
+
+MCP Unity offers several compelling advantages for developers, artists, and project managers:
+
+-   **Accelerated Development:** Automate repetitive tasks, generate boilerplate code, and manage assets using AI prompts. This frees up your time to focus on creative and complex problem-solving.
+-   **Enhanced Productivity:** Interact with Unity Editor features without needing to manually click through menus or write scripts for simple operations. Your AI assistant becomes a direct extension of your capabilities within Unity.
+-   **Improved Accessibility:** Allows users who are less familiar with the deep intricacies of the Unity Editor or C# scripting to still make meaningful contributions and modifications to a project through AI guidance.
+-   **Seamless Integration:** Designed to work with various AI assistants and IDEs that support MCP, providing a consistent way to leverage AI across your development toolkit.
+-   **Extensibility:** The protocol and the toolset can be expanded. You can define new tools and resources to expose more of your project-specific or Unity's functionality to AI.
+-   **Collaborative Potential:** Facilitates a new way of collaborating where AI can assist in tasks traditionally done by team members, or help in onboarding new developers by guiding them through project structures and operations.
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">How does MCP Unity compare with the upcoming Unity 6.2 AI features?</span></summary>
+
+Unity 6.2 is set to introduce new built-in AI tools, including the previous Unity Muse (for generative AI capabilities like texture and animation generation) and Unity Sentis (for running neural networks in Unity runtime). As Unity 6.2 is not yet fully released, this comparison is based on publicly available information and anticipated functionalities:
+
+-   **Focus:**
+    -   **MCP Unity:** Primarily focuses on **Editor automation and interaction**. It allows external AI (like LLM-based coding assistants) to *control and query the Unity Editor itself* to manipulate scenes, assets, and project settings. It's about augmenting the *developer's workflow* within the Editor.
+    -   **Unity 6.2 AI:**
+        -   Aims at in-Editor content creation (generating textures, sprites, animations, behaviors, scripts) and AI-powered assistance for common tasks, directly integrated into the Unity Editor interface.
+        -   A fine-tuned model to ask any question about Unity's documentation and API structure, with customized examples more accurate to Unity's environment.
+        -   Adds the functionality to run AI model inference, allowing developers to deploy and run pre-trained neural networks *within your game or application* for features like NPC behavior, image recognition, etc.
+
+-   **Use Cases:**
+    -   **MCP Unity:** "Create a new 3D object, name it 'Player', add a Rigidbody, and set its mass to 10." "Run all Play Mode tests." "Ask to fix the error on the console log." "Execute the custom menu item 'Prepare build for iOS' and fix any errors that may occur."
+    -   **Unity 6.2 AI:** "Generate a sci-fi texture for this material." "Update all trees position in the scene to be placed inside of terrain zones tagged with 'forest'." "Create a walking animation for this character." "Generate 2D sprites to complete the character." "Ask details about the error on the console log."
+
+-   **Complementary, Not Mutually Exclusive:**
+    MCP Unity and Unity's native AI tools can be seen as complementary. You might use MCP Unity with your AI coding assistant to set up a scene or batch-modify assets, and then use Unity AI tools to generate a specific texture, or to create animations, or 2D sprites for one of those assets. MCP Unity provides a flexible, protocol-based way to interact with the Editor, which can be powerful for developers who want to integrate with a broader range of external AI services or build custom automation workflows.
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">What MCP hosts and IDEs currently support MCP Unity?</span></summary>
+
+MCP Unity is designed to work with any AI assistant or development environment that can act as an MCP client. The ecosystem is growing, but current known integrations or compatible platforms include:
+-  Windsurf
+-  Cursor
+-  GitHub Copilot
+-  Claude Desktop
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Can I extend MCP Unity with custom tools for my project?</span></summary>
+
+Yes, absolutely! One of the significant benefits of the MCP Unity architecture is its extensibility.
+-   **In Unity (C#):** You can create new C# classes that inherit from `McpToolBase` (or a similar base for resources) to expose custom Unity Editor functionality. These tools would then be registered in `McpUnityServer.cs`. For example, you could write a tool to automate a specific asset import pipeline unique to your project.
+-   **In Node.js Server (TypeScript):** You would then define the corresponding TypeScript tool handler in the `Server/src/tools/` directory, including its Zod schema for inputs/outputs, and register it in `Server/src/index.ts`. This Node.js part will forward the request to your new C# tool in Unity.
+
+This allows you to tailor the AI's capabilities to the specific needs and workflows of your game or application.
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Is MCP Unity free to use?</span></summary>
+
+Yes, MCP Unity is an open-source project distributed under the MIT License. You are free to use, modify, and distribute it according to the license terms.
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Why am I unable to connect to MCP Unity?</span></summary>
 
 - Ensure the WebSocket server is running (check the Server Window in Unity)
 - Send a console log message from MCP client to force a reconnection between MCP client and Unity server
 - Change the port number in the Unity Editor MCP Server window. (Tools > MCP Unity > Server Window)
+
 </details>
 
 <details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Server Not Starting</span></summary>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Why won't the MCP Unity server start?</span></summary>
 
 - Check the Unity Console for error messages
 - Ensure Node.js is properly installed and accessible in your PATH
 - Verify that all dependencies are installed in the Server directory
+
 </details>
 
 <details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Connection failed when running Play Mode tests</span></summary>
+<summary><span style="font-size: 1.1em; font-weight: bold;">Why do I get a connection failed error when running Play Mode tests?</span></summary>
 
 The `run_tests` tool returns the following response:
 ```
@@ -381,13 +457,12 @@ Connection failed: Unknown error
 
 This error occurs because the bridge connection is lost when the domain reloads upon switching to Play Mode.  
 The workaround is to turn off **Reload Domain** in **Edit > Project Settings > Editor > "Enter Play Mode Settings"**.
+
 </details>
 
 ## Support & Feedback
 
-If you have any questions or need support, please open an [issue](https://github.com/CoderGamester/mcp-unity/issues) on this repository.
-
-Alternative you can reach out on:
+If you have any questions or need support, please open an [issue](https://github.com/CoderGamester/mcp-unity/issues) on this repository or alternative you can reach out on:
 - Linkedin: [![](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white 'LinkedIn')](https://www.linkedin.com/in/miguel-tomas/)
 - Discord: gamester7178
 - Email: game.gamester@gmail.com

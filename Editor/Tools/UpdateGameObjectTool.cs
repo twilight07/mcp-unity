@@ -86,7 +86,7 @@ namespace McpUnity.Tools
                 {
                     McpLogger.LogWarning($"UpdateGameObjectTool: Tag '{newTag}' does not exist for GameObject '{originalNameForLog}'. Tag not changed. Please create the tag in Unity's Tag Manager.");
                 }
-                else if (targetGameObject.tag != newTag)
+                else if (!targetGameObject.CompareTag(newTag))
                 {
                     targetGameObject.tag = newTag;
                     propertiesUpdated = true;
