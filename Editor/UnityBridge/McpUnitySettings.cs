@@ -72,18 +72,6 @@ namespace McpUnity.Unity
                     string json = File.ReadAllText(SettingsPath);
                     JsonUtility.FromJsonOverwrite(json, this);
                 }
-                
-                // Check for environment variable PORT
-                string envPort = System.Environment.GetEnvironmentVariable(EnvUnityPort);
-                if (!string.IsNullOrEmpty(envPort) && int.TryParse(envPort, out int port))
-                {
-                    Port = port;
-                }
-                string envTimeout = System.Environment.GetEnvironmentVariable(EnvUnityRequestTimeout);
-                if (!string.IsNullOrEmpty(envTimeout) && int.TryParse(envTimeout, out int timeout))
-                {
-                    RequestTimeoutSeconds = timeout;
-                }
             }
             catch (Exception ex)
             {
@@ -103,38 +91,14 @@ namespace McpUnity.Unity
                 string json = JsonUtility.ToJson(this, true);
                 File.WriteAllText(SettingsPath, json);
 
-                // Set environment variable PORT for the Node.js process
-                // EnvironmentVariableTarget.User and EnvironmentVariableTarget.Machine should be used on .NET implementations running on Windows systems only.
-                // For non-Windows systems, User and Machine are treated as Process.
-                // Using Process target for broader compatibility.
-                // see: https://learn.microsoft.com/en-us/dotnet/api/system.environmentvariabletarget?view=net-8.0#remarks
-                Environment.SetEnvironmentVariable(EnvUnityPort, Port.ToString(), EnvironmentVariableTarget.Process);
-                Environment.SetEnvironmentVariable(EnvUnityRequestTimeout, RequestTimeoutSeconds.ToString(), EnvironmentVariableTarget.Process);
-
-                // For non w32 systems.
-                SaveSettingsToNodeServer();
+                // Now save these same settings to the server to read on start-up.
+                string propertiesPath = GetServerPath() + "/build/McpUnitySettings.json";
+                File.WriteAllText(propertiesPath, json);
             }
             catch (Exception ex)
             {
                 // Can't use LoggerService here as it might create circular dependency
                 Debug.LogError($"[MCP Unity] Failed to save settings: {ex.Message}");
-            }
-        }
-
-        
-        public void SaveSettingsToNodeServer() {
-            try
-            {
-                string propertiesPath = GetServerPath() + "/build/server.env";
-                using (var writer = new StreamWriter(propertiesPath, false))
-                {
-                    writer.WriteLine($"{EnvUnityPort}={Port}");
-                    writer.WriteLine($"{EnvUnityRequestTimeout}={RequestTimeoutSeconds}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[MCP Unity] Failed to write server env properties: {ex.Message}");
             }
         }
     }

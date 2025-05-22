@@ -2,8 +2,6 @@ import WebSocket from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '../utils/logger.js';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
-import { execSync } from 'child_process';
-import { default as winreg } from 'winreg';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -32,28 +30,14 @@ interface UnityResponse {
 
 export class McpUnity {
   private logger: Logger;
-  private port: number;
+  private port: number | null = null;
   private ws: WebSocket | null = null;
   private pendingRequests: Map<string, PendingRequest> = new Map<string, PendingRequest>();
-  private readonly REQUEST_TIMEOUT: number;
+  private requestTimeout = 10000;
   private retryDelay = 1000;
   
   constructor(logger: Logger) {
     this.logger = logger;
-    
-    // Initialize port from environment variable or use default
-    const envRegistry = process.platform === 'win32' 
-        ? this.getUnityPortFromWindowsRegistry()
-        : this.getUnityPortFromConfig();
-    
-    const envPort = process.env.UNITY_PORT || envRegistry;
-    this.port = envPort ? parseInt(envPort, 10) : 8090;
-    this.logger.warn(`Using port: ${this.port} for Unity WebSocket connection`);
-    
-    // Initialize timeout from environment variable (in seconds; it is the same as Cline) or use default (10 seconds)
-    const envTimeout = process.env.UNITY_REQUEST_TIMEOUT;
-    this.REQUEST_TIMEOUT = envTimeout ? parseInt(envTimeout, 10) * 1000 : 10000;
-    this.logger.info(`Using request timeout: ${this.REQUEST_TIMEOUT / 1000} seconds`);
   }
   
   /**
@@ -62,6 +46,9 @@ export class McpUnity {
    */
   public async start(clientName?: string): Promise<void> {
     try {
+      this.logger.info('Attempting to read startup parameters...');
+      this.parseAndSetConfig();
+
       this.logger.info('Attempting to connect to Unity WebSocket...');
       await this.connect(clientName); // Pass client name to connect
       this.logger.info('Successfully connected to Unity WebSocket');
@@ -78,6 +65,22 @@ export class McpUnity {
     }
     
     return Promise.resolve();
+  }
+
+  /**
+   * Reads our configuration file and sets parameters of the server based on them.
+   */
+  private async parseAndSetConfig() {
+    const config = await this.readConfigFileAsJson();
+
+    const configPort = config.Port;
+    this.port = configPort ? parseInt(configPort, 10) : 8090;
+    this.logger.info(`Using port: ${this.port} for Unity WebSocket connection`);
+    
+    // Initialize timeout from environment variable (in seconds; it is the same as Cline) or use default (10 seconds)
+    const configTimeout = config.RequestTimeoutSeconds;
+    this.requestTimeout = configTimeout ? parseInt(configTimeout, 10) * 1000 : 10000;
+    this.logger.info(`Using request timeout: ${this.requestTimeout / 1000} seconds`);
   }
   
   /**
@@ -114,7 +117,7 @@ export class McpUnity {
           this.disconnect();
           reject(new McpUnityError(ErrorType.CONNECTION, 'Connection timeout'));
         }
-      }, this.REQUEST_TIMEOUT);
+      }, this.requestTimeout);
         
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
@@ -251,12 +254,12 @@ export class McpUnity {
       // Create timeout for the request
       const timeout = setTimeout(() => {
         if (this.pendingRequests.has(requestId)) {
-          this.logger.error(`Request ${requestId} timed out after ${this.REQUEST_TIMEOUT}ms`);
+          this.logger.error(`Request ${requestId} timed out after ${this.requestTimeout}ms`);
           this.pendingRequests.delete(requestId);
           reject(new McpUnityError(ErrorType.TIMEOUT, 'Request timed out'));
         }
         this.reconnect();
-      }, this.REQUEST_TIMEOUT);
+      }, this.requestTimeout);
       
       // Store pending request
       this.pendingRequests.set(requestId, {
@@ -284,34 +287,21 @@ export class McpUnity {
     // Basic WebSocket connection check
     return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
   }
-  
-  /**
-   * Retrieves the UNITY_PORT value from the Windows registry (HKCU\Environment)
-   * @returns The port value as a string if found, otherwise an empty string
-   */
-  private getUnityPortFromWindowsRegistry(): string {
-    const regKey = new winreg({hive: winreg.HKCU, key: '\\Environment'});
-    let result = '';
-    regKey.get('UNITY_PORT', (err: Error | null, item: any) => {
-      if (err) {
-        this.logger.error(`Error getting registry value: ${err.message}`);
-      } else {
-        result = item.value;
-      }
-    });
-    return result;
-  }
 
-  private getUnityPortFromConfig(): string {
-    // Read UNITY_PORT value from env.config synchronously using execSync
-    const configPath = path.resolve(process.cwd(), 'env.config');
+  /**
+   * Read the McpUnitySettings.json file and return its contents as a JSON object.
+   * @returns a JSON object with the contents of the McpUnitySettings.json file.
+   */
+  private async readConfigFileAsJson(): Promise<any> {
+    const configPath = path.resolve(process.cwd(), 'build/McpUnitySettings.json');
+    this.logger.debug(`Reading McpUnitySettings.json from ${configPath}`);
     try {
-      const content = execSync(`cat "${configPath}"`, { stdio: ['pipe', 'pipe', 'ignore'] }).toString();
-      const match = content.match(/^UNITY_PORT\s*=\s*(\d+)/m);
-      return match ? match[1] : '';
+      const content = await fs.readFile(configPath, 'utf-8');
+      const json = JSON.parse(content);
+      return json;
     } catch (err) {
-      this.logger.debug(`env.config not found or unreadable: ${err instanceof Error ? err.message : String(err)}`);
-      return '';
+      this.logger.debug(`McpUnitySettings.json not found or unreadable: ${err instanceof Error ? err.message : String(err)}`);
+      return {};
     }
   }
 }

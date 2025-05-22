@@ -383,6 +383,20 @@ This error occurs because the bridge connection is lost when the domain reloads 
 The workaround is to turn off **Reload Domain** in **Edit > Project Settings > Editor > "Enter Play Mode Settings"**.
 </details>
 
+## Node Server
+These steps can be useful if you want to build and run the server independently of the Unity plugin.
+### Requirements
+As well as `node`, you will need `tsc`.
+### Steps
+1. cd into the `Server~/` directory.
+2. run `npm install` to install the project.
+3. run `npm run build` to build the project.
+4. run `node build/index.js` to run the server! 🚀
+
+### Troubleshooting 🔨
+#### Logging
+Logging is enabled when the environment variable `LOGGING` is set to true. E.g. `export LOGGING=true`.
+
 ## Support & Feedback
 
 If you have any questions or need support, please open an [issue](https://github.com/CoderGamester/mcp-unity/issues) on this repository.
