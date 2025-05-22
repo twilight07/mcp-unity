@@ -19,6 +19,9 @@ namespace McpUnity.Unity
 
         private const string EnvUnityPort = "UNITY_PORT";
         private const string EnvUnityRequestTimeout = "UNITY_REQUEST_TIMEOUT";
+        /// <remarks>
+        /// This file path is also read by the MCP server. Changes here will require updates to it. See mcpUnity.ts
+        /// </remarks>
         private const string SettingsPath = "ProjectSettings/McpUnitySettings.json";
         
         private static McpUnitySettings _instance;
@@ -72,18 +75,6 @@ namespace McpUnity.Unity
                     string json = File.ReadAllText(SettingsPath);
                     JsonUtility.FromJsonOverwrite(json, this);
                 }
-                
-                // Check for environment variable PORT
-                string envPort = System.Environment.GetEnvironmentVariable(EnvUnityPort);
-                if (!string.IsNullOrEmpty(envPort) && int.TryParse(envPort, out int port))
-                {
-                    Port = port;
-                }
-                string envTimeout = System.Environment.GetEnvironmentVariable(EnvUnityRequestTimeout);
-                if (!string.IsNullOrEmpty(envTimeout) && int.TryParse(envTimeout, out int timeout))
-                {
-                    RequestTimeoutSeconds = timeout;
-                }
             }
             catch (Exception ex)
             {
@@ -95,6 +86,9 @@ namespace McpUnity.Unity
         /// <summary>
         /// Save settings to disk
         /// </summary>
+        /// <remarks>
+        /// WARNING: This file is also read by the MCP server. Changes here will require updates to it. See mcpUnity.ts
+        /// </remarks>
         public void SaveSettings()
         {
             try
@@ -102,14 +96,6 @@ namespace McpUnity.Unity
                 // Save settings to McpUnitySettings.json
                 string json = JsonUtility.ToJson(this, true);
                 File.WriteAllText(SettingsPath, json);
-
-                // Set environment variable PORT for the Node.js process
-                // EnvironmentVariableTarget.User and EnvironmentVariableTarget.Machine should be used on .NET implementations running on Windows systems only.
-                // For non-Windows systems, User and Machine are treated as Process.
-                // Using Process target for broader compatibility.
-                // see: https://learn.microsoft.com/en-us/dotnet/api/system.environmentvariabletarget?view=net-8.0#remarks
-                Environment.SetEnvironmentVariable(EnvUnityPort, Port.ToString(), EnvironmentVariableTarget.Process);
-                Environment.SetEnvironmentVariable(EnvUnityRequestTimeout, RequestTimeoutSeconds.ToString(), EnvironmentVariableTarget.Process);
             }
             catch (Exception ex)
             {

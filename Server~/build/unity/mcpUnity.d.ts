@@ -9,7 +9,7 @@ export declare class McpUnity {
     private port;
     private ws;
     private pendingRequests;
-    private readonly REQUEST_TIMEOUT;
+    private requestTimeout;
     private retryDelay;
     constructor(logger: Logger);
     /**
@@ -17,6 +17,10 @@ export declare class McpUnity {
      * @param clientName Optional name of the MCP client connecting to Unity
      */
     start(clientName?: string): Promise<void>;
+    /**
+     * Reads our configuration file and sets parameters of the server based on them.
+     */
+    private parseAndSetConfig;
     /**
      * Connect to the Unity WebSocket
      * @param clientName Optional name of the MCP client connecting to Unity
@@ -48,14 +52,9 @@ export declare class McpUnity {
      */
     get isConnected(): boolean;
     /**
-     * Retrieves the UNITY_PORT value from the Windows registry (HKCU\Environment)
-     * @returns The port value as a string if found, otherwise an empty string
+     * Read the McpUnitySettings.json file and return its contents as a JSON object.
+     * @returns a JSON object with the contents of the McpUnitySettings.json file.
      */
-    private getUnityPortFromWindowsRegistry;
-    /**
-     * Retrieves the UNITY_PORT value from Unix-like system environment variables
-     * @returns The port value as a string if found, otherwise an empty string
-     */
-    private getUnityPortFromUnixRegistry;
+    private readConfigFileAsJson;
 }
 export {};
