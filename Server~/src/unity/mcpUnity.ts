@@ -47,7 +47,7 @@ export class McpUnity {
   public async start(clientName?: string): Promise<void> {
     try {
       this.logger.info('Attempting to read startup parameters...');
-      this.parseAndSetConfig();
+      await this.parseAndSetConfig();
 
       this.logger.info('Attempting to connect to Unity WebSocket...');
       await this.connect(clientName); // Pass client name to connect

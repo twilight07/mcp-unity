@@ -20,7 +20,7 @@ export class McpUnity {
     async start(clientName) {
         try {
             this.logger.info('Attempting to read startup parameters...');
-            this.parseAndSetConfig();
+            await this.parseAndSetConfig();
             this.logger.info('Attempting to connect to Unity WebSocket...');
             await this.connect(clientName); // Pass client name to connect
             this.logger.info('Successfully connected to Unity WebSocket');
@@ -233,7 +233,7 @@ export class McpUnity {
      * @returns a JSON object with the contents of the McpUnitySettings.json file.
      */
     async readConfigFileAsJson() {
-        const configPath = path.resolve(process.cwd(), 'build/McpUnitySettings.json');
+        const configPath = path.resolve(process.cwd(), '../ProjectSettings/McpUnitySettings.json');
         this.logger.debug(`Reading McpUnitySettings.json from ${configPath}`);
         try {
             const content = await fs.readFile(configPath, 'utf-8');
