@@ -293,7 +293,7 @@ export class McpUnity {
    * @returns a JSON object with the contents of the McpUnitySettings.json file.
    */
   private async readConfigFileAsJson(): Promise<any> {
-    const configPath = path.resolve(process.cwd(), 'build/McpUnitySettings.json');
+    const configPath = path.resolve(process.cwd(), '../ProjectSettings/McpUnitySettings.json');
     this.logger.debug(`Reading McpUnitySettings.json from ${configPath}`);
     try {
       const content = await fs.readFile(configPath, 'utf-8');

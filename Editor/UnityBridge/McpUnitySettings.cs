@@ -19,6 +19,9 @@ namespace McpUnity.Unity
 
         private const string EnvUnityPort = "UNITY_PORT";
         private const string EnvUnityRequestTimeout = "UNITY_REQUEST_TIMEOUT";
+        /// <remarks>
+        /// This file path is also read by the MCP server. Changes here will require updates to it. See mcpUnity.ts
+        /// </remarks>
         private const string SettingsPath = "ProjectSettings/McpUnitySettings.json";
         
         private static McpUnitySettings _instance;
@@ -83,6 +86,9 @@ namespace McpUnity.Unity
         /// <summary>
         /// Save settings to disk
         /// </summary>
+        /// <remarks>
+        /// WARNING: This file is also read by the MCP server. Changes here will require updates to it. See mcpUnity.ts
+        /// </remarks>
         public void SaveSettings()
         {
             try
@@ -90,10 +96,6 @@ namespace McpUnity.Unity
                 // Save settings to McpUnitySettings.json
                 string json = JsonUtility.ToJson(this, true);
                 File.WriteAllText(SettingsPath, json);
-
-                // Now save these same settings to the server to read on start-up.
-                string propertiesPath = GetServerPath() + "/build/McpUnitySettings.json";
-                File.WriteAllText(propertiesPath, json);
             }
             catch (Exception ex)
             {
