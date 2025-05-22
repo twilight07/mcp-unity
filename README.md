@@ -207,11 +207,19 @@ Open the MCP configuration file of your AI client (e.g. claude_desktop_config.js
 
 > When the AI client connects to the WebSocket server, it will automatically show in the green box in the window
 
-## Optional: Set WebSocket Port
-By default, the WebSocket server runs on port 8090. You can change this port in two ways:
+## Optional: Install Node.js Server
+By default, the Node.js server is installed in the `Server~/` directory. 
+In case of issues, you can force install it in by:
 
-<details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Option 1: Using the Unity Editor</span></summary>
+1. Open the Unity Editor
+2. Navigate to Tools > MCP Unity > Server Window
+3. Click on "Force Install Server" button
+
+> [!TIP]  
+> The Node.js server is installed in the `Server~/` directory.
+
+## Optional: Set WebSocket Port
+By default, the WebSocket server runs on port '8090'. You can change this port in two ways:
 
 1. Open the Unity Editor
 2. Navigate to Tools > MCP Unity > Server Window
@@ -220,32 +228,10 @@ By default, the WebSocket server runs on port 8090. You can change this port in 
 5. Restart the Node.js server
 6. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
 
-</details>
-
-<details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Option 2: Using the terminal</span></summary>
-
-1. Set the UNITY_PORT environment variable in the terminal
-   - Powershell
-   ```powershell
-   $env:UNITY_PORT = "8090"
-   ```
-   - Command Prompt/Terminal
-   ```cmd
-   set UNITY_PORT=8090
-   ```
-2. Restart the Node.js server
-3. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
-
-</details>
-
 ## Optional: Set Timeout
 
 By default, the timeout between the MCP server and the WebSocket is 10 seconds.
 You can change depending on the OS you are using:
-
-<details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Option 1: Windows OS</span></summary>
 
 1. Open the Unity Editor
 2. Navigate to Tools > MCP Unity > Server Window
@@ -253,35 +239,6 @@ You can change depending on the OS you are using:
 4. Unity will setup the system environment variable UNITY_REQUEST_TIMEOUT to the new timeout value
 5. Restart the Node.js server
 6. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
-
-</details>
-
-<details>
-<summary><span style="font-size: 1.1em; font-weight: bold;">Option 2: Non-Windows OS</span></summary>
-
-For non-Windows OS, you need to configure two places:
-
-### In Editor Process Timeout
-
-1. Open the Unity Editor
-2. Navigate to Tools > MCP Unity > Server Window
-3. Change the "Request Timeout (seconds)" value to your desired timeout seconds
-
-### WebSocket Timeout
-
-1. Set the UNITY_REQUEST_TIMEOUT environment variable in the terminal
-    - Powershell
-   ```powershell
-   $env:UNITY_REQUEST_TIMEOUT = "300"
-   ```
-    - Command Prompt/Terminal
-   ```cmd
-   set UNITY_REQUEST_TIMEOUT=300
-   ```
-2. Restart the Node.js server
-3. Click again on "Start Server" to reconnect the Unity Editor web socket to the Node.js MCP Server
-
-</details>
 
 > [!TIP]  
 > The timeout between your AI Coding IDE (e.g., Claude Desktop, Cursor IDE, Windsurf IDE) and the MCP Server depends on the IDE.
@@ -292,24 +249,26 @@ For non-Windows OS, you need to configure two places:
 <summary><span style="font-size: 1.1em; font-weight: bold;">Building the Node.js Server</span></summary>
 
 The MCP Unity server is built using Node.js . It requires to compile the TypeScript code to JavaScript in the `build` directory.
-To build the server, open a terminal and:
+This process is automatically handled by the Unity Editor when you click on "Start Server", but if you want to build it manually, you can follow these steps:
 
-1. Navigate to the Server directory:
+1. Open a terminal/PowerShell/Command Prompt
+
+2. Navigate to the Server directory:
    ```bash
    cd ABSOLUTE/PATH/TO/mcp-unity/Server~
    ```
 
-2. Install dependencies:
+3. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Build the server:
+4. Build the server:
    ```bash
    npm run build
    ```
 
-4. Run the server:
+5. Run the server:
    ```bash
    node build/index.js
    ```

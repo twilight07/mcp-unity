@@ -115,7 +115,9 @@ GvhProjectSettings.xml
 **/package-lock.json.meta
 .codeiumignore
 .windsurf
-Server/log.txt
-Server/log.txt.meta
+Server~/log.txt
+Server~/log.txt.meta
 log.txt
 log.txt.meta
+Server~/build/*
+Server~/node_modules/*

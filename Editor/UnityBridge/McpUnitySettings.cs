@@ -19,18 +19,15 @@ namespace McpUnity.Unity
 
         private const string EnvUnityPort = "UNITY_PORT";
         private const string EnvUnityRequestTimeout = "UNITY_REQUEST_TIMEOUT";
-        /// <remarks>
-        /// This file path is also read by the MCP server. Changes here will require updates to it. See mcpUnity.ts
-        /// </remarks>
         private const string SettingsPath = "ProjectSettings/McpUnitySettings.json";
         
         private static McpUnitySettings _instance;
 
-        // Server settings
-        public int Port { get; set; } = 8090;
+        [Tooltip("Port number for MCP server")]
+        public int Port = 8090;
         
         [Tooltip("Timeout in seconds for tool request")]
-        public int RequestTimeoutSeconds { get; set; } = RequestTimeoutMinimum;
+        public int RequestTimeoutSeconds = RequestTimeoutMinimum;
         
         [Tooltip("Whether to automatically start the MCP server when Unity opens")]
         public bool AutoStartServer = true;

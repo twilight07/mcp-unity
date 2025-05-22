@@ -164,8 +164,8 @@ namespace McpUnity.Unity
             
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
-            
-            EditorGUILayout.Space();
+
+            EditorGUILayout.Space(); 
             
             EditorGUILayout.LabelField("Connected Clients", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical("box"); // Keep the default gray box for the container
@@ -210,7 +210,7 @@ namespace McpUnity.Unity
             
             if (string.IsNullOrEmpty(_mcpConfigJson) || before != _tabsIndentationJson)
             {
-                _mcpConfigJson = McpConfigUtils.GenerateMcpConfigJson(_tabsIndentationJson);
+                _mcpConfigJson = McpUtils.GenerateMcpConfigJson(_tabsIndentationJson);
             }
                 
             if (GUILayout.Button("Copy to Clipboard", GUILayout.Height(30)))
@@ -224,7 +224,7 @@ namespace McpUnity.Unity
             
             if (GUILayout.Button("Configure Windsurf IDE", GUILayout.Height(30)))
             {
-                bool added = McpConfigUtils.AddToWindsurfIdeConfig(_tabsIndentationJson);
+                bool added = McpUtils.AddToWindsurfIdeConfig(_tabsIndentationJson);
                 if (added)
                 {
                     EditorUtility.DisplayDialog("Success", "The MCP configuration was successfully added to the Windsurf config file.", "OK");
@@ -239,7 +239,7 @@ namespace McpUnity.Unity
             
             if (GUILayout.Button("Configure Claude Desktop", GUILayout.Height(30)))
             {
-                bool added = McpConfigUtils.AddToClaudeDesktopConfig(_tabsIndentationJson);
+                bool added = McpUtils.AddToClaudeDesktopConfig(_tabsIndentationJson);
                 if (added)
                 {
                     EditorUtility.DisplayDialog("Success", "The MCP configuration was successfully added to the Claude Desktop config file.", "OK");
@@ -254,7 +254,7 @@ namespace McpUnity.Unity
             
             if (GUILayout.Button("Configure Cursor", GUILayout.Height(30)))
             {
-                bool added = McpConfigUtils.AddToCursorConfig(_tabsIndentationJson);
+                bool added = McpUtils.AddToCursorConfig(_tabsIndentationJson);
                 if (added)
                 {
                     EditorUtility.DisplayDialog("Success", "The MCP configuration was successfully added to the Cursor config file.", "OK");
@@ -266,6 +266,14 @@ namespace McpUnity.Unity
             }
             
             EditorGUILayout.EndVertical();
+            
+            EditorGUILayout.Space(); 
+
+            // Force Install Server button
+            if (GUILayout.Button("Force Install Server", GUILayout.Height(30)))
+            {
+                McpUnityServer.Instance.InstallServer();
+            }
         }
         
         private void DrawHelpTab()

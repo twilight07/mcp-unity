@@ -8,6 +8,8 @@ using McpUnity.Resources;
 using McpUnity.Services;
 using McpUnity.Utils;
 using WebSocketSharp.Server;
+using System.IO;
+using System.Diagnostics;
 
 namespace McpUnity.Unity
 {
@@ -74,6 +76,7 @@ namespace McpUnity.Unity
         /// </summary>
         private McpUnityServer()
         {
+            InstallServer(); 
             InitializeServices();
             RegisterResources();
             RegisterTools();
@@ -137,6 +140,33 @@ namespace McpUnity.Unity
         public bool TryGetResource(string name, out McpResourceBase resource)
         {
             return _resources.TryGetValue(name, out resource);
+        }
+
+        /// <summary>
+        /// Installs the MCP Node.js server by running 'npm install' and 'npm run build'
+        /// in the server directory if 'node_modules' or 'build' folders are missing.
+        /// </summary>
+        public void InstallServer()
+        {
+            string serverPath = McpUtils.GetServerPath();
+
+            if (string.IsNullOrEmpty(serverPath) || !Directory.Exists(serverPath))
+            {
+                McpLogger.LogError($"Server path not found or invalid: {serverPath}. Make sure that MCP Node.js server is installed.");
+                return;
+            }
+
+            string nodeModulesPath = Path.Combine(serverPath, "node_modules");
+            if (!Directory.Exists(nodeModulesPath))
+            {
+                McpUtils.RunNpmCommand("install", serverPath);
+            }
+
+            string buildPath = Path.Combine(serverPath, "build");
+            if (!Directory.Exists(buildPath))
+            {
+                McpUtils.RunNpmCommand("run build", serverPath);
+            }
         }
         
         /// <summary>

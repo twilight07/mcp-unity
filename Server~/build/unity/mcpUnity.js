@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { McpUnityError, ErrorType } from '../utils/errors.js';
 import { promises as fs } from 'fs';
 import path from 'path';
+// Top-level constant for the Unity settings JSON path
+const MCP_UNITY_SETTINGS_PATH = path.resolve(process.cwd(), '../ProjectSettings/McpUnitySettings.json');
 export class McpUnity {
     logger;
     port = null;
@@ -233,8 +235,7 @@ export class McpUnity {
      * @returns a JSON object with the contents of the McpUnitySettings.json file.
      */
     async readConfigFileAsJson() {
-        const configPath = path.resolve(process.cwd(), '../ProjectSettings/McpUnitySettings.json');
-        this.logger.debug(`Reading McpUnitySettings.json from ${configPath}`);
+        const configPath = MCP_UNITY_SETTINGS_PATH;
         try {
             const content = await fs.readFile(configPath, 'utf-8');
             const json = JSON.parse(content);

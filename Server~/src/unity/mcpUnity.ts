@@ -5,6 +5,9 @@ import { McpUnityError, ErrorType } from '../utils/errors.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+// Top-level constant for the Unity settings JSON path
+const MCP_UNITY_SETTINGS_PATH = path.resolve(process.cwd(), '../ProjectSettings/McpUnitySettings.json');
+
 interface PendingRequest {
   resolve: (value: any) => void;
   reject: (reason: any) => void;
@@ -293,8 +296,7 @@ export class McpUnity {
    * @returns a JSON object with the contents of the McpUnitySettings.json file.
    */
   private async readConfigFileAsJson(): Promise<any> {
-    const configPath = path.resolve(process.cwd(), '../ProjectSettings/McpUnitySettings.json');
-    this.logger.debug(`Reading McpUnitySettings.json from ${configPath}`);
+    const configPath = MCP_UNITY_SETTINGS_PATH;
     try {
       const content = await fs.readFile(configPath, 'utf-8');
       const json = JSON.parse(content);
